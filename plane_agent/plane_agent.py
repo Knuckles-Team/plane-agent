@@ -8,7 +8,7 @@ from pydantic_ai.models.openai import OpenAIModel
 
 from plane_agent.mcp import mcp
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 # --- Configuration ---
 DEFAULT_HOST = "0.0.0.0"
