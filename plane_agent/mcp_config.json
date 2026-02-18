@@ -1,7 +1,13 @@
 {
   "mcpServers": {
-    "servicenow": {
-      "url": "${MCP_URL:-http://localhost:8000/mcp}"
+    "plane": {
+      "command": "uvx",
+      "args": ["plane-mcp-server", "stdio"],
+      "env": {
+        "PLANE_API_KEY": "${PLANE_API_KEY}",
+        "PLANE_WORKSPACE_SLUG": "${PLANE_WORKSPACE_SLUG:-workspace}",
+        "PLANE_BASE_URL": "${PLANE_BASE_URL:-https://api.plane.so }"
+      }
     }
   }
 }

@@ -2,24 +2,24 @@
 # coding: utf-8
 
 import os
-import httpx
 import pickle
 import yaml
-import logging
 from pathlib import Path
-from typing import Union, List, Any, Optional
+from typing import Any, Union, List, Optional
 import json
 from importlib.resources import files, as_file
+import httpx
+
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.models.huggingface import HuggingFaceModel
 from pydantic_ai.models.groq import GroqModel
 from pydantic_ai.models.mistral import MistralModel
+
 from fasta2a import Skill
 
 try:
-
     from openai import AsyncOpenAI
     from pydantic_ai.providers.openai import OpenAIProvider
 except ImportError:
@@ -46,9 +46,6 @@ try:
 except ImportError:
     AsyncAnthropic = None
     AnthropicProvider = None
-
-
-logger = logging.getLogger(__name__)
 
 
 def to_integer(string: Union[str, int] = None) -> int:
@@ -244,14 +241,6 @@ def load_skills_from_directory(directory: str) -> List[Skill]:
     return skills
 
 
-def get_http_client(
-    ssl_verify: bool = True, timeout: float = 300.0
-) -> httpx.AsyncClient | None:
-    if not ssl_verify:
-        return httpx.AsyncClient(verify=False, timeout=timeout)
-    return None
-
-
 def create_model(
     provider: str,
     model_id: str,
@@ -413,6 +402,16 @@ def extract_tool_tags(tool_def: Any) -> List[str]:
     if isinstance(tags_list, list) and tags_list:
         return tags_list
 
+    # Fallback to manual mapping
+    try:
+        from plane_agent.tool_tags import TOOL_NAME_TO_TAG
+
+        tool_name = getattr(tool_def, "name", None)
+        if tool_name and tool_name in TOOL_NAME_TO_TAG:
+            return [TOOL_NAME_TO_TAG[tool_name]]
+    except ImportError:
+        pass
+
     return []
 
 
@@ -425,10 +424,3 @@ def tool_in_tag(tool_def: Any, tag: str) -> bool:
         return True
     else:
         return False
-
-
-def filter_tools_by_tag(tools: List[Any], tag: str) -> List[Any]:
-    """
-    Filters a list of tools for a given tag.
-    """
-    return [t for t in tools if tool_in_tag(t, tag)]

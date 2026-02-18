@@ -1,53 +1,17 @@
 ---
 services:
-  plane-mcp:
-    image: docker.io/knucklessg1/plane-agent:latest
-    # build:
-    #   context: . # Debug
-    #   dockerfile: debug.Dockerfile
-    container_name: plane-mcp
-    hostname: plane-mcp
-    command: [ "plane-mcp" ]
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: always
-    env_file:
-      - .env
-
-    environment:
-      - "PYTHONUNBUFFERED=1"
-      - HOST=0.0.0.0
-      - PORT=8005
-      - TRANSPORT=streamable-http
-      - PLANE_API_KEY=${PLANE_API_KEY}
-      - PLANE_WORKSPACE_SLUG=${PLANE_WORKSPACE_SLUG}
-      - PLANE_BASE_URL=${PLANE_BASE_URL:-https://api.plane.so}
-    ports:
-      - "8005:8005"
-    healthcheck:
-      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   plane-agent:
-    image: docker.io/knucklessg1/plane-agent:latest
-    # build:
-    #   context: . # Debug
-    #   dockerfile: debug.Dockerfile
+    # image: docker.io/knucklessg1/plane-agent:latest
+    build:
+     context: . # Debug
+     dockerfile: debug.Dockerfile
     container_name: plane-agent
     hostname: plane-agent
     command: [ "plane-agent" ]
+    dns:
+      - "${IP_DNS:-1.1.1.1}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - plane-mcp
     logging:
       driver: json-file
       options:
@@ -56,12 +20,10 @@ services:
     restart: always
     env_file:
       - .env
-
     environment:
       - "PYTHONUNBUFFERED=1"
       - "HOST=0.0.0.0"
       - "PORT=9005"
-      - "MCP_URL=http://plane-mcp:8005/mcp"
       - "PROVIDER=openai"
       - "LLM_BASE_URL=${LLM_BASE_URL:-http://host.docker.internal:1234/v1}"
       - "LLM_API_KEY=${LLM_API_KEY:-llama}"
