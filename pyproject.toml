@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plane-agent"
-version = "0.1.3"
+version = "0.1.4"
 description = "Plane MCP Agent"
 readme = "README.md"
 authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]
@@ -23,14 +23,13 @@ dependencies = [
     "pydantic>=2.8.2",
     "fastmcp>=3.0.0b1",
     "eunomia-mcp>=0.3.10",
-    "pydantic-ai-slim[fastmcp,openai,anthropic,groq,mistral,google,huggingface,a2a,ag-ui,web]>=1.58.0",
+    "pydantic-ai-slim[fastmcp,openai,groq,anthropic,mistral,google,huggingface,a2a,ag-ui,web]>=1.60.0",
     "pydantic-ai-skills>=v0.4.0",
     "fastapi>=0.128.0"
 ]
 
 [project.scripts]
-plane-mcp = "plane_agent.mcp:main"
-plane-agent = "plane_agent.agent:main"
+plane-agent = "plane_agent.plane_agent:agent_server"
 
 [tool.setuptools.package-data]
 plane_agent = ["mcp_config.json", "skills/**"]
