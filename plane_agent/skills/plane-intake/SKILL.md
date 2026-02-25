@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane intake.
+tags: [intake]
 name: plane-intake
 tools:
 - list_intake_work_items

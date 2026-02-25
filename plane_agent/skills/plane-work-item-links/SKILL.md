@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work item links.
+tags: [work-item-links]
 name: plane-work-item-links
 tools:
 - list_work_item_links

@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work items.
+tags: [work-items]
 name: plane-work-items
 tools:
 - list_work_items

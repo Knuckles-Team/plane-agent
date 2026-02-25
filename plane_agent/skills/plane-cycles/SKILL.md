@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane cycles.
+tags: [cycles]
 name: plane-cycles
 tools:
 - list_cycles

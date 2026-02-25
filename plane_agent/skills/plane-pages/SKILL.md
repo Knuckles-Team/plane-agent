@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane pages.
+tags: [pages]
 name: plane-pages
 tools:
 - retrieve_workspace_page

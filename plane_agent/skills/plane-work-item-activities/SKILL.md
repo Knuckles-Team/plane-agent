@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work item activities.
+tags: [work-item-activities]
 name: plane-work-item-activities
 tools:
 - list_work_item_activities

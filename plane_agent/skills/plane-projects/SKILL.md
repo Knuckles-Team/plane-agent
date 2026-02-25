@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane projects.
+tags: [projects]
 name: plane-projects
 tools:
 - list_projects

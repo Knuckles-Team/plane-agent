@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane labels.
+tags: [labels]
 name: plane-labels
 tools:
 - list_labels

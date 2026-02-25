@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane workspaces.
+tags: [workspaces]
 name: plane-workspaces
 tools:
 - get_workspace_members

@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane states.
+tags: [states]
 name: plane-states
 tools:
 - list_states

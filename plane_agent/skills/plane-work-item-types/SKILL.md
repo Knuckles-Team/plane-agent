@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work item types.
+tags: [work-item-types]
 name: plane-work-item-types
 tools:
 - list_work_item_types

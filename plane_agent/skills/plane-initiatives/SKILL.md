@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane initiatives.
+tags: [initiatives]
 name: plane-initiatives
 tools:
 - list_initiatives

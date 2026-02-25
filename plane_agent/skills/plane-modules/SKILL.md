@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane modules.
+tags: [modules]
 name: plane-modules
 tools:
 - list_modules

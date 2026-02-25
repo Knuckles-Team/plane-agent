@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work item properties.
+tags: [work-item-properties]
 name: plane-work-item-properties
 tools:
 - list_work_item_properties

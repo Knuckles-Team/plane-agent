@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work item relations.
+tags: [work-item-relations]
 name: plane-work-item-relations
 tools:
 - list_work_item_relations

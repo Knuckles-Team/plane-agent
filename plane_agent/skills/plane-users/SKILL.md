@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane users.
+tags: [users]
 name: plane-users
 tools:
 - get_me

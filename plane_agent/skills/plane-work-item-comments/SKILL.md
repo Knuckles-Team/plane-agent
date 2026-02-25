@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work item comments.
+tags: [work-item-comments]
 name: plane-work-item-comments
 tools:
 - list_work_item_comments

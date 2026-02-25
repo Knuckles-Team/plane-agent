@@ -1,5 +1,6 @@
 ---
 description: Tools for managing Plane work logs.
+tags: [work-logs]
 name: plane-work-logs
 tools:
 - list_work_logs
