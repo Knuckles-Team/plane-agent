@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plane-agent"
-version = "0.1.16"
+version = "0.1.17"
 description = "Plane MCP Agent"
 readme = "README.md"
 authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]
@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3"]
 requires-python = ">=3.10"
 dependencies = [
-    "agent-utilities[agent,logfire]>=0.2.12"]
+    "agent-utilities[agent,logfire]>=0.2.13"]
 
 [project.scripts]
 plane-agent = "plane_agent.plane_agent:agent_server"
