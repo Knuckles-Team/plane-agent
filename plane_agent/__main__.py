@@ -1,4 +1,4 @@
-from plane_agent.agent_server import main
+from plane_agent.agent_server import agent_server
 
 if __name__ == "__main__":
-    main()
+    agent_server()
