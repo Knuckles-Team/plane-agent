@@ -33,7 +33,6 @@ class WorkItemModel(BaseModel):
     api_parameters: Optional[Dict] = Field(description="API Parameters", default=None)
 
 
-                                                       
 class Project(BaseModel):
     id: str
     name: str = ""
