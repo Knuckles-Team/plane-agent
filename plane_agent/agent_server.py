@@ -14,7 +14,7 @@ from agent_utilities import (
 )
 from plane_agent.graph_config import TAG_PROMPTS, TAG_ENV_VARS
 
-__version__ = "0.1.41"
+__version__ = "0.1.42"
 
 logging.basicConfig(
     level=logging.INFO,
