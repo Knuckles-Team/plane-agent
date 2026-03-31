@@ -4,7 +4,7 @@ This is the only file needed to enable graph mode for this agent.
 Provides TAG_PROMPTS and TAG_ENV_VARS for create_graph_agent_server().
 """
 
-# ── Tag → System Prompt Mapping ──────────────────────────────────────
+                                                                       
 TAG_PROMPTS: dict[str, str] = {
     "projects": (
         "You are a Plane Projects specialist. Help users manage and interact with Projects functionality using the available tools."
@@ -48,7 +48,7 @@ TAG_PROMPTS: dict[str, str] = {
 }
 
 
-# ── Tag → Environment Variable Mapping ────────────────────────────────
+                                                                        
 TAG_ENV_VARS: dict[str, str] = {
     "projects": "PROJECTSTOOL",
     "work_items": "WORK_ITEMSTOOL",

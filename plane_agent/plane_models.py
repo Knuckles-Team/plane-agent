@@ -33,7 +33,7 @@ class WorkItemModel(BaseModel):
     api_parameters: Optional[Dict] = Field(description="API Parameters", default=None)
 
 
-# Define response models based on what the tools return
+                                                       
 class Project(BaseModel):
     id: str
     name: str = ""

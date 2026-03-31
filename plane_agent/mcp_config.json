@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "plane": {
+      "command": "plane-mcp",
+      "args": ["--transport", "stdio"],
+      "env": {
+        "PLANE_URL": "${PLANE_URL:-http://localhost:8080}",
+        "PLANE_TOKEN": "${PLANE_TOKEN}"
+      }
+    }
+  }
+}

@@ -48,7 +48,7 @@ class Api:
         if not self.verify:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        # Validate connection/auth
+                                  
         self._validate_auth()
 
     def _validate_auth(self):
@@ -107,7 +107,7 @@ class Api:
         response = self._get("/projects/", params=kwargs)
         response.raise_for_status()
         data = response.json()
-        # Handle paginated response if necessary
+                                                
         results = data.get("results", data) if isinstance(data, dict) else data
         parsed_data = [Project(**item) for item in results]
         return Response(response=response, data=parsed_data)
@@ -279,7 +279,7 @@ class Api:
     @require_auth
     def create_epic(self, project_id: str, data: Dict[str, Any]) -> Response:
         """Create a new epic (technically a work item with epic type)."""
-        # First, ensure we have the work item type for epics if not provided
+                                                                            
         if "type_id" not in data:
             types_res = self.list_work_item_types(project_id)
             epic_type = next((t for t in types_res.data if t.get("is_epic")), None)
@@ -491,8 +491,8 @@ class Api:
         self, project_id: str, work_item_id: str, link_id: str
     ) -> Response:
         """Retrieve a specific link for a work item."""
-        # Endpoint might not support direct retrieval of link by ID without knowing work_item_id?
-        # Using the standard pattern.
+                                                                                                 
+                                     
         response = self._get(
             f"/projects/{project_id}/issues/{work_item_id}/links/{link_id}/"
         )
@@ -606,8 +606,8 @@ class Api:
         self, project_id: str, work_item_id: str, related_issue: str
     ) -> Response:
         """Remove a relation from a work item."""
-        # Using a DELETE with data or individual delete if supported.
-        # API often uses POST /remove or DELETE with a specifically formatted payload.
+                                                                     
+                                                                                      
         response = self._delete(
             f"/projects/{project_id}/issues/{work_item_id}/relations/",
             json={"related_issue": related_issue},
@@ -680,8 +680,8 @@ class Api:
         response = self._get(
             f"/projects/{project_identifier}/issues/{issue_identifier}/"
         )
-        # Note: Identifier endpoints often differ slightly.
-        # In the original SDK it was issue_identifier (int).
+                                                           
+                                                            
         response.raise_for_status()
         return Response(response=response, data=response.json())
 
@@ -863,9 +863,9 @@ class Api:
         self, project_id: str, milestone_id: str, issue_ids: List[str]
     ) -> Response:
         """Remove work items from a milestone."""
-        # Using a POST to a remove endpoint if it exists, or individual deletes.
-        # Original used client.milestones.remove_work_items.
-        # I'll assume a batch delete endpoint or loop.
+                                                                                
+                                                            
+                                                      
         response = self._post(
             f"/projects/{project_id}/milestones/{milestone_id}/milestone-issues/remove/",
             data={"issues": issue_ids},

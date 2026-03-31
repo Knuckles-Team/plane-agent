@@ -601,7 +601,7 @@ docker run -d \
   -e SERVICENOW_PASSWORD=pass \
   -e SERVICENOW_CLIENT_ID=client_id \
   -e SERVICENOW_CLIENT_SECRET=client_secret \
-  -e SERVICENOW_VERIFY=False \
+  -e SERVICENOW_SSL_VERIFY=False \
   knucklessg1/servicenow:latest
 ```
 
@@ -635,7 +635,7 @@ docker run -d \
   -e SERVICENOW_PASSWORD=pass \
   -e SERVICENOW_CLIENT_ID=client_id \
   -e SERVICENOW_CLIENT_SECRET=client_secret \
-  -e SERVICENOW_VERIFY=False \
+  -e SERVICENOW_SSL_VERIFY=False \
   -e OPENAPI_FILE=/app/servicenow_openapi.json \
   knucklessg1/servicenow:latest
 ```
@@ -679,7 +679,7 @@ For Testing Only: Plain text storage will also work, although **not** recommende
         "SERVICENOW_PASSWORD": "pass",
         "SERVICENOW_CLIENT_ID": "client_id",
         "SERVICENOW_CLIENT_SECRET": "client_secret",
-        "SERVICENOW_VERIFY": "False",
+        "SERVICENOW_SSL_VERIFY": "False",
         "TOKEN_JWKS_URI": "${TOKEN_JWKS_URI}",
         "TOKEN_ISSUER": "${TOKEN_ISSUER}",
         "TOKEN_AUDIENCE": "${TOKEN_AUDIENCE}",
