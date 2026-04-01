@@ -627,13 +627,6 @@ class Api:
         return Response(response=response, data=response.json())
 
     @require_auth
-    def retrieve_work_item(self, project_id: str, work_item_id: str) -> Response:
-        """Retrieve a work item by ID."""
-        response = self._get(f"/projects/{project_id}/issues/{work_item_id}/")
-        response.raise_for_status()
-        return Response(response=response, data=response.json())
-
-    @require_auth
     def retrieve_work_item_by_identifier(
         self, project_identifier: str, issue_identifier: int
     ) -> Response:
@@ -666,18 +659,6 @@ class Api:
     def search_work_items(self, query: str, **kwargs) -> Response:
         """Search work items across a workspace."""
         response = self._get("/search-issues/", params={"query": query, **kwargs})
-        response.raise_for_status()
-        return Response(response=response, data=response.json())
-
-    @require_auth
-    def retrieve_work_item_by_identifier(
-        self, project_identifier: str, issue_identifier: int
-    ) -> Response:
-        """Retrieve a work item by project identifier and issue sequence number."""
-        response = self._get(
-            f"/projects/{project_identifier}/issues/{issue_identifier}/"
-        )
-
         response.raise_for_status()
         return Response(response=response, data=response.json())
 
