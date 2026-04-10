@@ -2,11 +2,15 @@
   "mcpServers": {
     "plane": {
       "command": "uvx",
-      "args": ["plane-mcp-server", "stdio"],
+      "args": [
+        "--transport",
+        "stdio"
+      ],
       "env": {
         "PLANE_API_KEY": "${PLANE_API_KEY}",
         "PLANE_WORKSPACE_SLUG": "${PLANE_WORKSPACE_SLUG}",
-        "PLANE_BASE_URL": "${PLANE_BASE_URL:-https://api.plane.so}"
+        "PLANE_BASE_URL": "${PLANE_BASE_URL:-https://api.plane.so}",
+        "PLANE_URL": "${PLANE_URL:-http://localhost:8080}"
       }
     }
   }

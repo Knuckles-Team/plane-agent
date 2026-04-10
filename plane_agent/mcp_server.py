@@ -1,5 +1,18 @@
 #!/usr/bin/python
+import warnings
 
+# Filter RequestsDependencyWarning early to prevent log spam
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    try:
+        from requests.exceptions import RequestsDependencyWarning
+        warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
+    except ImportError:
+        pass
+
+# General urllib3/chardet mismatch warnings
+warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
+warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import os
 import sys
@@ -1760,10 +1773,14 @@ def get_mcp_instance() -> FastMCP:
     return mcp
 
 
-def main():
+def mcp_server():
     mcp = get_mcp_instance()
     mcp.run()
 
 
+def main():
+    mcp_server()
+
+
 if __name__ == "__main__":
-    main()
+    mcp_server()
