@@ -6,6 +6,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         from requests.exceptions import RequestsDependencyWarning
+
         warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
     except ImportError:
         pass
@@ -18,13 +19,16 @@ import os
 import sys
 import logging
 from typing import Optional, List, Dict, Any
+from dotenv import load_dotenv, find_dotenv
 
 from pydantic import Field
 from fastmcp import FastMCP
 from fastmcp.utilities.logging import get_logger
 from plane_agent.plane_models import Response
+from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     config,
+    create_mcp_server,
 )
 from plane_agent.auth import get_client
 
@@ -1752,34 +1756,84 @@ def register_page_tools(mcp: FastMCP):
         return client.create_project_page(project_id=project_id, data=data)
 
 
-def get_mcp_instance() -> FastMCP:
+def register_prompts(mcp: FastMCP):
+    """Register Plane-specific prompts."""
+
+    @mcp.prompt(
+        name="plane-work-summary",
+        description="Get a summary of current work in Plane",
+    )
+    def plane_work_summary() -> str:
+        return "Review active cycles, high-priority issues, and recently updated documents in the Plane workspace."
+
+
+def register_all_tools(mcp: FastMCP) -> list[str]:
+    """Register all Plane tool categories correctly gated by environment variables."""
+    registered_tags = []
+
+    # Mapping of toggle env var to (registration_func, tag_name)
+    tool_mappings = [
+        ("PROJECTS_TOOL", (register_projects_tools, "projects")),
+        ("WORK_ITEMS_TOOL", (register_work_items_tools, "work_items")),
+        ("CYCLES_TOOL", (register_cycles_tools, "cycles")),
+        ("EPICS_TOOL", (register_epics_tools, "epics")),
+        ("INITIATIVE_TOOL", (register_initiative_tools, "initiative")),
+        ("INTAKE_TOOL", (register_intake_tools, "intake")),
+        ("LABEL_TOOL", (register_label_tools, "label")),
+        ("PAGE_TOOL", (register_page_tools, "page")),
+        ("MILESTONES_TOOL", (register_milestones_tools, "milestones")),
+        ("MODULES_TOOL", (register_modules_tools, "modules")),
+        ("STATES_TOOL", (register_states_tools, "states")),
+        ("USERS_TOOL", (register_users_tools, "users")),
+        ("WORKSPACES_TOOL", (register_workspaces_tools, "workspaces")),
+    ]
+
+    for env_key, (register_func, tag) in tool_mappings:
+        if to_boolean(os.getenv(env_key, "True")):
+            register_func(mcp)
+            registered_tags.append(tag)
+
+    return registered_tags
+
+
+def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
     """Create and return the Plane MCP instance."""
-    mcp = FastMCP("Plane MCP Server", version=__version__)
+    load_dotenv(find_dotenv())
 
-    register_projects_tools(mcp)
-    register_work_items_tools(mcp)
-    register_cycles_tools(mcp)
-    register_epics_tools(mcp)
-    register_initiative_tools(mcp)
-    register_intake_tools(mcp)
-    register_label_tools(mcp)
-    register_page_tools(mcp)
-    register_milestones_tools(mcp)
-    register_modules_tools(mcp)
-    register_states_tools(mcp)
-    register_users_tools(mcp)
-    register_workspaces_tools(mcp)
+    args, mcp, middlewares = create_mcp_server(
+        name="plane",
+        version=__version__,
+        instructions="Plane MCP Server",
+    )
 
-    return mcp
+    registered_tags = register_all_tools(mcp)
+    register_prompts(mcp)
+
+    for mw in middlewares:
+        mcp.add_middleware(mw)
+
+    return mcp, args, middlewares, registered_tags
 
 
 def mcp_server():
-    mcp = get_mcp_instance()
-    mcp.run()
+    """Run the Plane MCP server."""
+    mcp, args, middlewares, registered_tags = get_mcp_instance()
 
+    print(f"Plane Agent MCP v{__version__}", file=sys.stderr)
+    print("\nStarting MCP Server", file=sys.stderr)
+    print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
+    print(f"  Auth: {args.auth_type}", file=sys.stderr)
+    print(f"  Dynamic Tags Loaded: {registered_tags}", file=sys.stderr)
 
-def main():
-    mcp_server()
+    if args.transport == "stdio":
+        mcp.run(transport="stdio")
+    elif args.transport == "streamable-http":
+        mcp.run(transport="streamable-http", host=args.host, port=args.port)
+    elif args.transport == "sse":
+        mcp.run(transport="sse", host=args.host, port=args.port)
+    else:
+        logger.error(f"Invalid transport: {args.transport}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
