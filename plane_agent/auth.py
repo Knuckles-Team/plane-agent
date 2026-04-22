@@ -1,20 +1,22 @@
 """Authentication utility for Plane API."""
 
-import os
 import logging
-from typing import Optional, Any
+import os
+from typing import Any
+
 from agent_utilities.exceptions import AuthError, UnauthorizedError
+
 from plane_agent.api_wrapper import Api
 
 logger = logging.getLogger(__name__)
 
 
 def get_client(
-    url: Optional[str] = os.getenv("PLANE_BASE_URL", "https://api.plane.so"),
-    api_key: Optional[str] = os.getenv("PLANE_API_KEY", None),
-    workspace_slug: Optional[str] = os.getenv("PLANE_WORKSPACE_SLUG", None),
+    url: str | None = os.getenv("PLANE_BASE_URL", "https://api.plane.so"),
+    api_key: str | None = os.getenv("PLANE_API_KEY", None),
+    workspace_slug: str | None = os.getenv("PLANE_WORKSPACE_SLUG", None),
     verify: bool = True,
-    config: Optional[Any] = None,
+    config: Any | None = None,
 ) -> Api:
     """
     Initialize and return a Plane API client.

@@ -1,6 +1,7 @@
 """Pydantic models for Plane API."""
 
-from typing import Optional, Any, Dict
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -14,37 +15,37 @@ class Response(BaseModel):
 class ProjectModel(BaseModel):
     """Input model for project operations."""
 
-    project_id: Optional[str] = None
-    name: Optional[str] = None
-    identifier: Optional[str] = None
-    description: Optional[str] = None
-    api_parameters: Optional[Dict] = Field(description="API Parameters", default=None)
+    project_id: str | None = None
+    name: str | None = None
+    identifier: str | None = None
+    description: str | None = None
+    api_parameters: dict | None = Field(description="API Parameters", default=None)
 
 
 class WorkItemModel(BaseModel):
     """Input model for work item operations."""
 
-    project_id: Optional[str] = None
-    work_item_id: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    priority: Optional[str] = None
-    state: Optional[str] = None
-    api_parameters: Optional[Dict] = Field(description="API Parameters", default=None)
+    project_id: str | None = None
+    work_item_id: str | None = None
+    name: str | None = None
+    description: str | None = None
+    priority: str | None = None
+    state: str | None = None
+    api_parameters: dict | None = Field(description="API Parameters", default=None)
 
 
 class Project(BaseModel):
     id: str
     name: str = ""
     identifier: str = ""
-    description: Optional[str] = None
-    workspace: Optional[str] = None
+    description: str | None = None
+    workspace: str | None = None
 
 
 class WorkItem(BaseModel):
     id: str
     name: str = ""
-    project: Optional[str] = None
-    state: Optional[str] = None
-    priority: Optional[str] = None
-    description: Optional[str] = None
+    project: str | None = None
+    state: str | None = None
+    priority: str | None = None
+    description: str | None = None

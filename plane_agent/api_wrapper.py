@@ -1,16 +1,18 @@
 """Plane API wrapper implementation."""
 
 import logging
+from typing import Any, TypeVar
+
 import requests
 import urllib3
-from typing import Dict, Any, List, Optional, TypeVar
 from agent_utilities.decorators import require_auth
 from agent_utilities.exceptions import (
     AuthError,
-    UnauthorizedError,
     ParameterError,
+    UnauthorizedError,
 )
-from plane_agent.plane_models import Response, Project, WorkItem
+
+from plane_agent.plane_models import Project, Response, WorkItem
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ class Api:
         api_key: str,
         workspace_slug: str,
         verify: bool = True,
-        proxies: Optional[Dict] = None,
+        proxies: dict | None = None,
         debug: bool = False,
     ):
         self.url = url.rstrip("/")
@@ -64,7 +66,7 @@ class Api:
             raise ParameterError(f"Workspace slug '{self.workspace_slug}' not found.")
         response.raise_for_status()
 
-    def _get(self, endpoint: str, params: Optional[Dict] = None) -> requests.Response:
+    def _get(self, endpoint: str, params: dict | None = None) -> requests.Response:
         url = f"{self.url}/workspaces/{self.workspace_slug}{endpoint}"
         return self._session.get(
             url,
@@ -74,7 +76,7 @@ class Api:
             proxies=self.proxies,
         )
 
-    def _post(self, endpoint: str, data: Optional[Dict] = None) -> requests.Response:
+    def _post(self, endpoint: str, data: dict | None = None) -> requests.Response:
         url = f"{self.url}/workspaces/{self.workspace_slug}{endpoint}"
         return self._session.post(
             url,
@@ -84,7 +86,7 @@ class Api:
             proxies=self.proxies,
         )
 
-    def _patch(self, endpoint: str, data: Optional[Dict] = None) -> requests.Response:
+    def _patch(self, endpoint: str, data: dict | None = None) -> requests.Response:
         url = f"{self.url}/workspaces/{self.workspace_slug}{endpoint}"
         return self._session.patch(
             url,
@@ -147,7 +149,7 @@ class Api:
         return Response(response=response, data=results)
 
     @require_auth
-    def create_cycle(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_cycle(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new cycle."""
         response = self._post(f"/projects/{project_id}/cycles/", data=data)
         response.raise_for_status()
@@ -162,7 +164,7 @@ class Api:
 
     @require_auth
     def update_cycle(
-        self, project_id: str, cycle_id: str, data: Dict[str, Any]
+        self, project_id: str, cycle_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a cycle by ID."""
         response = self._patch(f"/projects/{project_id}/cycles/{cycle_id}/", data=data)
@@ -202,7 +204,7 @@ class Api:
 
     @require_auth
     def update_project_features(
-        self, project_id: str, data: Dict[str, Any]
+        self, project_id: str, data: dict[str, Any]
     ) -> Response:
         """Update features of a project."""
         response = self._patch(f"/projects/{project_id}/", data={"features": data})
@@ -220,7 +222,7 @@ class Api:
 
     @require_auth
     def add_work_items_to_cycle(
-        self, project_id: str, cycle_id: str, issue_ids: List[str]
+        self, project_id: str, cycle_id: str, issue_ids: list[str]
     ) -> Response:
         """Add work items to a cycle."""
         response = self._post(
@@ -276,7 +278,7 @@ class Api:
         return Response(response=response, data=results)
 
     @require_auth
-    def create_epic(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_epic(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new epic (technically a work item with epic type)."""
 
         if "type_id" not in data:
@@ -301,7 +303,7 @@ class Api:
 
     @require_auth
     def update_epic(
-        self, project_id: str, epic_id: str, data: Dict[str, Any]
+        self, project_id: str, epic_id: str, data: dict[str, Any]
     ) -> Response:
         """Update an epic by ID."""
         response = self._patch(
@@ -334,7 +336,7 @@ class Api:
         return Response(response=response, data=results)
 
     @require_auth
-    def create_initiative(self, data: Dict[str, Any]) -> Response:
+    def create_initiative(self, data: dict[str, Any]) -> Response:
         """Create a new initiative in the workspace."""
         response = self._post("/initiatives/", data=data)
         response.raise_for_status()
@@ -348,7 +350,7 @@ class Api:
         return Response(response=response, data=response.json())
 
     @require_auth
-    def update_initiative(self, initiative_id: str, data: Dict[str, Any]) -> Response:
+    def update_initiative(self, initiative_id: str, data: dict[str, Any]) -> Response:
         """Update an initiative by ID."""
         response = self._patch(f"/initiatives/{initiative_id}/", data=data)
         response.raise_for_status()
@@ -372,7 +374,7 @@ class Api:
 
     @require_auth
     def create_intake_work_item(
-        self, project_id: str, data: Dict[str, Any]
+        self, project_id: str, data: dict[str, Any]
     ) -> Response:
         """Create a new intake work item in a project."""
         response = self._post(f"/projects/{project_id}/intake/", data=data)
@@ -418,7 +420,7 @@ class Api:
 
     @require_auth
     def create_work_item_comment(
-        self, project_id: str, work_item_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, data: dict[str, Any]
     ) -> Response:
         """Create a comment for a work item."""
         response = self._post(
@@ -440,7 +442,7 @@ class Api:
 
     @require_auth
     def update_work_item_comment(
-        self, project_id: str, work_item_id: str, comment_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, comment_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a comment for a work item."""
         response = self._patch(
@@ -476,7 +478,7 @@ class Api:
 
     @require_auth
     def create_work_item_link(
-        self, project_id: str, work_item_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, data: dict[str, Any]
     ) -> Response:
         """Create a link for a work item."""
         response = self._post(
@@ -499,7 +501,7 @@ class Api:
 
     @require_auth
     def update_work_item_link(
-        self, project_id: str, work_item_id: str, link_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, link_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a link for a work item."""
         response = self._patch(
@@ -534,7 +536,7 @@ class Api:
 
     @require_auth
     def create_work_item_property(
-        self, project_id: str, type_id: str, data: Dict[str, Any]
+        self, project_id: str, type_id: str, data: dict[str, Any]
     ) -> Response:
         """Create a new work item property."""
         response = self._post(
@@ -560,7 +562,7 @@ class Api:
         project_id: str,
         type_id: str,
         work_item_property_id: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
     ) -> Response:
         """Update a work item property by ID."""
         response = self._patch(
@@ -590,7 +592,7 @@ class Api:
 
     @require_auth
     def create_work_item_relation(
-        self, project_id: str, work_item_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, data: dict[str, Any]
     ) -> Response:
         """Create relations for a work item."""
         response = self._post(
@@ -613,14 +615,14 @@ class Api:
         return Response(response=response, data={"status": "removed"})
 
     @require_auth
-    def create_work_item_type(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_work_item_type(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new work item type."""
         response = self._post(f"/projects/{project_id}/types/", data=data)
         response.raise_for_status()
         return Response(response=response, data=response.json())
 
     @require_auth
-    def create_work_item(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_work_item(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new work item."""
         response = self._post(f"/projects/{project_id}/issues/", data=data)
         response.raise_for_status()
@@ -639,7 +641,7 @@ class Api:
 
     @require_auth
     def update_work_item(
-        self, project_id: str, work_item_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a work item by ID."""
         response = self._patch(
@@ -663,7 +665,7 @@ class Api:
         return Response(response=response, data=response.json())
 
     @require_auth
-    def advanced_search_work_items(self, data: Dict[str, Any]) -> Response:
+    def advanced_search_work_items(self, data: dict[str, Any]) -> Response:
         """Advanced search for work items."""
         response = self._post("/advanced-search/", data=data)
         response.raise_for_status()
@@ -671,7 +673,7 @@ class Api:
 
     @require_auth
     def update_work_item_type(
-        self, project_id: str, work_item_type_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_type_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a work item type by ID."""
         response = self._patch(
@@ -702,7 +704,7 @@ class Api:
 
     @require_auth
     def create_work_log(
-        self, project_id: str, work_item_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, data: dict[str, Any]
     ) -> Response:
         """Create a work log for a work item."""
         response = self._post(
@@ -713,7 +715,7 @@ class Api:
 
     @require_auth
     def update_work_log(
-        self, project_id: str, work_item_id: str, work_log_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, work_log_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a work log for a work item."""
         response = self._patch(
@@ -752,7 +754,7 @@ class Api:
         return Response(response=response, data=data.get("features", {}))
 
     @require_auth
-    def update_workspace_features(self, data: Dict[str, Any]) -> Response:
+    def update_workspace_features(self, data: dict[str, Any]) -> Response:
         """Update features of the current workspace."""
         response = self._patch("/", data={"features": data})
         response.raise_for_status()
@@ -767,7 +769,7 @@ class Api:
 
     @require_auth
     def update_intake_work_item(
-        self, project_id: str, work_item_id: str, data: Dict[str, Any]
+        self, project_id: str, work_item_id: str, data: dict[str, Any]
     ) -> Response:
         """Update an intake work item by work item ID."""
         response = self._patch(
@@ -792,7 +794,7 @@ class Api:
         return Response(response=response, data=results)
 
     @require_auth
-    def create_milestone(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_milestone(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new milestone."""
         response = self._post(f"/projects/{project_id}/milestones/", data=data)
         response.raise_for_status()
@@ -807,7 +809,7 @@ class Api:
 
     @require_auth
     def update_milestone(
-        self, project_id: str, milestone_id: str, data: Dict[str, Any]
+        self, project_id: str, milestone_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a milestone by ID."""
         response = self._patch(
@@ -825,7 +827,7 @@ class Api:
 
     @require_auth
     def add_work_items_to_milestone(
-        self, project_id: str, milestone_id: str, issue_ids: List[str]
+        self, project_id: str, milestone_id: str, issue_ids: list[str]
     ) -> Response:
         """Add work items to a milestone."""
         response = self._post(
@@ -837,7 +839,7 @@ class Api:
 
     @require_auth
     def remove_work_items_from_milestone(
-        self, project_id: str, milestone_id: str, issue_ids: List[str]
+        self, project_id: str, milestone_id: str, issue_ids: list[str]
     ) -> Response:
         """Remove work items from a milestone."""
 
@@ -872,7 +874,7 @@ class Api:
         return Response(response=response, data=results)
 
     @require_auth
-    def create_module(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_module(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new module."""
         response = self._post(f"/projects/{project_id}/modules/", data=data)
         response.raise_for_status()
@@ -887,7 +889,7 @@ class Api:
 
     @require_auth
     def update_module(
-        self, project_id: str, module_id: str, data: Dict[str, Any]
+        self, project_id: str, module_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a module by ID."""
         response = self._patch(
@@ -914,7 +916,7 @@ class Api:
 
     @require_auth
     def add_work_items_to_module(
-        self, project_id: str, module_id: str, issue_ids: List[str]
+        self, project_id: str, module_id: str, issue_ids: list[str]
     ) -> Response:
         """Add work items to a module."""
         response = self._post(
@@ -972,7 +974,7 @@ class Api:
         return Response(response=response, data=results)
 
     @require_auth
-    def create_state(self, project_id: str, data: Dict[str, Any]) -> Response:
+    def create_state(self, project_id: str, data: dict[str, Any]) -> Response:
         """Create a new state."""
         response = self._post(f"/projects/{project_id}/states/", data=data)
         response.raise_for_status()
@@ -987,7 +989,7 @@ class Api:
 
     @require_auth
     def update_state(
-        self, project_id: str, state_id: str, data: Dict[str, Any]
+        self, project_id: str, state_id: str, data: dict[str, Any]
     ) -> Response:
         """Update a state by ID."""
         response = self._patch(f"/projects/{project_id}/states/{state_id}/", data=data)

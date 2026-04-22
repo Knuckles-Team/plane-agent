@@ -15,22 +15,23 @@ with warnings.catch_warnings():
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
+import logging
 import os
 import sys
-import logging
-from typing import Optional, List, Dict, Any
-from dotenv import load_dotenv, find_dotenv
+from typing import Any
 
-from pydantic import Field
-from fastmcp import FastMCP
-from fastmcp.utilities.logging import get_logger
-from plane_agent.plane_models import Response
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     config,
     create_mcp_server,
 )
+from dotenv import find_dotenv, load_dotenv
+from fastmcp import FastMCP
+from fastmcp.utilities.logging import get_logger
+from pydantic import Field
+
 from plane_agent.auth import get_client
+from plane_agent.plane_models import Response
 
 __version__ = "0.1.37"
 print(f"Plane MCP v{__version__}", file=sys.stderr)
@@ -50,19 +51,19 @@ def register_projects_tools(mcp: FastMCP):
         tags={"projects"},
     )
     def list_projects(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL of Plane instance",
             default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
         ),
-        api_key: Optional[str] = Field(
+        api_key: str | None = Field(
             description="Plane API key",
             default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
         ),
-        workspace_slug: Optional[str] = Field(
+        workspace_slug: str | None = Field(
             description="Plane workspace slug",
             default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
         ),
-        verify: Optional[bool] = Field(
+        verify: bool | None = Field(
             description="Verify SSL certificate",
             default=True,
         ),
@@ -83,19 +84,19 @@ def register_projects_tools(mcp: FastMCP):
     )
     def retrieve_project(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL of Plane instance",
             default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
         ),
-        api_key: Optional[str] = Field(
+        api_key: str | None = Field(
             description="Plane API key",
             default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
         ),
-        workspace_slug: Optional[str] = Field(
+        workspace_slug: str | None = Field(
             description="Plane workspace slug",
             default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
         ),
-        verify: Optional[bool] = Field(
+        verify: bool | None = Field(
             description="Verify SSL certificate",
             default=True,
         ),
@@ -112,15 +113,15 @@ def register_projects_tools(mcp: FastMCP):
 
 
 def _build_advanced_search_filters(
-    assignee_ids: Optional[List[str]] = None,
-    state_ids: Optional[List[str]] = None,
-    state_groups: Optional[List[str]] = None,
-    priorities: Optional[List[str]] = None,
-    label_ids: Optional[List[str]] = None,
-    type_ids: Optional[List[str]] = None,
-    cycle_ids: Optional[List[str]] = None,
-    module_ids: Optional[List[str]] = None,
-) -> Optional[Dict[str, Any]]:
+    assignee_ids: list[str] | None = None,
+    state_ids: list[str] | None = None,
+    state_groups: list[str] | None = None,
+    priorities: list[str] | None = None,
+    label_ids: list[str] | None = None,
+    type_ids: list[str] | None = None,
+    cycle_ids: list[str] | None = None,
+    module_ids: list[str] | None = None,
+) -> dict[str, Any] | None:
     """Build an AND filter dict from flat filter params."""
     conditions = []
     if assignee_ids:
@@ -153,31 +154,29 @@ def register_work_items_tools(mcp: FastMCP):
         tags={"work_items"},
     )
     def list_work_items(
-        project_id: Optional[str] = Field(
-            description="UUID of the project", default=None
-        ),
-        query: Optional[str] = Field(description="Search query", default=None),
-        assignee_ids: Optional[List[str]] = None,
-        state_ids: Optional[List[str]] = None,
-        state_groups: Optional[List[str]] = None,
-        priorities: Optional[List[str]] = None,
-        label_ids: Optional[List[str]] = None,
-        type_ids: Optional[List[str]] = None,
-        cycle_ids: Optional[List[str]] = None,
-        module_ids: Optional[List[str]] = None,
-        plane_url: Optional[str] = Field(
+        project_id: str | None = Field(description="UUID of the project", default=None),
+        query: str | None = Field(description="Search query", default=None),
+        assignee_ids: list[str] | None = None,
+        state_ids: list[str] | None = None,
+        state_groups: list[str] | None = None,
+        priorities: list[str] | None = None,
+        label_ids: list[str] | None = None,
+        type_ids: list[str] | None = None,
+        cycle_ids: list[str] | None = None,
+        module_ids: list[str] | None = None,
+        plane_url: str | None = Field(
             description="Base URL of Plane instance",
             default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
         ),
-        api_key: Optional[str] = Field(
+        api_key: str | None = Field(
             description="Plane API key",
             default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
         ),
-        workspace_slug: Optional[str] = Field(
+        workspace_slug: str | None = Field(
             description="Plane workspace slug",
             default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
         ),
-        verify: Optional[bool] = Field(
+        verify: bool | None = Field(
             description="Verify SSL certificate",
             default=True,
         ),
@@ -221,23 +220,19 @@ def register_work_items_tools(mcp: FastMCP):
     def create_work_item(
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Name of the work item"),
-        description_html: Optional[str] = None,
-        priority: Optional[str] = None,
-        state_id: Optional[str] = None,
-        assignee_ids: Optional[List[str]] = None,
-        label_ids: Optional[List[str]] = None,
-        plane_url: Optional[str] = Field(
+        description_html: str | None = None,
+        priority: str | None = None,
+        state_id: str | None = None,
+        assignee_ids: list[str] | None = None,
+        label_ids: list[str] | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new work item."""
         client = get_client(
@@ -260,30 +255,26 @@ def register_work_items_tools(mcp: FastMCP):
     def update_work_item(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        name: Optional[str] = None,
-        description_html: Optional[str] = None,
-        priority: Optional[str] = None,
-        state_id: Optional[str] = None,
-        assignee_ids: Optional[List[str]] = None,
-        label_ids: Optional[List[str]] = None,
-        plane_url: Optional[str] = Field(
+        name: str | None = None,
+        description_html: str | None = None,
+        priority: str | None = None,
+        state_id: str | None = None,
+        assignee_ids: list[str] | None = None,
+        label_ids: list[str] | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Update a work item."""
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        data = {}
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if description_html:
@@ -307,18 +298,14 @@ def register_work_items_tools(mcp: FastMCP):
     def delete_work_item(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Delete a work item."""
         client = get_client(
@@ -332,18 +319,14 @@ def register_work_items_tools(mcp: FastMCP):
     )
     def search_work_items(
         query: str = Field(description="Search query"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Search work items across workspace."""
         client = get_client(
@@ -358,18 +341,14 @@ def register_work_items_tools(mcp: FastMCP):
     def retrieve_work_item_by_identifier(
         project_identifier: str = Field(description="Project identifier (e.g. MP)"),
         issue_identifier: int = Field(description="Issue sequence number (e.g. 1)"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Retrieve a work item by project identifier and issue sequence number."""
         client = get_client(
@@ -386,19 +365,19 @@ def register_work_items_tools(mcp: FastMCP):
     def retrieve_work_item(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL of Plane instance",
             default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
         ),
-        api_key: Optional[str] = Field(
+        api_key: str | None = Field(
             description="Plane API key",
             default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
         ),
-        workspace_slug: Optional[str] = Field(
+        workspace_slug: str | None = Field(
             description="Plane workspace slug",
             default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
         ),
-        verify: Optional[bool] = Field(
+        verify: bool | None = Field(
             description="Verify SSL certificate",
             default=True,
         ),
@@ -422,18 +401,14 @@ def register_work_items_tools(mcp: FastMCP):
     def list_work_item_activities(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List activities for a work item."""
         client = get_client(
@@ -450,18 +425,14 @@ def register_work_items_tools(mcp: FastMCP):
     def list_work_item_comments(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List comments for a work item."""
         client = get_client(
@@ -479,18 +450,14 @@ def register_work_items_tools(mcp: FastMCP):
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
         comment_html: str = Field(description="Comment content in HTML"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a comment for a work item."""
         client = get_client(
@@ -508,18 +475,14 @@ def register_work_items_tools(mcp: FastMCP):
     def list_work_item_links(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List links for a work item."""
         client = get_client(
@@ -537,18 +500,14 @@ def register_work_items_tools(mcp: FastMCP):
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
         url: str = Field(description="URL of the link"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a link for a work item."""
         client = get_client(
@@ -566,18 +525,14 @@ def register_work_items_tools(mcp: FastMCP):
     def list_work_item_relations(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List relations for a work item."""
         client = get_client(
@@ -593,18 +548,14 @@ def register_work_items_tools(mcp: FastMCP):
     )
     def list_work_item_types(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List work item types in a project."""
         client = get_client(
@@ -619,18 +570,14 @@ def register_work_items_tools(mcp: FastMCP):
     def list_work_logs(
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List work logs for a work item."""
         client = get_client(
@@ -646,19 +593,15 @@ def register_work_items_tools(mcp: FastMCP):
         project_id: str = Field(description="UUID of the project"),
         work_item_id: str = Field(description="UUID of the work item"),
         duration: int = Field(description="Duration in minutes"),
-        description: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        description: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a work log for a work item."""
         client = get_client(
@@ -677,18 +620,14 @@ def register_cycles_tools(mcp: FastMCP):
     )
     def list_cycles(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List cycles in a project."""
         client = get_client(
@@ -704,21 +643,17 @@ def register_cycles_tools(mcp: FastMCP):
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Cycle name"),
         owned_by: str = Field(description="UUID of the owner"),
-        description: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        description: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new cycle."""
         client = get_client(
@@ -740,18 +675,14 @@ def register_cycles_tools(mcp: FastMCP):
     def retrieve_cycle(
         project_id: str = Field(description="UUID of the project"),
         cycle_id: str = Field(description="UUID of the cycle"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Retrieve a cycle by ID."""
         client = get_client(
@@ -766,29 +697,25 @@ def register_cycles_tools(mcp: FastMCP):
     def update_cycle(
         project_id: str = Field(description="UUID of the project"),
         cycle_id: str = Field(description="UUID of the cycle"),
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        owned_by: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        name: str | None = None,
+        description: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        owned_by: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Update a cycle by ID."""
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        data = {}
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if description:
@@ -808,18 +735,14 @@ def register_cycles_tools(mcp: FastMCP):
     def delete_cycle(
         project_id: str = Field(description="UUID of the project"),
         cycle_id: str = Field(description="UUID of the cycle"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Delete a cycle by ID."""
         client = get_client(
@@ -834,18 +757,14 @@ def register_cycles_tools(mcp: FastMCP):
     def list_cycle_work_items(
         project_id: str = Field(description="UUID of the project"),
         cycle_id: str = Field(description="UUID of the cycle"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List work items in a cycle."""
         client = get_client(
@@ -860,19 +779,15 @@ def register_cycles_tools(mcp: FastMCP):
     def add_work_items_to_cycle(
         project_id: str = Field(description="UUID of the project"),
         cycle_id: str = Field(description="UUID of the cycle"),
-        issue_ids: List[str] = Field(description="List of work item IDs"),
-        plane_url: Optional[str] = Field(
+        issue_ids: list[str] = Field(description="List of work item IDs"),
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Add work items to a cycle."""
         client = get_client(
@@ -890,18 +805,14 @@ def register_epics_tools(mcp: FastMCP):
     )
     def list_epics(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List epics in a project."""
         client = get_client(
@@ -916,20 +827,16 @@ def register_epics_tools(mcp: FastMCP):
     def create_epic(
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Epic name"),
-        priority: Optional[str] = None,
-        description: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        priority: str | None = None,
+        description: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new epic."""
         client = get_client(
@@ -945,18 +852,14 @@ def register_epics_tools(mcp: FastMCP):
     def retrieve_epic(
         project_id: str = Field(description="UUID of the project"),
         epic_id: str = Field(description="UUID of the epic"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Retrieve an epic by ID."""
         client = get_client(
@@ -971,27 +874,23 @@ def register_epics_tools(mcp: FastMCP):
     def update_epic(
         project_id: str = Field(description="UUID of the project"),
         epic_id: str = Field(description="UUID of the epic"),
-        name: Optional[str] = None,
-        priority: Optional[str] = None,
-        description: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        name: str | None = None,
+        priority: str | None = None,
+        description: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Update an epic by ID."""
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        data = {}
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if priority:
@@ -1007,18 +906,14 @@ def register_epics_tools(mcp: FastMCP):
     def delete_epic(
         project_id: str = Field(description="UUID of the project"),
         epic_id: str = Field(description="UUID of the epic"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Delete an epic by ID."""
         client = get_client(
@@ -1034,18 +929,14 @@ def register_milestones_tools(mcp: FastMCP):
     )
     def list_milestones(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List milestones in a project."""
         client = get_client(
@@ -1060,19 +951,15 @@ def register_milestones_tools(mcp: FastMCP):
     def create_milestone(
         project_id: str = Field(description="UUID of the project"),
         title: str = Field(description="Milestone title"),
-        target_date: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        target_date: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new milestone."""
         client = get_client(
@@ -1088,18 +975,14 @@ def register_milestones_tools(mcp: FastMCP):
     def retrieve_milestone(
         project_id: str = Field(description="UUID of the project"),
         milestone_id: str = Field(description="UUID of the milestone"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Retrieve a milestone by ID."""
         client = get_client(
@@ -1116,26 +999,22 @@ def register_milestones_tools(mcp: FastMCP):
     def update_milestone(
         project_id: str = Field(description="UUID of the project"),
         milestone_id: str = Field(description="UUID of the milestone"),
-        title: Optional[str] = None,
-        target_date: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        title: str | None = None,
+        target_date: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Update a milestone by ID."""
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        data = {}
+        data: dict[str, Any] = {}
         if title:
             data["title"] = title
         if target_date:
@@ -1151,18 +1030,14 @@ def register_milestones_tools(mcp: FastMCP):
     def delete_milestone(
         project_id: str = Field(description="UUID of the project"),
         milestone_id: str = Field(description="UUID of the milestone"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Delete a milestone by ID."""
         client = get_client(
@@ -1178,18 +1053,14 @@ def register_modules_tools(mcp: FastMCP):
     )
     def list_modules(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List modules in a project."""
         client = get_client(
@@ -1204,20 +1075,16 @@ def register_modules_tools(mcp: FastMCP):
     def create_module(
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Module name"),
-        description: Optional[str] = None,
-        status: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        description: str | None = None,
+        status: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new module."""
         client = get_client(
@@ -1233,18 +1100,14 @@ def register_modules_tools(mcp: FastMCP):
     def retrieve_module(
         project_id: str = Field(description="UUID of the project"),
         module_id: str = Field(description="UUID of the module"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Retrieve a module by ID."""
         client = get_client(
@@ -1259,27 +1122,23 @@ def register_modules_tools(mcp: FastMCP):
     def update_module(
         project_id: str = Field(description="UUID of the project"),
         module_id: str = Field(description="UUID of the module"),
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        status: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        name: str | None = None,
+        description: str | None = None,
+        status: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Update a module by ID."""
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        data = {}
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if description:
@@ -1297,18 +1156,14 @@ def register_modules_tools(mcp: FastMCP):
     def delete_module(
         project_id: str = Field(description="UUID of the project"),
         module_id: str = Field(description="UUID of the module"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Delete a module by ID."""
         client = get_client(
@@ -1324,18 +1179,14 @@ def register_states_tools(mcp: FastMCP):
     )
     def list_states(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List states in a project."""
         client = get_client(
@@ -1351,19 +1202,15 @@ def register_states_tools(mcp: FastMCP):
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="State name"),
         color: str = Field(description="Hex color code"),
-        group: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        group: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new state."""
         client = get_client(
@@ -1379,18 +1226,14 @@ def register_users_tools(mcp: FastMCP):
         tags={"users"},
     )
     def list_users(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List users in the workspace."""
         client = get_client(
@@ -1403,18 +1246,14 @@ def register_users_tools(mcp: FastMCP):
         tags={"users"},
     )
     def get_me(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Get current user information."""
         client = get_client(
@@ -1429,18 +1268,14 @@ def register_workspaces_tools(mcp: FastMCP):
         tags={"workspaces"},
     )
     def get_workspace(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Get current workspace details."""
         client = get_client(
@@ -1453,18 +1288,14 @@ def register_workspaces_tools(mcp: FastMCP):
         tags={"workspaces"},
     )
     def get_workspace_members(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Get all members of the current workspace."""
         client = get_client(
@@ -1477,18 +1308,14 @@ def register_workspaces_tools(mcp: FastMCP):
         tags={"workspaces"},
     )
     def get_workspace_features(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Get features of the current workspace."""
         client = get_client(
@@ -1501,28 +1328,24 @@ def register_workspaces_tools(mcp: FastMCP):
         tags={"workspaces"},
     )
     def update_workspace_features(
-        project_grouping: Optional[bool] = None,
-        initiatives: Optional[bool] = None,
-        teams: Optional[bool] = None,
-        customers: Optional[bool] = None,
-        plane_url: Optional[str] = Field(
+        project_grouping: bool | None = None,
+        initiatives: bool | None = None,
+        teams: bool | None = None,
+        customers: bool | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Update features of the current workspace."""
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        data = {}
+        data: dict[str, Any] = {}
         if project_grouping is not None:
             data["project_grouping"] = project_grouping
         if initiatives is not None:
@@ -1540,18 +1363,14 @@ def register_initiative_tools(mcp: FastMCP):
         tags={"initiatives"},
     )
     def list_initiatives(
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List all initiatives in the workspace."""
         client = get_client(
@@ -1565,21 +1384,17 @@ def register_initiative_tools(mcp: FastMCP):
     )
     def create_initiative(
         name: str = Field(description="Initiative name"),
-        description: Optional[str] = None,
-        state: Optional[str] = None,
-        lead: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        description: str | None = None,
+        state: str | None = None,
+        lead: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new initiative."""
         client = get_client(
@@ -1596,18 +1411,14 @@ def register_intake_tools(mcp: FastMCP):
     )
     def list_intake_work_items(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List all intake work items in a project."""
         client = get_client(
@@ -1622,19 +1433,15 @@ def register_intake_tools(mcp: FastMCP):
     def create_intake_work_item(
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Work item name"),
-        description: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        description: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new intake work item."""
         client = get_client(
@@ -1651,18 +1458,14 @@ def register_label_tools(mcp: FastMCP):
     )
     def list_labels(
         project_id: str = Field(description="UUID of the project"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """List all labels in a project."""
         client = get_client(
@@ -1677,20 +1480,16 @@ def register_label_tools(mcp: FastMCP):
     def create_label(
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Label name"),
-        color: Optional[str] = None,
-        description: Optional[str] = None,
-        plane_url: Optional[str] = Field(
+        color: str | None = None,
+        description: str | None = None,
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a new label."""
         client = get_client(
@@ -1708,18 +1507,14 @@ def register_page_tools(mcp: FastMCP):
     def retrieve_project_page(
         project_id: str = Field(description="UUID of the project"),
         page_id: str = Field(description="UUID of the page"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Retrieve a project page by ID."""
         client = get_client(
@@ -1735,18 +1530,14 @@ def register_page_tools(mcp: FastMCP):
         project_id: str = Field(description="UUID of the project"),
         name: str = Field(description="Page name"),
         description_html: str = Field(description="Content in HTML"),
-        plane_url: Optional[str] = Field(
+        plane_url: str | None = Field(
             description="Base URL", default=DEFAULT_PLANE_URL
         ),
-        api_key: Optional[str] = Field(
-            description="API key", default=DEFAULT_PLANE_KEY
-        ),
-        workspace_slug: Optional[str] = Field(
+        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
+        workspace_slug: str | None = Field(
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
-        verify: Optional[bool] = Field(
-            description="Verify SSL certificate", default=True
-        ),
+        verify: bool | None = Field(description="Verify SSL certificate", default=True),
     ) -> Response:
         """Create a project page."""
         client = get_client(
