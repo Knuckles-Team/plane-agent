@@ -6,7 +6,7 @@ from typing import Any
 
 from agent_utilities.exceptions import AuthError, UnauthorizedError
 
-from plane_agent.api_wrapper import Api
+from plane_agent.api_client import Api
 
 logger = logging.getLogger(__name__)
 
