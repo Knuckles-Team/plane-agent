@@ -5,8 +5,8 @@ from typing import Any, TypeVar
 
 import requests
 import urllib3
-from agent_utilities.decorators import require_auth
-from agent_utilities.exceptions import (
+from agent_utilities.core.decorators import require_auth
+from agent_utilities.core.exceptions import (
     AuthError,
     ParameterError,
     UnauthorizedError,
@@ -24,14 +24,14 @@ class Api:
 
     def __init__(
         self,
-        url: str,
+        url: str | None,
         api_key: str,
         workspace_slug: str,
-        verify: bool = True,
+        verify: bool | None = True,
         proxies: dict | None = None,
         debug: bool = False,
     ):
-        self.url = url.rstrip("/")
+        self.url = (url or "").rstrip("/")
         if "/api/v1" not in self.url:
             self.url = f"{self.url}/api/v1"
 
@@ -96,10 +96,14 @@ class Api:
             proxies=self.proxies,
         )
 
-    def _delete(self, endpoint: str) -> requests.Response:
+    def _delete(self, endpoint: str, json: dict | None = None) -> requests.Response:
         url = f"{self.url}/workspaces/{self.workspace_slug}{endpoint}"
         return self._session.delete(
-            url, headers=self.headers, verify=self.verify, proxies=self.proxies
+            url,
+            headers=self.headers,
+            json=json,
+            verify=self.verify,
+            proxies=self.proxies,
         )
 
     @require_auth
@@ -1028,5 +1032,33 @@ class Api:
             verify=self.verify,
             proxies=self.proxies,
         )
+        response.raise_for_status()
+        return Response(response=response, data=response.json())
+
+    @require_auth
+    def list_labels(self, project_id: str, **kwargs) -> Response:
+        """List all labels in a project."""
+        response = self._get(f"/projects/{project_id}/labels/", params=kwargs)
+        response.raise_for_status()
+        return Response(response=response, data=response.json())
+
+    @require_auth
+    def create_label(self, project_id: str, data: dict[str, Any]) -> Response:
+        """Create a new label."""
+        response = self._post(f"/projects/{project_id}/labels/", data=data)
+        response.raise_for_status()
+        return Response(response=response, data=response.json())
+
+    @require_auth
+    def retrieve_project_page(self, project_id: str, page_id: str) -> Response:
+        """Retrieve a project page by ID."""
+        response = self._get(f"/projects/{project_id}/pages/{page_id}/")
+        response.raise_for_status()
+        return Response(response=response, data=response.json())
+
+    @require_auth
+    def create_project_page(self, project_id: str, data: dict[str, Any]) -> Response:
+        """Create a new project page."""
+        response = self._post(f"/projects/{project_id}/pages/", data=data)
         response.raise_for_status()
         return Response(response=response, data=response.json())

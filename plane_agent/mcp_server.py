@@ -69,7 +69,7 @@ def register_projects_tools(mcp: FastMCP):
             description="Verify SSL certificate",
             default=True,
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -105,7 +105,7 @@ def register_projects_tools(mcp: FastMCP):
             description="Verify SSL certificate",
             default=True,
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -188,7 +188,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Verify SSL certificate",
             default=True,
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -244,7 +244,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -283,7 +283,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -323,13 +323,13 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
         """Delete a work item."""
         if not await ctx_confirm_destructive(ctx, "delete work item"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
         await ctx_progress(ctx, 0, 100)
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
@@ -350,7 +350,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -375,7 +375,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -410,7 +410,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Verify SSL certificate",
             default=True,
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -441,7 +441,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -468,7 +468,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -496,7 +496,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -524,7 +524,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -552,7 +552,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -580,7 +580,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -606,7 +606,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -631,7 +631,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -658,7 +658,7 @@ def register_work_items_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -687,7 +687,7 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -716,7 +716,7 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -748,7 +748,7 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -778,7 +778,7 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -814,18 +814,18 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
         """Delete a cycle by ID."""
         if not await ctx_confirm_destructive(ctx, "delete cycle"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
         await ctx_progress(ctx, 0, 100)
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
         )
-        return client.delete_cycle(project_id=project_id, cycle_id=cycle_id)
+        return client.delete_cycle(project_id=project_id, cycle_id=cycle_id)  # type: ignore
 
     @mcp.tool(
         exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
@@ -842,7 +842,7 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -868,7 +868,7 @@ def register_cycles_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -896,7 +896,7 @@ def register_epics_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -923,7 +923,7 @@ def register_epics_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -949,7 +949,7 @@ def register_epics_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -977,7 +977,7 @@ def register_epics_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1009,13 +1009,13 @@ def register_epics_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
         """Delete an epic by ID."""
         if not await ctx_confirm_destructive(ctx, "delete epic"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
         await ctx_progress(ctx, 0, 100)
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
@@ -1038,7 +1038,7 @@ def register_milestones_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1064,7 +1064,7 @@ def register_milestones_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1090,7 +1090,7 @@ def register_milestones_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1119,7 +1119,7 @@ def register_milestones_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1151,13 +1151,13 @@ def register_milestones_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
         """Delete a milestone by ID."""
         if not await ctx_confirm_destructive(ctx, "delete milestone"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
         await ctx_progress(ctx, 0, 100)
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
@@ -1180,7 +1180,7 @@ def register_modules_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1207,7 +1207,7 @@ def register_modules_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1233,7 +1233,7 @@ def register_modules_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1261,7 +1261,7 @@ def register_modules_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1295,13 +1295,13 @@ def register_modules_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
         """Delete a module by ID."""
         if not await ctx_confirm_destructive(ctx, "delete module"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
         await ctx_progress(ctx, 0, 100)
         client = get_client(
             url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
@@ -1324,7 +1324,7 @@ def register_states_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1351,7 +1351,7 @@ def register_states_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1377,7 +1377,7 @@ def register_users_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1400,7 +1400,7 @@ def register_users_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1425,7 +1425,7 @@ def register_workspaces_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1448,7 +1448,7 @@ def register_workspaces_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1471,7 +1471,7 @@ def register_workspaces_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1498,7 +1498,7 @@ def register_workspaces_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1532,7 +1532,7 @@ def register_initiative_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1559,7 +1559,7 @@ def register_initiative_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1586,7 +1586,7 @@ def register_intake_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1612,7 +1612,7 @@ def register_intake_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1639,7 +1639,7 @@ def register_label_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1666,7 +1666,7 @@ def register_label_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1694,7 +1694,7 @@ def register_page_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:
@@ -1720,7 +1720,7 @@ def register_page_tools(mcp: FastMCP):
             description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
         ),
         verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> Response:

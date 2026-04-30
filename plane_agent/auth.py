@@ -4,7 +4,7 @@ import logging
 import os
 from typing import Any
 
-from agent_utilities.exceptions import AuthError, UnauthorizedError
+from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
 from plane_agent.api_client import Api
 
@@ -15,7 +15,7 @@ def get_client(
     url: str | None = os.getenv("PLANE_BASE_URL", "https://api.plane.so"),
     api_key: str | None = os.getenv("PLANE_API_KEY", None),
     workspace_slug: str | None = os.getenv("PLANE_WORKSPACE_SLUG", None),
-    verify: bool = True,
+    verify: bool | None = True,
     config: Any | None = None,
 ) -> Api:
     """
