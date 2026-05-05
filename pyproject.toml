@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plane-agent"
-version = "0.4.0"
+version = "0.5.0"
 description = "Plane MCP Agent"
 readme = "README.md"
 classifiers = [ "Development Status :: 4 - Beta", "License :: OSI Approved :: MIT License", "Environment :: Console", "Operating System :: POSIX :: Linux", "Programming Language :: Python :: 3",]
@@ -35,6 +35,11 @@ target-version = "py310"
 python_version = "3.10"
 ignore_missing_imports = true
 check_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "pytest-timeout>=2.4.0",
+]
 
 [tool.setuptools.package-data]
 plane_agent = [ "mcp_config.json", "agent_data/**",]
