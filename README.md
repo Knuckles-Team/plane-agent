@@ -33,7 +33,7 @@
 
 Meet [Plane](https://plane.so/), an open-source project management tool to track issues, run ~sprints~ cycles, and manage product roadmaps without the chaos of managing the tool itself. 🧘♀️
 
-*Version: 0.5.0*
+*Version: 0.6.0*
 
 > Plane is evolving every day. Your suggestions, ideas, and reported bugs help us immensely. Do not hesitate to join in the conversation on [Discord](https://discord.com/invite/A92xrEGCge) or raise a GitHub issue. We read everything and respond to most.
 
@@ -461,3 +461,70 @@ If you were using the previous Node.js-based `@makeplane/plane-mcp-server`, your
 ```
 
 **Please migrate to the new Python-based configuration shown in the Usage section above.**
+
+
+## MCP Configuration Examples
+
+### 1. Standard IO (stdio) Deployment
+
+```json
+{
+  "mcpServers": {
+    "plane-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "plane-mcp"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
+        "LLM_API_KEY": "<YOUR_LLM_API_KEY>",
+        "LLM_BASE_URL": "<YOUR_LLM_BASE_URL>",
+        "MCP_URL": "<YOUR_MCP_URL>",
+        "MODEL_ID": "<YOUR_MODEL_ID>",
+        "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
+        "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
+        "PLANE_URL": "<YOUR_PLANE_URL>",
+        "PLANE_WORKSPACE_SLUG": "<YOUR_PLANE_WORKSPACE_SLUG>"
+      }
+    }
+  }
+}
+```
+
+### 2. Streamable HTTP (SSE) Deployment
+
+```json
+{
+  "mcpServers": {
+    "plane-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "plane-mcp",
+        "--transport",
+        "http",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
+        "LLM_API_KEY": "<YOUR_LLM_API_KEY>",
+        "LLM_BASE_URL": "<YOUR_LLM_BASE_URL>",
+        "MCP_URL": "<YOUR_MCP_URL>",
+        "MODEL_ID": "<YOUR_MODEL_ID>",
+        "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
+        "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
+        "PLANE_URL": "<YOUR_PLANE_URL>",
+        "PLANE_WORKSPACE_SLUG": "<YOUR_PLANE_WORKSPACE_SLUG>"
+      }
+    }
+  }
+}
+```
