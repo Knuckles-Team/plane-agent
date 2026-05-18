@@ -1,0 +1,59 @@
+# Tasks: Code Enhancement: plane-agent
+
+Generated: 2026-05-12T14:14:41.016170+00:00
+Skipped informational: 5
+
+- [ ] [P] **T001** [Codebase Optimization] 2 functions exceed 200 lines (actionable refactoring targets): register_work_ite
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T002** [Codebase Optimization] Monolithic: mcp_server.py (1816L) — 2 functions with high complexity (worst: reg
+  - Priority: P1-High | Effort: Large
+- [ ] [P] **T003** [Codebase Optimization] Needs attention: api_client.py (1064L) — God class: Api (107 methods) — consider
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T004** [Test Coverage] Low test-to-source ratio: 0.27
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T005** [Test Coverage] Test suite lacks intent diversity (only one type)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T006** [Test Coverage] 37 potential doc-test drift items
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T007** [Documentation & Governance] README.md missing sections: overview
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T008** [Documentation & Governance] 1 broken internal links in README.md
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T009** [Documentation & Governance] README missing: Has a clear project description (>50 chars)
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T010** [Documentation & Governance] README missing: Has a Table of Contents
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T011** [Documentation & Governance] README missing: Has architecture overview or diagram
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T012** [Documentation & Governance] README missing: References /docs directory material
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T013** [Architecture & Design Patterns] SRP: 2 modules exceed 500 lines (god modules)
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T014** [Architecture & Design Patterns] SRP: 1 classes have >15 methods
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T015** [Architecture & Design Patterns] No discernible layer architecture (no domain/service/adapter separation)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T016** [Concept Traceability] Low traceability ratio: 0% concepts fully traced
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T017** [Concept Traceability] 3 test functions missing concept markers
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T018** [Concept Traceability] 96 significant functions (>10 lines) missing concept markers in docstrings
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T019** [Linting & Formatting] Total lint findings: 0 (high/error: 0, medium/warning: 0, low: 0)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T020** [Pre-Commit Compliance] 2 hook(s) may be outdated: ruff-pre-commit, uv-pre-commit
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T021** [Directory Organization] 2 rogue/throwaway scripts detected (fix_*, validate_*, patch_*, etc.): scripts/v
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T022** [Changelog Audit] CHANGELOG.md exists but could not be parsed — check format compliance
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T023** [Changelog Audit] No changelog entries within the last 30 days
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T024** [Changelog Audit] keepachangelog not installed — pip install 'universal-skills[code-enhancer]'
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T025** [Environment Variables] Only 23% of env vars documented in README.md
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T026** [Environment Variables] Undocumented env vars: ALLOWED_CLIENT_REDIRECT_URIS, AUTH_TYPE, EUNOMIA_POLICY_F
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T027** [Environment Variables] 8 Python env vars not in .env.example: DEFAULT_AGENT_NAME, LLM_API_KEY, LLM_BASE
+  - Priority: P2-Medium | Effort: Medium

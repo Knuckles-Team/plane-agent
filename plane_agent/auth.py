@@ -2,7 +2,6 @@
 
 import logging
 import os
-from typing import Any
 
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
@@ -16,7 +15,6 @@ def get_client(
     api_key: str | None = os.getenv("PLANE_API_KEY", None),
     workspace_slug: str | None = os.getenv("PLANE_WORKSPACE_SLUG", None),
     verify: bool | None = True,
-    config: Any | None = None,
 ) -> Api:
     """
     Initialize and return a Plane API client.

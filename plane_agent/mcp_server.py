@@ -11,7 +11,6 @@ with warnings.catch_warnings():
     except ImportError:
         pass
 
-# General urllib3/chardet mismatch warnings
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
@@ -21,1785 +20,702 @@ import sys
 from typing import Any
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import (
-    config,
-    create_mcp_server,
-    ctx_confirm_destructive,
-    ctx_progress,
-)
+from agent_utilities.mcp_utilities import create_mcp_server
 from dotenv import find_dotenv, load_dotenv
-from fastmcp import Context, FastMCP
+from fastmcp import FastMCP
+from fastmcp.dependencies import Depends
 from fastmcp.utilities.logging import get_logger
 from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from plane_agent.auth import get_client
-from plane_agent.plane_models import Response
 
 __version__ = "0.1.37"
-print(f"Plane MCP v{__version__}", file=sys.stderr)
 
-logger = get_logger(name="mcp_server")
-logger.setLevel(logging.DEBUG)
-
-
-DEFAULT_PLANE_URL = os.getenv("PLANE_BASE_URL", "https://api.plane.so")
-DEFAULT_PLANE_KEY = os.getenv("PLANE_API_KEY", None)
-DEFAULT_PLANE_WORKSPACE = os.getenv("PLANE_WORKSPACE_SLUG", None)
+logger = get_logger(name="plane-agent")
+logger.setLevel(logging.INFO)
 
 
 def register_projects_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"projects"},
-    )
-    def list_projects(
-        plane_url: str | None = Field(
-            description="Base URL of Plane instance",
-            default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
+    @mcp.tool(tags={"projects"})
+    async def plane_projects(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_projects', 'retrieve_project'"
         ),
-        api_key: str | None = Field(
-            description="Plane API key",
-            default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
-        ),
-        workspace_slug: str | None = Field(
-            description="Plane workspace slug",
-            default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
-        ),
-        verify: bool | None = Field(
-            description="Verify SSL certificate",
-            default=True,
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List all projects in the workspace."""
-        client = get_client(
-            url=plane_url,
-            api_key=api_key,
-            workspace_slug=workspace_slug,
-            verify=verify,
-            config=config,
+        project_id: str | None = Field(default=None, description="project id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage projects operations.
+
+        Actions:
+          - 'list_projects': List all projects in the workspace.
+          - 'retrieve_project': Retrieve a project by ID.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_projects":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_projects(**kwargs)
+        if action == "retrieve_project":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_project(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_projects', 'retrieve_project"
         )
-        return client.list_projects()
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"projects"},
-    )
-    def retrieve_project(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL of Plane instance",
-            default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
-        ),
-        api_key: str | None = Field(
-            description="Plane API key",
-            default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
-        ),
-        workspace_slug: str | None = Field(
-            description="Plane workspace slug",
-            default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
-        ),
-        verify: bool | None = Field(
-            description="Verify SSL certificate",
-            default=True,
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a project by ID."""
-        client = get_client(
-            url=plane_url,
-            api_key=api_key,
-            workspace_slug=workspace_slug,
-            verify=verify,
-            config=config,
-        )
-        return client.retrieve_project(project_id=project_id)
-
-
-def _build_advanced_search_filters(
-    assignee_ids: list[str] | None = None,
-    state_ids: list[str] | None = None,
-    state_groups: list[str] | None = None,
-    priorities: list[str] | None = None,
-    label_ids: list[str] | None = None,
-    type_ids: list[str] | None = None,
-    cycle_ids: list[str] | None = None,
-    module_ids: list[str] | None = None,
-) -> dict[str, Any] | None:
-    """Build an AND filter dict from flat filter params."""
-    conditions = []
-    if assignee_ids:
-        conditions.append({"assignee_id__in": assignee_ids})
-    if state_ids:
-        conditions.append({"state_id__in": state_ids})
-    if state_groups:
-        conditions.append({"state_group__in": state_groups})
-    if priorities:
-        conditions.append({"priority__in": priorities})
-    if label_ids:
-        conditions.append({"label_id__in": label_ids})
-    if type_ids:
-        conditions.append({"type_id__in": type_ids})
-    if cycle_ids:
-        conditions.append({"cycle_id__in": cycle_ids})
-    if module_ids:
-        conditions.append({"module_id__in": module_ids})
-
-    if not conditions:
-        return None
-    if len(conditions) == 1:
-        return conditions[0]
-    return {"and": conditions}
 
 
 def register_work_items_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_items(
-        project_id: str | None = Field(description="UUID of the project", default=None),
-        query: str | None = Field(description="Search query", default=None),
-        assignee_ids: list[str] | None = None,
-        state_ids: list[str] | None = None,
-        state_groups: list[str] | None = None,
-        priorities: list[str] | None = None,
-        label_ids: list[str] | None = None,
-        type_ids: list[str] | None = None,
-        cycle_ids: list[str] | None = None,
-        module_ids: list[str] | None = None,
-        plane_url: str | None = Field(
-            description="Base URL of Plane instance",
-            default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
+    @mcp.tool(tags={"work_items"})
+    async def plane_work_items(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_work_items', 'create_work_item', 'update_work_item', 'delete_work_item', 'search_work_items', 'retrieve_work_item_by_identifier', 'retrieve_work_item', 'list_work_item_activities', 'list_work_item_comments', 'create_work_item_comment', 'list_work_item_links', 'create_work_item_link', 'list_work_item_relations', 'list_work_item_types', 'list_work_logs', 'create_work_log'"
         ),
-        api_key: str | None = Field(
-            description="Plane API key",
-            default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
+        project_id: str | None = Field(default=None, description="project id"),
+        work_item_id: str | None = Field(default=None, description="work item id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        project_identifier: str | None = Field(
+            default=None, description="project identifier"
         ),
-        workspace_slug: str | None = Field(
-            description="Plane workspace slug",
-            default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
+        issue_identifier: int | None = Field(
+            default=None, description="issue identifier"
         ),
-        verify: bool | None = Field(
-            description="Verify SSL certificate",
-            default=True,
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List work items in a project or search across workspace."""
-        client = get_client(
-            url=plane_url,
-            api_key=api_key,
-            workspace_slug=workspace_slug,
-            verify=verify,
-            config=config,
-        )
+        query: str | None = Field(default=None, description="query"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage work items operations.
 
-        filters = _build_advanced_search_filters(
-            assignee_ids=assignee_ids,
-            state_ids=state_ids,
-            state_groups=state_groups,
-            priorities=priorities,
-            label_ids=label_ids,
-            type_ids=type_ids,
-            cycle_ids=cycle_ids,
-            module_ids=module_ids,
-        )
-
-        if filters or query:
-            data = {"query": query, "filters": filters, "project_id": project_id}
-            return client.advanced_search_work_items(data=data)
-
-        if not project_id:
-            return Response(
-                response=None,
-                data={"error": "project_id is required for listing without filters."},
-            )
-
-        return client.list_work_items(project_id=project_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def create_work_item(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Name of the work item"),
-        description_html: str | None = None,
-        priority: str | None = None,
-        state_id: str | None = None,
-        assignee_ids: list[str] | None = None,
-        label_ids: list[str] | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {
-            "name": name,
-            "description_html": description_html,
-            "priority": priority,
-            "state_id": state_id,
-            "assignees": assignee_ids,
-            "labels": label_ids,
-        }
-        return client.create_work_item(project_id=project_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def update_work_item(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        name: str | None = None,
-        description_html: str | None = None,
-        priority: str | None = None,
-        state_id: str | None = None,
-        assignee_ids: list[str] | None = None,
-        label_ids: list[str] | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Update a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data: dict[str, Any] = {}
-        if name:
-            data["name"] = name
-        if description_html:
-            data["description_html"] = description_html
-        if priority:
-            data["priority"] = priority
-        if state_id:
-            data["state_id"] = state_id
-        if assignee_ids:
-            data["assignees"] = assignee_ids
-        if label_ids:
-            data["labels"] = label_ids
-        return client.update_work_item(
-            project_id=project_id, work_item_id=work_item_id, data=data
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    async def delete_work_item(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Delete a work item."""
-        if not await ctx_confirm_destructive(ctx, "delete work item"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
-        await ctx_progress(ctx, 0, 100)
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.delete_work_item(project_id=project_id, work_item_id=work_item_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def search_work_items(
-        query: str = Field(description="Search query"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Search work items across workspace."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.search_work_items(query=query)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def retrieve_work_item_by_identifier(
-        project_identifier: str = Field(description="Project identifier (e.g. MP)"),
-        issue_identifier: int = Field(description="Issue sequence number (e.g. 1)"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a work item by project identifier and issue sequence number."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.retrieve_work_item_by_identifier(
-            project_identifier=project_identifier, issue_identifier=issue_identifier
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def retrieve_work_item(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL of Plane instance",
-            default=os.environ.get("PLANE_URL", DEFAULT_PLANE_URL),
-        ),
-        api_key: str | None = Field(
-            description="Plane API key",
-            default=os.environ.get("PLANE_API_KEY", DEFAULT_PLANE_KEY),
-        ),
-        workspace_slug: str | None = Field(
-            description="Plane workspace slug",
-            default=os.environ.get("PLANE_WORKSPACE_SLUG", DEFAULT_PLANE_WORKSPACE),
-        ),
-        verify: bool | None = Field(
-            description="Verify SSL certificate",
-            default=True,
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a work item by ID."""
-        client = get_client(
-            url=plane_url,
-            api_key=api_key,
-            workspace_slug=workspace_slug,
-            verify=verify,
-            config=config,
-        )
-        return client.retrieve_work_item(
-            project_id=project_id, work_item_id=work_item_id
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_item_activities(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List activities for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_work_item_activities(
-            project_id=project_id, work_item_id=work_item_id
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_item_comments(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List comments for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_work_item_comments(
-            project_id=project_id, work_item_id=work_item_id
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def create_work_item_comment(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        comment_html: str = Field(description="Comment content in HTML"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a comment for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {"comment_html": comment_html}
-        return client.create_work_item_comment(
-            project_id=project_id, work_item_id=work_item_id, data=data
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_item_links(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List links for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_work_item_links(
-            project_id=project_id, work_item_id=work_item_id
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def create_work_item_link(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        url: str = Field(description="URL of the link"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a link for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {"url": url}
-        return client.create_work_item_link(
-            project_id=project_id, work_item_id=work_item_id, data=data
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_item_relations(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List relations for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_work_item_relations(
-            project_id=project_id, work_item_id=work_item_id
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_item_types(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List work item types in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_work_item_types(project_id=project_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def list_work_logs(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List work logs for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_work_logs(project_id=project_id, work_item_id=work_item_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"work_items"},
-    )
-    def create_work_log(
-        project_id: str = Field(description="UUID of the project"),
-        work_item_id: str = Field(description="UUID of the work item"),
-        duration: int = Field(description="Duration in minutes"),
-        description: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a work log for a work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {"duration": duration, "description": description}
-        return client.create_work_log(
-            project_id=project_id, work_item_id=work_item_id, data=data
+        Actions:
+          - 'list_work_items': List work items in a project.
+          - 'create_work_item': Create a new work item.
+          - 'update_work_item': Update a work item by ID.
+          - 'delete_work_item': Delete a work item by ID.
+          - 'search_work_items': Search work items across a workspace.
+          - 'retrieve_work_item_by_identifier': Retrieve a work item by project identifier and issue sequence number.
+          - 'retrieve_work_item': Retrieve a work item by ID.
+          - 'list_work_item_activities': List activities for a work item.
+          - 'list_work_item_comments': List comments for a work item.
+          - 'create_work_item_comment': Create a comment for a work item.
+          - 'list_work_item_links': List links for a work item.
+          - 'create_work_item_link': Create a link for a work item.
+          - 'list_work_item_relations': List relations for a work item.
+          - 'list_work_item_types': List work item types in a project.
+          - 'list_work_logs': List work logs for a work item.
+          - 'create_work_log': Create a work log for a work item.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_work_items":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_items(**kwargs)
+        if action == "create_work_item":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_work_item(**kwargs)
+        if action == "update_work_item":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+                "data": data,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_work_item(**kwargs)
+        if action == "delete_work_item":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_work_item(**kwargs)
+        if action == "search_work_items":
+            kwargs = {"query": query}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.search_work_items(**kwargs)
+        if action == "retrieve_work_item_by_identifier":
+            kwargs = {
+                "project_identifier": project_identifier,
+                "issue_identifier": issue_identifier,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_work_item_by_identifier(**kwargs)
+        if action == "retrieve_work_item":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_work_item(**kwargs)
+        if action == "list_work_item_activities":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_item_activities(**kwargs)
+        if action == "list_work_item_comments":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_item_comments(**kwargs)
+        if action == "create_work_item_comment":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+                "data": data,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_work_item_comment(**kwargs)
+        if action == "list_work_item_links":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_item_links(**kwargs)
+        if action == "create_work_item_link":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+                "data": data,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_work_item_link(**kwargs)
+        if action == "list_work_item_relations":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_item_relations(**kwargs)
+        if action == "list_work_item_types":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_item_types(**kwargs)
+        if action == "list_work_logs":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_work_logs(**kwargs)
+        if action == "create_work_log":
+            kwargs = {
+                "project_id": project_id,
+                "work_item_id": work_item_id,
+                "data": data,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_work_log(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_work_items', 'create_work_item', 'update_work_item', 'delete_work_item', 'search_work_items', 'retrieve_work_item_by_identifier', 'retrieve_work_item', 'list_work_item_activities', 'list_work_item_comments', 'create_work_item_comment', 'list_work_item_links', 'create_work_item_link', 'list_work_item_relations', 'list_work_item_types', 'list_work_logs', 'create_work_log"
         )
 
 
 def register_cycles_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    def list_cycles(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"cycles"})
+    async def plane_cycles(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_cycles', 'create_cycle', 'retrieve_cycle', 'update_cycle', 'delete_cycle', 'list_cycle_work_items', 'add_work_items_to_cycle'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List cycles in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_cycles(project_id=project_id)
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        cycle_id: str | None = Field(default=None, description="cycle id"),
+        issue_ids: list[str] | None = Field(default=None, description="issue ids"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage cycles operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    def create_cycle(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Cycle name"),
-        owned_by: str = Field(description="UUID of the owner"),
-        description: str | None = None,
-        start_date: str | None = None,
-        end_date: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new cycle."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {
-            "name": name,
-            "owned_by": owned_by,
-            "description": description,
-            "start_date": start_date,
-            "end_date": end_date,
-        }
-        return client.create_cycle(project_id=project_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    def retrieve_cycle(
-        project_id: str = Field(description="UUID of the project"),
-        cycle_id: str = Field(description="UUID of the cycle"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a cycle by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.retrieve_cycle(project_id=project_id, cycle_id=cycle_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    def update_cycle(
-        project_id: str = Field(description="UUID of the project"),
-        cycle_id: str = Field(description="UUID of the cycle"),
-        name: str | None = None,
-        description: str | None = None,
-        start_date: str | None = None,
-        end_date: str | None = None,
-        owned_by: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Update a cycle by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data: dict[str, Any] = {}
-        if name:
-            data["name"] = name
-        if description:
-            data["description"] = description
-        if start_date:
-            data["start_date"] = start_date
-        if end_date:
-            data["end_date"] = end_date
-        if owned_by:
-            data["owned_by"] = owned_by
-        return client.update_cycle(project_id=project_id, cycle_id=cycle_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    async def delete_cycle(
-        project_id: str = Field(description="UUID of the project"),
-        cycle_id: str = Field(description="UUID of the cycle"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Delete a cycle by ID."""
-        if not await ctx_confirm_destructive(ctx, "delete cycle"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
-        await ctx_progress(ctx, 0, 100)
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.delete_cycle(project_id=project_id, cycle_id=cycle_id)  # type: ignore
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    def list_cycle_work_items(
-        project_id: str = Field(description="UUID of the project"),
-        cycle_id: str = Field(description="UUID of the cycle"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List work items in a cycle."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_cycle_work_items(project_id=project_id, cycle_id=cycle_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"cycles"},
-    )
-    def add_work_items_to_cycle(
-        project_id: str = Field(description="UUID of the project"),
-        cycle_id: str = Field(description="UUID of the cycle"),
-        issue_ids: list[str] = Field(description="List of work item IDs"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Add work items to a cycle."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.add_work_items_to_cycle(
-            project_id=project_id, cycle_id=cycle_id, issue_ids=issue_ids
+        Actions:
+          - 'list_cycles': List all cycles in a project.
+          - 'create_cycle': Create a new cycle.
+          - 'retrieve_cycle': Retrieve a cycle by ID.
+          - 'update_cycle': Update a cycle by ID.
+          - 'delete_cycle': Call delete_cycle
+          - 'list_cycle_work_items': List work items in a cycle.
+          - 'add_work_items_to_cycle': Add work items to a cycle.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_cycles":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_cycles(**kwargs)
+        if action == "create_cycle":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_cycle(**kwargs)
+        if action == "retrieve_cycle":
+            kwargs = {"project_id": project_id, "cycle_id": cycle_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_cycle(**kwargs)
+        if action == "update_cycle":
+            kwargs = {
+                "project_id": project_id,
+                "cycle_id": cycle_id,
+                "data": data,
+            }  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_cycle(**kwargs)
+        if action == "delete_cycle":
+            kwargs = {"project_id": project_id, "cycle_id": cycle_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_cycle(**kwargs)
+        if action == "list_cycle_work_items":
+            kwargs = {"project_id": project_id, "cycle_id": cycle_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_cycle_work_items(**kwargs)
+        if action == "add_work_items_to_cycle":
+            kwargs = {
+                "project_id": project_id,
+                "cycle_id": cycle_id,
+                "issue_ids": issue_ids,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.add_work_items_to_cycle(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_cycles', 'create_cycle', 'retrieve_cycle', 'update_cycle', 'delete_cycle', 'list_cycle_work_items', 'add_work_items_to_cycle"
         )
 
 
 def register_epics_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"epics"},
-    )
-    def list_epics(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"epics"})
+    async def plane_epics(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_epics', 'create_epic', 'retrieve_epic', 'update_epic', 'delete_epic'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List epics in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_epics(project_id=project_id)
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        epic_id: str | None = Field(default=None, description="epic id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage epics operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"epics"},
-    )
-    def create_epic(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Epic name"),
-        priority: str | None = None,
-        description: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new epic."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'list_epics': List all epics in a project.
+          - 'create_epic': Create a new epic (technically a work item with epic type).
+          - 'retrieve_epic': Retrieve an epic by ID.
+          - 'update_epic': Update an epic by ID.
+          - 'delete_epic': Delete an epic by ID.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_epics":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_epics(**kwargs)
+        if action == "create_epic":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_epic(**kwargs)
+        if action == "retrieve_epic":
+            kwargs = {"project_id": project_id, "epic_id": epic_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_epic(**kwargs)
+        if action == "update_epic":
+            kwargs = {
+                "project_id": project_id,
+                "epic_id": epic_id,
+                "data": data,
+            }  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_epic(**kwargs)
+        if action == "delete_epic":
+            kwargs = {"project_id": project_id, "epic_id": epic_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_epic(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_epics', 'create_epic', 'retrieve_epic', 'update_epic', 'delete_epic"
         )
-        data = {"name": name, "priority": priority, "description": description}
-        return client.create_epic(project_id=project_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"epics"},
-    )
-    def retrieve_epic(
-        project_id: str = Field(description="UUID of the project"),
-        epic_id: str = Field(description="UUID of the epic"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve an epic by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.retrieve_epic(project_id=project_id, epic_id=epic_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"epics"},
-    )
-    def update_epic(
-        project_id: str = Field(description="UUID of the project"),
-        epic_id: str = Field(description="UUID of the epic"),
-        name: str | None = None,
-        priority: str | None = None,
-        description: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Update an epic by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data: dict[str, Any] = {}
-        if name:
-            data["name"] = name
-        if priority:
-            data["priority"] = priority
-        if description:
-            data["description"] = description
-        return client.update_epic(project_id=project_id, epic_id=epic_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"epics"},
-    )
-    async def delete_epic(
-        project_id: str = Field(description="UUID of the project"),
-        epic_id: str = Field(description="UUID of the epic"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Delete an epic by ID."""
-        if not await ctx_confirm_destructive(ctx, "delete epic"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
-        await ctx_progress(ctx, 0, 100)
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.delete_epic(project_id=project_id, epic_id=epic_id)
 
 
 def register_milestones_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"milestones"},
-    )
-    def list_milestones(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"milestones"})
+    async def plane_milestones(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_milestones', 'create_milestone', 'retrieve_milestone', 'update_milestone', 'delete_milestone'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List milestones in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_milestones(project_id=project_id)
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        milestone_id: str | None = Field(default=None, description="milestone id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage milestones operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"milestones"},
-    )
-    def create_milestone(
-        project_id: str = Field(description="UUID of the project"),
-        title: str = Field(description="Milestone title"),
-        target_date: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new milestone."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'list_milestones': List all milestones in a project.
+          - 'create_milestone': Create a new milestone.
+          - 'retrieve_milestone': Retrieve a milestone by ID.
+          - 'update_milestone': Update a milestone by ID.
+          - 'delete_milestone': Delete a milestone by ID.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_milestones":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_milestones(**kwargs)
+        if action == "create_milestone":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_milestone(**kwargs)
+        if action == "retrieve_milestone":
+            kwargs = {
+                "project_id": project_id,
+                "milestone_id": milestone_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_milestone(**kwargs)
+        if action == "update_milestone":
+            kwargs = {
+                "project_id": project_id,
+                "milestone_id": milestone_id,
+                "data": data,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_milestone(**kwargs)
+        if action == "delete_milestone":
+            kwargs = {
+                "project_id": project_id,
+                "milestone_id": milestone_id,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_milestone(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_milestones', 'create_milestone', 'retrieve_milestone', 'update_milestone', 'delete_milestone"
         )
-        data = {"title": title, "target_date": target_date}
-        return client.create_milestone(project_id=project_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"milestones"},
-    )
-    def retrieve_milestone(
-        project_id: str = Field(description="UUID of the project"),
-        milestone_id: str = Field(description="UUID of the milestone"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a milestone by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.retrieve_milestone(
-            project_id=project_id, milestone_id=milestone_id
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"milestones"},
-    )
-    def update_milestone(
-        project_id: str = Field(description="UUID of the project"),
-        milestone_id: str = Field(description="UUID of the milestone"),
-        title: str | None = None,
-        target_date: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Update a milestone by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data: dict[str, Any] = {}
-        if title:
-            data["title"] = title
-        if target_date:
-            data["target_date"] = target_date
-        return client.update_milestone(
-            project_id=project_id, milestone_id=milestone_id, data=data
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"milestones"},
-    )
-    async def delete_milestone(
-        project_id: str = Field(description="UUID of the project"),
-        milestone_id: str = Field(description="UUID of the milestone"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Delete a milestone by ID."""
-        if not await ctx_confirm_destructive(ctx, "delete milestone"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
-        await ctx_progress(ctx, 0, 100)
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.delete_milestone(project_id=project_id, milestone_id=milestone_id)
 
 
 def register_modules_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"modules"},
-    )
-    def list_modules(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"modules"})
+    async def plane_modules(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_modules', 'create_module', 'retrieve_module', 'update_module', 'delete_module'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List modules in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_modules(project_id=project_id)
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        module_id: str | None = Field(default=None, description="module id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage modules operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"modules"},
-    )
-    def create_module(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Module name"),
-        description: str | None = None,
-        status: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new module."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'list_modules': List all modules in a project.
+          - 'create_module': Create a new module.
+          - 'retrieve_module': Retrieve a module by ID.
+          - 'update_module': Update a module by ID.
+          - 'delete_module': Delete a module by ID.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_modules":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_modules(**kwargs)
+        if action == "create_module":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_module(**kwargs)
+        if action == "retrieve_module":
+            kwargs = {"project_id": project_id, "module_id": module_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_module(**kwargs)
+        if action == "update_module":
+            kwargs = {
+                "project_id": project_id,
+                "module_id": module_id,
+                "data": data,
+            }  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_module(**kwargs)
+        if action == "delete_module":
+            kwargs = {"project_id": project_id, "module_id": module_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_module(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_modules', 'create_module', 'retrieve_module', 'update_module', 'delete_module"
         )
-        data = {"name": name, "description": description, "status": status}
-        return client.create_module(project_id=project_id, data=data)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"modules"},
-    )
-    def retrieve_module(
-        project_id: str = Field(description="UUID of the project"),
-        module_id: str = Field(description="UUID of the module"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a module by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.retrieve_module(project_id=project_id, module_id=module_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"modules"},
-    )
-    def update_module(
-        project_id: str = Field(description="UUID of the project"),
-        module_id: str = Field(description="UUID of the module"),
-        name: str | None = None,
-        description: str | None = None,
-        status: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Update a module by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data: dict[str, Any] = {}
-        if name:
-            data["name"] = name
-        if description:
-            data["description"] = description
-        if status:
-            data["status"] = status
-        return client.update_module(
-            project_id=project_id, module_id=module_id, data=data
-        )
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"modules"},
-    )
-    async def delete_module(
-        project_id: str = Field(description="UUID of the project"),
-        module_id: str = Field(description="UUID of the module"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Delete a module by ID."""
-        if not await ctx_confirm_destructive(ctx, "delete module"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}  # type: ignore
-        await ctx_progress(ctx, 0, 100)
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.delete_module(project_id=project_id, module_id=module_id)
 
 
 def register_states_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"states"},
-    )
-    def list_states(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"states"})
+    async def plane_states(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_states', 'create_state'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List states in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_states(project_id=project_id)
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage states operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"states"},
-    )
-    def create_state(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="State name"),
-        color: str = Field(description="Hex color code"),
-        group: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new state."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'list_states': List all states in a project.
+          - 'create_state': Create a new state.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_states":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_states(**kwargs)
+        if action == "create_state":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_state(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_states', 'create_state"
         )
-        data = {"name": name, "color": color, "group": group}
-        return client.create_state(project_id=project_id, data=data)
 
 
 def register_users_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"users"},
-    )
-    def list_users(
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"users"})
+    async def plane_users(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_users', 'get_me'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List users in the workspace."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_users()
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage users operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"users"},
-    )
-    def get_me(
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Get current user information."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'list_users': List all users in the workspace.
+          - 'get_me': Get current user information.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_users":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_users(**kwargs)
+        if action == "get_me":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_me(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_users', 'get_me"
         )
-        return client.get_me()
 
 
 def register_workspaces_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"workspaces"},
-    )
-    def get_workspace(
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"workspaces"})
+    async def plane_workspaces(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_workspace', 'get_workspace_members', 'get_workspace_features', 'update_workspace_features'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Get current workspace details."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.get_workspace()
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage workspaces operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"workspaces"},
-    )
-    def get_workspace_members(
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Get all members of the current workspace."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'get_workspace': Get current workspace details.
+          - 'get_workspace_members': Get all members of the current workspace.
+          - 'get_workspace_features': Get features of the current workspace.
+          - 'update_workspace_features': Update features of the current workspace.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_workspace":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workspace(**kwargs)
+        if action == "get_workspace_members":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workspace_members(**kwargs)
+        if action == "get_workspace_features":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workspace_features(**kwargs)
+        if action == "update_workspace_features":
+            kwargs = {"data": data}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_workspace_features(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_workspace', 'get_workspace_members', 'get_workspace_features', 'update_workspace_features"
         )
-        return client.get_workspace_members()
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"workspaces"},
-    )
-    def get_workspace_features(
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Get features of the current workspace."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.get_workspace_features()
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"workspaces"},
-    )
-    def update_workspace_features(
-        project_grouping: bool | None = None,
-        initiatives: bool | None = None,
-        teams: bool | None = None,
-        customers: bool | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Update features of the current workspace."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data: dict[str, Any] = {}
-        if project_grouping is not None:
-            data["project_grouping"] = project_grouping
-        if initiatives is not None:
-            data["initiatives"] = initiatives
-        if teams is not None:
-            data["teams"] = teams
-        if customers is not None:
-            data["customers"] = customers
-        return client.update_workspace_features(data=data)
 
 
-def register_initiative_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"initiatives"},
-    )
-    def list_initiatives(
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+def register_initiatives_tools(mcp: FastMCP):
+    @mcp.tool(tags={"initiatives"})
+    async def plane_initiatives(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_initiatives', 'create_initiative'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List all initiatives in the workspace."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.list_initiatives()
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage initiatives operations.
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"initiatives"},
-    )
-    def create_initiative(
-        name: str = Field(description="Initiative name"),
-        description: str | None = None,
-        state: str | None = None,
-        lead: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new initiative."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        Actions:
+          - 'list_initiatives': List all initiatives in the workspace.
+          - 'create_initiative': Create a new initiative in the workspace.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_initiatives":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_initiatives(**kwargs)
+        if action == "create_initiative":
+            kwargs = {"data": data}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_initiative(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_initiatives', 'create_initiative"
         )
-        data = {"name": name, "description": description, "state": state, "lead": lead}
-        return client.create_initiative(data=data)
 
 
 def register_intake_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"intake"},
-    )
-    def list_intake_work_items(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+    @mcp.tool(tags={"intake"})
+    async def plane_intake(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_intake_work_items', 'create_intake_work_item'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List all intake work items in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage intake operations.
+
+        Actions:
+          - 'list_intake_work_items': List all intake work items in a project.
+          - 'create_intake_work_item': Create a new intake work item in a project.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_intake_work_items":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_intake_work_items(**kwargs)
+        if action == "create_intake_work_item":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_intake_work_item(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_intake_work_items', 'create_intake_work_item"
         )
-        return client.list_intake_work_items(project_id=project_id)
 
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"intake"},
-    )
-    def create_intake_work_item(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Work item name"),
-        description: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+
+def register_labels_tools(mcp: FastMCP):
+    @mcp.tool(tags={"labels"})
+    async def plane_labels(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_labels', 'create_label'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new intake work item."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        project_id: str | None = Field(default=None, description="project id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage labels operations.
+
+        Actions:
+          - 'list_labels': List all labels in a project.
+          - 'create_label': Create a new label.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_labels":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_labels(**kwargs)
+        if action == "create_label":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_label(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_labels', 'create_label"
         )
-        data = {"name": name, "description": description}
-        return client.create_intake_work_item(project_id=project_id, data=data)
 
 
-def register_label_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"labels"},
-    )
-    def list_labels(
-        project_id: str = Field(description="UUID of the project"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
+def register_pages_tools(mcp: FastMCP):
+    @mcp.tool(tags={"pages"})
+    async def plane_pages(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'retrieve_project_page', 'create_project_page'"
         ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """List all labels in a project."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
+        project_id: str | None = Field(default=None, description="project id"),
+        page_id: str | None = Field(default=None, description="page id"),
+        data: dict[str, Any] | None = Field(default=None, description="data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage pages operations.
+
+        Actions:
+          - 'retrieve_project_page': Retrieve a project page by ID.
+          - 'create_project_page': Create a new project page.
+        """
+        kwargs: dict[str, Any]
+        if action == "retrieve_project_page":
+            kwargs = {"project_id": project_id, "page_id": page_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.retrieve_project_page(**kwargs)
+        if action == "create_project_page":
+            kwargs = {"project_id": project_id, "data": data}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_project_page(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: retrieve_project_page', 'create_project_page"
         )
-        return client.list_labels(project_id=project_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"labels"},
-    )
-    def create_label(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Label name"),
-        color: str | None = None,
-        description: str | None = None,
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a new label."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {"name": name, "color": color, "description": description}
-        return client.create_label(project_id=project_id, data=data)
 
 
-def register_page_tools(mcp: FastMCP):
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"pages"},
-    )
-    def retrieve_project_page(
-        project_id: str = Field(description="UUID of the project"),
-        page_id: str = Field(description="UUID of the page"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Retrieve a project page by ID."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        return client.retrieve_project_page(project_id=project_id, page_id=page_id)
-
-    @mcp.tool(
-        exclude_args=["plane_url", "api_key", "workspace_slug", "verify"],
-        tags={"pages"},
-    )
-    def create_project_page(
-        project_id: str = Field(description="UUID of the project"),
-        name: str = Field(description="Page name"),
-        description_html: str = Field(description="Content in HTML"),
-        plane_url: str | None = Field(
-            description="Base URL", default=DEFAULT_PLANE_URL
-        ),
-        api_key: str | None = Field(description="API key", default=DEFAULT_PLANE_KEY),
-        workspace_slug: str | None = Field(
-            description="Workspace slug", default=DEFAULT_PLANE_WORKSPACE
-        ),
-        verify: bool | None = Field(description="Verify SSL certificate", default=True),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Response:
-        """Create a project page."""
-        client = get_client(
-            url=plane_url, api_key=api_key, workspace_slug=workspace_slug, verify=verify
-        )
-        data = {"name": name, "description_html": description_html}
-        return client.create_project_page(project_id=project_id, data=data)
-
-
-def register_prompts(mcp: FastMCP):
-    """Register Plane-specific prompts."""
-
-    @mcp.prompt(
-        name="plane-work-summary",
-        description="Get a summary of current work in Plane",
-    )
-    def plane_work_summary() -> str:
-        return "Review active cycles, high-priority issues, and recently updated documents in the Plane workspace."
-
-
-def register_all_tools(mcp: FastMCP) -> list[str]:
-    """Register all Plane tool categories correctly gated by environment variables."""
-    registered_tags = []
-
-    # Mapping of toggle env var to (registration_func, tag_name)
-    tool_mappings = [
-        ("PROJECTS_TOOL", (register_projects_tools, "projects")),
-        ("WORK_ITEMS_TOOL", (register_work_items_tools, "work_items")),
-        ("CYCLES_TOOL", (register_cycles_tools, "cycles")),
-        ("EPICS_TOOL", (register_epics_tools, "epics")),
-        ("INITIATIVE_TOOL", (register_initiative_tools, "initiative")),
-        ("INTAKE_TOOL", (register_intake_tools, "intake")),
-        ("LABEL_TOOL", (register_label_tools, "label")),
-        ("PAGE_TOOL", (register_page_tools, "page")),
-        ("MILESTONES_TOOL", (register_milestones_tools, "milestones")),
-        ("MODULES_TOOL", (register_modules_tools, "modules")),
-        ("STATES_TOOL", (register_states_tools, "states")),
-        ("USERS_TOOL", (register_users_tools, "users")),
-        ("WORKSPACES_TOOL", (register_workspaces_tools, "workspaces")),
-    ]
-
-    for env_key, (register_func, tag) in tool_mappings:
-        if to_boolean(os.getenv(env_key, "True")):
-            register_func(mcp)
-            registered_tags.append(tag)
-
-    return registered_tags
-
-
-def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
-    """Create and return the Plane MCP instance."""
+def get_mcp_instance() -> tuple[Any, ...]:
+    """Initialize and return the MCP instance."""
     load_dotenv(find_dotenv())
-
     args, mcp, middlewares = create_mcp_server(
-        name="plane",
+        name="plane-agent MCP",
         version=__version__,
-        instructions="Plane MCP Server",
+        instructions="plane-agent MCP Server — Condensed Action-Routed Tools.",
     )
 
-    registered_tags = register_all_tools(mcp)
-    register_prompts(mcp)
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health_check(request: Request) -> JSONResponse:
+        return JSONResponse({"status": "OK"})
+
+    DEFAULT_PROJECTSTOOL = to_boolean(os.getenv("PROJECTSTOOL", "True"))
+    if DEFAULT_PROJECTSTOOL:
+        register_projects_tools(mcp)
+    DEFAULT_WORK_ITEMSTOOL = to_boolean(os.getenv("WORK_ITEMSTOOL", "True"))
+    if DEFAULT_WORK_ITEMSTOOL:
+        register_work_items_tools(mcp)
+    DEFAULT_CYCLESTOOL = to_boolean(os.getenv("CYCLESTOOL", "True"))
+    if DEFAULT_CYCLESTOOL:
+        register_cycles_tools(mcp)
+    DEFAULT_EPICSTOOL = to_boolean(os.getenv("EPICSTOOL", "True"))
+    if DEFAULT_EPICSTOOL:
+        register_epics_tools(mcp)
+    DEFAULT_MILESTONESTOOL = to_boolean(os.getenv("MILESTONESTOOL", "True"))
+    if DEFAULT_MILESTONESTOOL:
+        register_milestones_tools(mcp)
+    DEFAULT_MODULESTOOL = to_boolean(os.getenv("MODULESTOOL", "True"))
+    if DEFAULT_MODULESTOOL:
+        register_modules_tools(mcp)
+    DEFAULT_STATESTOOL = to_boolean(os.getenv("STATESTOOL", "True"))
+    if DEFAULT_STATESTOOL:
+        register_states_tools(mcp)
+    DEFAULT_USERSTOOL = to_boolean(os.getenv("USERSTOOL", "True"))
+    if DEFAULT_USERSTOOL:
+        register_users_tools(mcp)
+    DEFAULT_WORKSPACESTOOL = to_boolean(os.getenv("WORKSPACESTOOL", "True"))
+    if DEFAULT_WORKSPACESTOOL:
+        register_workspaces_tools(mcp)
+    DEFAULT_INITIATIVESTOOL = to_boolean(os.getenv("INITIATIVESTOOL", "True"))
+    if DEFAULT_INITIATIVESTOOL:
+        register_initiatives_tools(mcp)
+    DEFAULT_INTAKETOOL = to_boolean(os.getenv("INTAKETOOL", "True"))
+    if DEFAULT_INTAKETOOL:
+        register_intake_tools(mcp)
+    DEFAULT_LABELSTOOL = to_boolean(os.getenv("LABELSTOOL", "True"))
+    if DEFAULT_LABELSTOOL:
+        register_labels_tools(mcp)
+    DEFAULT_PAGESTOOL = to_boolean(os.getenv("PAGESTOOL", "True"))
+    if DEFAULT_PAGESTOOL:
+        register_pages_tools(mcp)
 
     for mw in middlewares:
         mcp.add_middleware(mw)
+    return mcp, args, middlewares
 
-    return mcp, args, middlewares, registered_tags
 
-
-def mcp_server():
-    """Run the Plane MCP server."""
-    mcp, args, middlewares, registered_tags = get_mcp_instance()
-
-    print(f"Plane Agent MCP v{__version__}", file=sys.stderr)
+def mcp_server() -> None:
+    mcp, args, middlewares = get_mcp_instance()
+    print(f"plane-agent MCP v{__version__}", file=sys.stderr)
     print("\nStarting MCP Server", file=sys.stderr)
     print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
     print(f"  Auth: {args.auth_type}", file=sys.stderr)
-    print(f"  Dynamic Tags Loaded: {registered_tags}", file=sys.stderr)
 
     if args.transport == "stdio":
         mcp.run(transport="stdio")
@@ -1808,7 +724,7 @@ def mcp_server():
     elif args.transport == "sse":
         mcp.run(transport="sse", host=args.host, port=args.port)
     else:
-        logger.error(f"Invalid transport: {args.transport}")
+        logger.error("Invalid transport", extra={"transport": args.transport})
         sys.exit(1)
 
 

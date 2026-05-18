@@ -176,6 +176,13 @@ class Api:
         return Response(response=response, data=response.json())
 
     @require_auth
+    def delete_cycle(self, project_id: str, cycle_id: str) -> Response:
+        """Delete a cycle by ID."""
+        response = self._delete(f"/projects/{project_id}/cycles/{cycle_id}/")
+        response.raise_for_status()
+        return Response(response=response, data={"status": "deleted"})
+
+    @require_auth
     def delete_project(self, project_id: str) -> Response:
         """Delete a project by ID."""
         response = self._delete(f"/projects/{project_id}/")

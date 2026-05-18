@@ -3,8 +3,8 @@ services:
   plane-agent:
     # image: docker.io/knucklessg1/plane-agent:latest
     build:
-     context: . # Debug
-     dockerfile: debug.Dockerfile
+     context: .. # Debug
+     dockerfile: docker/debug.Dockerfile
     container_name: plane-agent
     hostname: plane-agent
     command: [ "plane-agent" ]
@@ -19,7 +19,7 @@ services:
         max-file: "3"
     restart: always
     env_file:
-      - .env
+      - ../.env
     environment:
       - "PYTHONUNBUFFERED=1"
       - "HOST=0.0.0.0"

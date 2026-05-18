@@ -299,106 +299,25 @@ export PLANE_WORKSPACE_SLUG="your-workspace-slug"
 
 **Note**: For remote HTTP transports (OAuth or PAT), authentication is handled via the connection method (OAuth flow or PAT headers) and does not require these environment variables.
 
-## Available Tools
+## Available MCP Tools
 
-The server provides comprehensive tools for interacting with Plane. All tools use Pydantic models from the Plane SDK for type safety and validation.
-
-### Projects
+This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
 | Tool Name | Description |
 |-----------|-------------|
-| `list_projects` | List all projects in a workspace with optional pagination and filtering |
-| `create_project` | Create a new project with name, identifier, and optional configuration |
-| `retrieve_project` | Retrieve a project by ID |
-| `update_project` | Update a project with partial data |
-| `delete_project` | Delete a project by ID |
-| `get_project_worklog_summary` | Get work log summary for a project |
-| `get_project_members` | Get all members of a project |
-| `get_project_features` | Get features configuration of a project |
-| `update_project_features` | Update features configuration of a project |
-
-### Work Items
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_work_items` | List all work items in a project with optional filtering and pagination |
-| `create_work_item` | Create a new work item with name, assignees, labels, and other attributes |
-| `retrieve_work_item` | Retrieve a work item by ID with optional field expansion |
-| `retrieve_work_item_by_identifier` | Retrieve a work item by project identifier and issue sequence number |
-| `update_work_item` | Update a work item with partial data |
-| `delete_work_item` | Delete a work item by ID |
-| `search_work_items` | Search work items across a workspace with query string |
-
-### Cycles
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_cycles` | List all cycles in a project |
-| `create_cycle` | Create a new cycle with name, dates, and owner |
-| `retrieve_cycle` | Retrieve a cycle by ID |
-| `update_cycle` | Update a cycle with partial data |
-| `delete_cycle` | Delete a cycle by ID |
-| `list_archived_cycles` | List archived cycles in a project |
-| `add_work_items_to_cycle` | Add work items to a cycle |
-| `remove_work_item_from_cycle` | Remove a work item from a cycle |
-| `list_cycle_work_items` | List work items in a cycle |
-| `transfer_cycle_work_items` | Transfer work items from one cycle to another |
-| `archive_cycle` | Archive a cycle |
-| `unarchive_cycle` | Unarchive a cycle |
-
-### Modules
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_modules` | List all modules in a project |
-| `create_module` | Create a new module with name, dates, status, and members |
-| `retrieve_module` | Retrieve a module by ID |
-| `update_module` | Update a module with partial data |
-| `delete_module` | Delete a module by ID |
-| `list_archived_modules` | List archived modules in a project |
-| `add_work_items_to_module` | Add work items to a module |
-| `remove_work_item_from_module` | Remove a work item from a module |
-| `list_module_work_items` | List work items in a module |
-| `archive_module` | Archive a module |
-| `unarchive_module` | Unarchive a module |
-
-### Initiatives
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_initiatives` | List all initiatives in a workspace |
-| `create_initiative` | Create a new initiative with name, dates, state, and lead |
-| `retrieve_initiative` | Retrieve an initiative by ID |
-| `update_initiative` | Update an initiative with partial data |
-| `delete_initiative` | Delete an initiative by ID |
-
-### Intake Work Items
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_intake_work_items` | List all intake work items in a project with optional pagination |
-| `create_intake_work_item` | Create a new intake work item in a project |
-| `retrieve_intake_work_item` | Retrieve an intake work item by work item ID with optional field expansion |
-| `update_intake_work_item` | Update an intake work item with partial data |
-| `delete_intake_work_item` | Delete an intake work item by work item ID |
-
-### Work Item Properties
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_work_item_properties` | List work item properties for a work item type |
-| `create_work_item_property` | Create a new work item property with type, settings, and validation rules |
-| `retrieve_work_item_property` | Retrieve a work item property by ID |
-| `update_work_item_property` | Update a work item property with partial data |
-| `delete_work_item_property` | Delete a work item property by ID |
-
-### Users
-
-| Tool Name | Description |
-|-----------|-------------|
-| `get_me` | Get current authenticated user information |
-
-**Total Tools**: 55+ tools across 8 categories
+| `plane_cycles` | Consolidated Action-Routed tool for cycles. Methods: list_cycles, create_cycle, retrieve_cycle, update_cycle, delete_cycle, list_cycle_work_items, add_work_items_to_cycle |
+| `plane_epics` | Consolidated Action-Routed tool for epics. Methods: list_epics, create_epic, retrieve_epic, update_epic, delete_epic |
+| `plane_initiatives` | Consolidated Action-Routed tool for initiatives. Methods: list_initiatives, create_initiative |
+| `plane_intake` | Consolidated Action-Routed tool for intake. Methods: list_intake_work_items, create_intake_work_item |
+| `plane_labels` | Consolidated Action-Routed tool for labels. Methods: list_labels, create_label |
+| `plane_milestones` | Consolidated Action-Routed tool for milestones. Methods: list_milestones, create_milestone, retrieve_milestone, update_milestone, delete_milestone |
+| `plane_modules` | Consolidated Action-Routed tool for modules. Methods: list_modules, create_module, retrieve_module, update_module, delete_module |
+| `plane_pages` | Consolidated Action-Routed tool for pages. Methods: retrieve_project_page, create_project_page |
+| `plane_projects` | Consolidated Action-Routed tool for projects. Methods: list_projects, retrieve_project |
+| `plane_states` | Consolidated Action-Routed tool for states. Methods: list_states, create_state |
+| `plane_users` | Consolidated Action-Routed tool for users. Methods: list_users, get_me |
+| `plane_work_items` | Consolidated Action-Routed tool for work_items. Methods: list_work_items, create_work_item, update_work_item, delete_work_item, search_work_items, retrieve_work_item_by_identifier, retrieve_work_item, list_work_item_activities, list_work_item_comments, create_work_item_comment, list_work_item_links, create_work_item_link, list_work_item_relations, list_work_item_types, list_work_logs, create_work_log |
+| `plane_workspaces` | Consolidated Action-Routed tool for workspaces. Methods: get_workspace, get_workspace_members, get_workspace_features, update_workspace_features |
 
 ## Development
 
