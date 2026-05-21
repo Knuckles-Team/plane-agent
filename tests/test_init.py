@@ -1,6 +1,6 @@
-import pytest
-from plane_agent.mcp_server import get_mcp_instance
 from fastmcp import FastMCP
+
+from plane_agent.mcp_server import get_mcp_instance
 
 
 def test_mcp_instance_creation():

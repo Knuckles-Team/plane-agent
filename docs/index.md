@@ -477,13 +477,6 @@ If you were using the previous Node.js-based `@makeplane/plane-mcp-server`, your
         "plane-mcp"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
-        "LLM_API_KEY": "<YOUR_LLM_API_KEY>",
-        "LLM_BASE_URL": "<YOUR_LLM_BASE_URL>",
-        "MCP_URL": "<YOUR_MCP_URL>",
-        "MODEL_ID": "<YOUR_MODEL_ID>",
         "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
         "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
         "PLANE_URL": "<YOUR_PLANE_URL>",
@@ -512,13 +505,6 @@ If you were using the previous Node.js-based `@makeplane/plane-mcp-server`, your
         "8000"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
-        "LLM_API_KEY": "<YOUR_LLM_API_KEY>",
-        "LLM_BASE_URL": "<YOUR_LLM_BASE_URL>",
-        "MCP_URL": "<YOUR_MCP_URL>",
-        "MODEL_ID": "<YOUR_MODEL_ID>",
         "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
         "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
         "PLANE_URL": "<YOUR_PLANE_URL>",

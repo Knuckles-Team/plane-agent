@@ -33,7 +33,7 @@
 
 Meet [Plane](https://plane.so/), an open-source project management tool to track issues, run ~sprints~ cycles, and manage product roadmaps without the chaos of managing the tool itself. 🧘♀️
 
-*Version: 0.11.0*
+*Version: 0.11.1*
 
 > Plane is evolving every day. Your suggestions, ideas, and reported bugs help us immensely. Do not hesitate to join in the conversation on [Discord](https://discord.com/invite/A92xrEGCge) or raise a GitHub issue. We read everything and respond to most.
 
@@ -319,6 +319,42 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 | `plane_work_items` | Consolidated Action-Routed tool for work_items. Methods: list_work_items, create_work_item, update_work_item, delete_work_item, search_work_items, retrieve_work_item_by_identifier, retrieve_work_item, list_work_item_activities, list_work_item_comments, create_work_item_comment, list_work_item_links, create_work_item_link, list_work_item_relations, list_work_item_types, list_work_logs, create_work_log |
 | `plane_workspaces` | Consolidated Action-Routed tool for workspaces. Methods: get_workspace, get_workspace_members, get_workspace_features, update_workspace_features |
 
+## Security & Governance
+
+This project is built on [`agent-utilities`](https://github.com/Knuckles-Team/agent-utilities), inheriting enterprise-grade security and governance features.
+
+### Authentication & Authorization
+| Feature | Description |
+|---------|-------------|
+| **OIDC Token Delegation** | RFC 8693 token exchange for user-context propagation from A2A → MCP |
+| **Eunomia Policies** | Fine-grained, policy-driven tool authorization (`none`, `embedded`, `remote`) |
+| **Scoped Credentials** | Tools execute with the caller's scoped identity where possible |
+| **3LO / OAuth / API Token** | Multiple auth strategies with graceful fallback |
+
+### Eunomia Policy Enforcement
+Eunomia provides a policy enforcement point for all tool calls:
+- **Embedded mode**: Load local `mcp_policies.json` for role-based access, sensitivity gating, and audit logging
+- **Remote mode**: Forward authorization decisions to a central Eunomia policy server for multi-agent governance
+- Enable via CLI: `--eunomia-type embedded --eunomia-policy-file mcp_policies.json`
+
+### Runtime Protections
+| Protection | Description |
+|------------|-------------|
+| **Tool Guard** | Sensitivity detection with human-in-the-loop approval gating |
+| **Prompt Injection Defense** | Input scanning and repetition/loop guards |
+| **Content Filtering** | Output schema enforcement and cost budget controls |
+| **Stuck Loop Detection** | Automatic detection and recovery from agent loops |
+| **Context Limit Warnings** | Proactive alerts before context window exhaustion |
+
+### Graph Agent Architecture
+The A2A agent uses `pydantic-graph` orchestration with:
+- **RouterNode**: Lightweight classifier that routes queries to specialized domains
+- **DomainNode**: Focused executor with only relevant tools loaded, preventing tool hallucination
+- **Approval Gates**: Policy-driven approval workflows before sensitive operations
+- **Usage Guards**: Budget and rate limiting enforcement
+
+> **Production Recommendation**: Enable `--eunomia-type embedded` (or `remote`) + OIDC delegation + containerized deployment. See [`agent-utilities` documentation](https://github.com/Knuckles-Team/agent-utilities) for full policy configuration.
+
 ## Development
 
 ### Running Tests
@@ -384,65 +420,29 @@ If you were using the previous Node.js-based `@makeplane/plane-mcp-server`, your
 
 ## MCP Configuration Examples
 
-### 1. Standard IO (stdio) Deployment
-
+### stdio (recommended for local development)
 ```json
 {
   "mcpServers": {
-    "plane-agent": {
-      "command": "uv",
-      "args": [
-        "run",
-        "plane-mcp"
-      ],
+    "plane": {
+      "command": ".venv/bin/plane-mcp",
+      "args": [],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
-        "LLM_API_KEY": "<YOUR_LLM_API_KEY>",
-        "LLM_BASE_URL": "<YOUR_LLM_BASE_URL>",
-        "MCP_URL": "<YOUR_MCP_URL>",
-        "MODEL_ID": "<YOUR_MODEL_ID>",
-        "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
-        "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
-        "PLANE_URL": "<YOUR_PLANE_URL>",
-        "PLANE_WORKSPACE_SLUG": "<YOUR_PLANE_WORKSPACE_SLUG>"
-      }
+        "PLANE_BASE_URL": "",
+        "PLANE_API_KEY": "",
+        "PLANE_WORKSPACE_SLUG": ""
+}
     }
   }
 }
 ```
 
-### 2. Streamable HTTP (SSE) Deployment
-
+### Streamable HTTP (recommended for production)
 ```json
 {
   "mcpServers": {
-    "plane-agent": {
-      "command": "uv",
-      "args": [
-        "run",
-        "plane-mcp",
-        "--transport",
-        "http",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8000"
-      ],
-      "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
-        "LLM_API_KEY": "<YOUR_LLM_API_KEY>",
-        "LLM_BASE_URL": "<YOUR_LLM_BASE_URL>",
-        "MCP_URL": "<YOUR_MCP_URL>",
-        "MODEL_ID": "<YOUR_MODEL_ID>",
-        "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
-        "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
-        "PLANE_URL": "<YOUR_PLANE_URL>",
-        "PLANE_WORKSPACE_SLUG": "<YOUR_PLANE_WORKSPACE_SLUG>"
-      }
+    "plane": {
+      "url": "http://localhost:8080/plane-mcp/mcp"
     }
   }
 }
