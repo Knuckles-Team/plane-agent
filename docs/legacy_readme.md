@@ -87,10 +87,10 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
       ],
       "env": {
         "PLANE_BASE_URL": "your_plane_base_url_here",
+        "PLANE_API_KEY": "your_plane_api_key_here",
         "PLANE_WORKSPACE_SLUG": "your_plane_workspace_slug_here",
         "DEBUG": "your_debug_here",
-        "PYTHONUNBUFFERED": "your_pythonunbuffered_here",
-        "PLANE_API_KEY": "your_plane_api_key_here"
+        "PYTHONUNBUFFERED": "your_pythonunbuffered_here"
       }
     }
   }
@@ -98,34 +98,7 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
 ```
 
 #### Streamable-HTTP Transport (Recommended for production deployments)
-Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx` with explicit host and port definition:
-
-```json
-{
-  "mcpServers": {
-    "plane-agent": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "plane-agent",
-        "plane-mcp"
-      ],
-      "env": {
-        "TRANSPORT": "streamable-http",
-        "HOST": "0.0.0.0",
-        "PORT": "8000",
-        "PLANE_BASE_URL": "your_plane_base_url_here",
-        "PLANE_WORKSPACE_SLUG": "your_plane_workspace_slug_here",
-        "DEBUG": "your_debug_here",
-        "PYTHONUNBUFFERED": "your_pythonunbuffered_here",
-        "PLANE_API_KEY": "your_plane_api_key_here"
-      }
-    }
-  }
-}
-```
-
-Alternatively, connect to a pre-deployed remote or local Streamable-HTTP instance:
+To run the server as a long-running Streamable-HTTP service:
 
 ```json
 {
@@ -146,10 +119,10 @@ docker run -d \
   -e TRANSPORT=streamable-http \
   -e PORT=8000 \
   -e PLANE_BASE_URL="your_value" \
+  -e PLANE_API_KEY="your_value" \
   -e PLANE_WORKSPACE_SLUG="your_value" \
   -e DEBUG="your_value" \
   -e PYTHONUNBUFFERED="your_value" \
-  -e PLANE_API_KEY="your_value" \
   knucklessg1/plane-agent:latest
 ```
 
@@ -165,10 +138,10 @@ To start the interactive command-line agent:
 ```bash
 # Set credentials
 export PLANE_BASE_URL="your_value"
+export PLANE_API_KEY="your_value"
 export PLANE_WORKSPACE_SLUG="your_value"
 export DEBUG="your_value"
 export PYTHONUNBUFFERED="your_value"
-export PLANE_API_KEY="your_value"
 
 # Run the agent server
 plane-agent --provider openai --model-id gpt-4o
