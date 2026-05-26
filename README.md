@@ -24,6 +24,25 @@
 
 ---
 
+## Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [CLI or API](#cli-or-api)
+- [MCP](#mcp)
+  - [Available MCP Tools](#available-mcp-tools)
+  - [MCP Configuration Examples](#mcp-configuration-examples)
+  - [Dynamic Tool Selection & Visibility](#dynamic-tool-selection--visibility)
+- [Agent](#agent)
+  - [Running the Agent CLI](#running-the-agent-cli)
+  - [Docker Compose Orchestration](#docker-compose-orchestration)
+- [Security & Governance](#security-governance)
+- [Environment Variables](#environment-variables)
+- [Installation](#installation)
+- [Repository Owners](#repository-owners)
+- [Contribute](#contribute)
+
+---
+
 ## Overview
 
 **Plane Agent** is a production-grade Agent and Model Context Protocol (MCP) server designed to interface directly with Plane MCP Agent.
@@ -43,7 +62,7 @@
 
 This agent wraps the Plane MCP Agent API. You can interact with it programmatically or via its integrated execution entrypoints.
 
-Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](file:///home/apps/workspace/agent-packages/agents/plane-agent/docs/index.md).
+Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](docs/index.md).
 
 ---
 
@@ -54,21 +73,42 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 ### Available MCP Tools
 | Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
 |-------------|----------------|--------------------|------------------------------|
-| **Projects** | `PROJECTSTOOL` | `True` | Manage plane projects operations. Action-routed methods: `list_projects`, `retrieve_project`. |
-| **Work Items** | `WORK_ITEMSTOOL` | `True` | Manage plane work items operations. Action-routed methods: `list_work_items`, `create_work_item`, `update_work_item`, `delete_work_item`, `search_work_items`, `retrieve_work_item_by_identifier`, `retrieve_work_item`, `list_work_item_activities`, `list_work_item_comments`, `create_work_item_comment`, `list_work_item_links`, `create_work_item_link`, `list_work_item_relations`, `list_work_item_types`, `list_work_logs`, `create_work_log`. |
-| **Cycles** | `CYCLESTOOL` | `True` | Manage plane cycles operations. Action-routed methods: `list_cycles`, `create_cycle`, `retrieve_cycle`, `update_cycle`, `delete_cycle`, `list_cycle_work_items`, `add_work_items_to_cycle`. |
-| **Epics** | `EPICSTOOL` | `True` | Manage plane epics operations. Action-routed methods: `list_epics`, `create_epic`, `retrieve_epic`, `update_epic`, `delete_epic`. |
-| **Milestones** | `MILESTONESTOOL` | `True` | Manage plane milestones operations. Action-routed methods: `list_milestones`, `create_milestone`, `retrieve_milestone`, `update_milestone`, `delete_milestone`. |
-| **Modules** | `MODULESTOOL` | `True` | Manage plane modules operations. Action-routed methods: `list_modules`, `create_module`, `retrieve_module`, `update_module`, `delete_module`. |
-| **States** | `STATESTOOL` | `True` | Manage plane states operations. Action-routed methods: `list_states`, `create_state`. |
-| **Users** | `USERSTOOL` | `True` | Manage plane users operations. Action-routed methods: `list_users`, `get_me`. |
-| **Workspaces** | `WORKSPACESTOOL` | `True` | Manage plane workspaces operations. Action-routed methods: `get_workspace`, `get_workspace_members`, `get_workspace_features`, `update_workspace_features`. |
-| **Initiatives** | `INITIATIVESTOOL` | `True` | Manage plane initiatives operations. Action-routed methods: `list_initiatives`, `create_initiative`. |
-| **Intake** | `INTAKETOOL` | `True` | Manage plane intake operations. Action-routed methods: `list_intake_work_items`, `create_intake_work_item`. |
-| **Labels** | `LABELSTOOL` | `True` | Manage plane labels operations. Action-routed methods: `list_labels`, `create_label`. |
-| **Pages** | `PAGESTOOL` | `True` | Manage plane pages operations. Action-routed methods: `retrieve_project_page`, `create_project_page`. |
+| **Projects** | `PROJECTS_TOOL` | `True` | Manage plane projects operations. Action-routed methods: `list_projects`, `retrieve_project`. |
+| **Work Items** | `WORK_ITEMS_TOOL` | `True` | Manage plane work items operations. Action-routed methods: `create_work_item`, `create_work_item_comment`, `create_work_item_link`, `create_work_log`, `delete_work_item`, `list_work_item_activities`, `list_work_item_comments`, `list_work_item_links`, `list_work_item_relations`, `list_work_item_types`, `list_work_items`, `list_work_logs`, `retrieve_work_item`, `retrieve_work_item_by_identifier`, `search_work_items`, `update_work_item`. |
+| **Cycles** | `CYCLES_TOOL` | `True` | Manage plane cycles operations. Action-routed methods: `add_work_items_to_cycle`, `create_cycle`, `delete_cycle`, `list_cycle_work_items`, `list_cycles`, `retrieve_cycle`, `update_cycle`. |
+| **Epics** | `EPICS_TOOL` | `True` | Manage plane epics operations. Action-routed methods: `create_epic`, `delete_epic`, `list_epics`, `retrieve_epic`, `update_epic`. |
+| **Milestones** | `MILESTONES_TOOL` | `True` | Manage plane milestones operations. Action-routed methods: `create_milestone`, `delete_milestone`, `list_milestones`, `retrieve_milestone`, `update_milestone`. |
+| **Modules** | `MODULES_TOOL` | `True` | Manage plane modules operations. Action-routed methods: `create_module`, `delete_module`, `list_modules`, `retrieve_module`, `update_module`. |
+| **States** | `STATES_TOOL` | `True` | Manage plane states operations. Action-routed methods: `create_state`, `list_states`. |
+| **Users** | `USERS_TOOL` | `True` | Manage plane users operations. Action-routed methods: `get_me`, `list_users`. |
+| **Workspaces** | `WORKSPACES_TOOL` | `True` | Manage plane workspaces operations. Action-routed methods: `get_workspace`, `get_workspace_features`, `get_workspace_members`, `update_workspace_features`. |
+| **Initiatives** | `INITIATIVES_TOOL` | `True` | Manage plane initiatives operations. Action-routed methods: `create_initiative`, `list_initiatives`. |
+| **Intake** | `INTAKE_TOOL` | `True` | Manage plane intake operations. Action-routed methods: `create_intake_work_item`, `list_intake_work_items`. |
+| **Labels** | `LABELS_TOOL` | `True` | Manage plane labels operations. Action-routed methods: `create_label`, `list_labels`. |
+| **Pages** | `PAGES_TOOL` | `True` | Manage plane pages operations. Action-routed methods: `create_project_page`, `retrieve_project_page`. |
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](file:///home/apps/workspace/agent-packages/agents/plane-agent/docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/index.md](docs/index.md).
+
+### Dynamic Tool Selection & Visibility
+
+This MCP server supports dynamic toolset selection and visibility filtering at runtime. This allows you to restrict the set of exposed tools in order to prevent blowing up the LLM's context window.
+
+You can configure tool filtering via multiple input channels:
+
+- **CLI Arguments:** Pass `--tools` or `--toolsets` (or their disabled counterparts `--disabled-tools` and `--disabled-toolsets`) during startup.
+- **Environment Variables:** Define standard environment variables:
+  - `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS`
+  - `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS`
+- **HTTP SSE Request Headers:** Pass custom headers during transport initialization:
+  - `x-mcp-enabled-tools` / `x-mcp-disabled-tools`
+  - `x-mcp-enabled-tags` / `x-mcp-disabled-tags`
+- **HTTP SSE Request Query Parameters:** Append query parameters directly to your transport connection URL:
+  - `?tools=tool1,tool2`
+  - `?tags=tag1`
+
+When query strings or parameters are supplied, an LLM-free **Knowledge Graph resolution layer** (using `DynamicToolOrchestrator`) matches query intents against known tool tags, names, or descriptions, with safe fallback and automated 24-hour background cache refreshing.
+
+---
 
 ### MCP Configuration Examples
 
@@ -242,7 +282,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](file:///home/apps/workspace/agent-packages/agents/plane-agent/docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/overview.md](docs/overview.md) and [docs/index.md](docs/index.md).
 
 ---
 
@@ -261,6 +301,38 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 | **Tool Guard** | Sensitivity inspection with human-in-the-loop validation | Enabled by default |
 | **Prompt Injection Defense** | Input scanning, repetition monitoring, and recursive loop blocks | Enabled by default |
 | **Context Safety Guard** | Stuck-loop detectors and contextual overflow preemptive alerts | Enabled by default |
+
+## Environment Variables
+
+The Plane Agent supports the following environment variables for configuration and integration:
+
+| Variable | Description |
+|----------|-------------|
+| `PLANE_BASE_URL` | The base URL of the Plane instance. |
+| `PLANE_WORKSPACE_SLUG` | The workspace slug of the Plane workspace. |
+| `PLANE_API_KEY` | The API key for authentication with Plane. |
+| `MCP_URL` | The URL of the MCP server. |
+| `MODEL_ID` | Default LLM model identifier (e.g. `gpt-4o`). |
+| `PROVIDER` | The LLM provider (e.g. `openai`, `anthropic`). |
+| `ENABLE_WEB_UI` | Set to `True` to enable the built-in Web UI. |
+| `ENABLE_OTEL` | Set to `True` to enable OpenTelemetry telemetry. |
+| `AGENT_UTILITIES_TESTING` | Set to `True` during testing to bypass production setups. |
+| `AUTH_TYPE` | The authentication type to use (e.g., jwt, none). |
+| `DEFAULT_API_KEY` | Default API key for fast server fallback authentication. |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | The OpenTelemetry OTLP endpoint. |
+| `PROJECTSTOOL` | Set to `True`/`False` to toggle the Projects tool module. |
+| `WORK_ITEMSTOOL` | Set to `True`/`False` to toggle the Work Items tool module. |
+| `CYCLESTOOL` | Set to `True`/`False` to toggle the Cycles tool module. |
+| `EPICSTOOL` | Set to `True`/`False` to toggle the Epics tool module. |
+| `MILESTONESTOOL` | Set to `True`/`False` to toggle the Milestones tool module. |
+| `MODULESTOOL` | Set to `True`/`False` to toggle the Modules tool module. |
+| `STATESTOOL` | Set to `True`/`False` to toggle the States tool module. |
+| `USERSTOOL` | Set to `True`/`False` to toggle the Users tool module. |
+| `WORKSPACESTOOL` | Set to `True`/`False` to toggle the Workspaces tool module. |
+| `INITIATIVESTOOL` | Set to `True`/`False` to toggle the Initiatives tool module. |
+| `INTAKETOOL` | Set to `True`/`False` to toggle the Intake tool module. |
+| `LABELSTOOL` | Set to `True`/`False` to toggle the Labels tool module. |
+| `PAGESTOOL` | Set to `True`/`False` to toggle the Pages tool module. |
 
 ---
 

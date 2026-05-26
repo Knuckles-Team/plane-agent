@@ -1,0 +1,51 @@
+"""MCP tools for milestones operations.
+
+Auto-generated from mcp_server.py during ecosystem standardization.
+"""
+
+from fastmcp import Context, FastMCP
+from fastmcp.dependencies import Depends
+from pydantic import Field
+
+from plane_agent.auth import get_client
+
+
+def register_milestones_tools(mcp: FastMCP):
+    # CONCEPT:ECO-4.1
+    @mcp.tool(tags={"milestones"})
+    async def plane_milestones(
+        # CONCEPT:ECO-4.1
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_milestones', 'create_milestone', 'retrieve_milestone', 'update_milestone', 'delete_milestone'"
+        ),
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
+        ),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """Manage plane milestones operations."""
+        if ctx:
+            await ctx.info("Executing tool...")
+        import json
+
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        if action == "list_milestones":
+            return client.list_milestones(**kwargs)
+        if action == "create_milestone":
+            return client.create_milestone(**kwargs)
+        if action == "retrieve_milestone":
+            return client.retrieve_milestone(**kwargs)
+        if action == "update_milestone":
+            return client.update_milestone(**kwargs)
+        if action == "delete_milestone":
+            return client.delete_milestone(**kwargs)
+        raise ValueError(f"Unknown action: {action}")

@@ -1,0 +1,2090 @@
+{
+  "project": "plane-agent",
+  "path": "/home/apps/workspace/agent-packages/agents/plane-agent",
+  "domain_results": [
+    {
+      "domain": "Project Analysis",
+      "score": 74,
+      "grade": "C",
+      "findings": [
+        "Detected ecosystem marker: agent-utilities \u2192 Agent-Utilities Ecosystem",
+        "Protocol support: MCP"
+      ],
+      "justifications": [
+        {
+          "criterion": "has_pyproject",
+          "points": 10,
+          "evidence": "pyproject.toml and requirements.txt",
+          "reasoning": "Both pyproject.toml and requirements.txt exist, fulfilling mandatory Python project requirements"
+        },
+        {
+          "criterion": "project_type_detected",
+          "points": 10,
+          "evidence": "Agent-Utilities Ecosystem",
+          "reasoning": "Identified 1 ecosystem marker(s) in dependencies"
+        },
+        {
+          "criterion": "externalized_prompts",
+          "points": 0,
+          "evidence": "/home/apps/workspace/agent-packages/agents/plane-agent",
+          "reasoning": "No prompts/ directory found. Prompts may be hardcoded in source."
+        },
+        {
+          "criterion": "observability",
+          "points": 0,
+          "evidence": "dependency list",
+          "reasoning": "No observability tools (logfire, sentry, opentelemetry) found"
+        },
+        {
+          "criterion": "testing_suite",
+          "points": 10,
+          "evidence": "tests dir: True, pytest dep: True",
+          "reasoning": "Tests directory exists, pytest in dependencies"
+        },
+        {
+          "criterion": "agents_md",
+          "points": 10,
+          "evidence": "/home/apps/workspace/agent-packages/agents/plane-agent/AGENTS.md (4415 bytes)",
+          "reasoning": "AGENTS.md exists with comprehensive content"
+        },
+        {
+          "criterion": "pre_commit_hooks",
+          "points": 10,
+          "evidence": "/home/apps/workspace/agent-packages/agents/plane-agent/.pre-commit-config.yaml",
+          "reasoning": "Pre-commit configuration found for automated code quality checks"
+        },
+        {
+          "criterion": "gitignore",
+          "points": 10,
+          "evidence": "/home/apps/workspace/agent-packages/agents/plane-agent/.gitignore",
+          "reasoning": ".gitignore exists to prevent committing build artifacts and secrets"
+        },
+        {
+          "criterion": "env_template",
+          "points": 10,
+          "evidence": "/home/apps/workspace/agent-packages/agents/plane-agent/.env.example",
+          "reasoning": "Environment template exists for onboarding and secret management"
+        },
+        {
+          "criterion": "protocol_support",
+          "points": 4,
+          "evidence": "MCP",
+          "reasoning": "1 communication protocol(s) detected"
+        }
+      ],
+      "details": {
+        "has_pyproject": true,
+        "has_requirements": true,
+        "dep_count": 5,
+        "project_types": [
+          "Agent-Utilities Ecosystem"
+        ],
+        "has_agent_skills": false
+      }
+    },
+    {
+      "domain": "Dependency Audit",
+      "score": 94,
+      "grade": "A",
+      "findings": [
+        "Minor update: pytest-xdist 3.6.0 (constraint \u2014 not installed) -> 3.8.0",
+        "Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0"
+      ],
+      "justifications": [
+        {
+          "criterion": "dependency_freshness",
+          "points": 94,
+          "evidence": "source=/home/apps/workspace/agent-packages/agents/plane-agent/pyproject.toml total=5 major=0 minor=2 patch=0 not_installed=2",
+          "reasoning": "Audited 5 deps (3 installed, 2 constraint-only). 0 major, 2 minor, 0 patch updates."
+        }
+      ],
+      "packages": {
+        "pytest-asyncio": {
+          "current": "Any",
+          "constraint": "Any",
+          "installed": null,
+          "latest": "1.3.0",
+          "status": "unknown",
+          "version_source": "constraint",
+          "summary": "Pytest support for asyncio"
+        },
+        "pytest-xdist": {
+          "current": "3.6.0",
+          "constraint": "3.6.0",
+          "installed": null,
+          "latest": "3.8.0",
+          "status": "minor",
+          "version_source": "constraint",
+          "summary": "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
+        },
+        "agent-utilities": {
+          "current": "0.2.40",
+          "constraint": "0.16.0",
+          "installed": "0.2.40",
+          "latest": "0.16.0",
+          "status": "minor",
+          "version_source": "installed",
+          "summary": "Agent Utilities for Pydantic AI Agents"
+        },
+        "pytest-cov": {
+          "current": "7.1.0",
+          "constraint": "Any",
+          "installed": "7.1.0",
+          "latest": "7.1.0",
+          "status": "up-to-date",
+          "version_source": "installed",
+          "summary": "Pytest plugin for measuring coverage."
+        },
+        "pytest": {
+          "current": "9.0.3",
+          "constraint": "Any",
+          "installed": "9.0.3",
+          "latest": "9.0.3",
+          "status": "up-to-date",
+          "version_source": "installed",
+          "summary": "pytest: simple powerful testing with Python"
+        }
+      }
+    },
+    {
+      "domain": "Codebase Optimization",
+      "score": 72,
+      "grade": "C",
+      "findings": [
+        "Monolithic: mcp_server.py (612L) \u2014 1 functions with high complexity (worst: register_work_items_tools at 59L, CC=20); Low cohesion: 18 distinct concepts in one file",
+        "6 functions with nesting depth >4"
+      ],
+      "justifications": [
+        {
+          "criterion": "code_quality",
+          "points": 72,
+          "evidence": "{\"file_count\": 26, \"total_lines\": 2984, \"function_count\": 173, \"avg_complexity\": 3.27, \"max_complexity\": 23, \"avg_function_length\": 16.4, \"max_function_length\": 123, \"max_nesting_depth\": 15, \"duplication_ratio\": 0.008, \"long_functions\": 6, \"complex_functions\": 10, \"deep_nesting_functions\": 6, \"parse_errors\": 0, \"structural_issues\": 1, \"truly_monolithic\": 1}",
+          "reasoning": "Analyzed 26 files, 173 functions. Avg CC=3.3, max length=123, duplication=0.8%, 1 structural issues (1 monolithic)."
+        }
+      ],
+      "metrics": {
+        "file_count": 26,
+        "total_lines": 2984,
+        "function_count": 173,
+        "avg_complexity": 3.27,
+        "max_complexity": 23,
+        "avg_function_length": 16.4,
+        "max_function_length": 123,
+        "max_nesting_depth": 15,
+        "duplication_ratio": 0.008,
+        "long_functions": 6,
+        "complex_functions": 10,
+        "deep_nesting_functions": 6,
+        "parse_errors": 0,
+        "structural_issues": 1,
+        "truly_monolithic": 1
+      },
+      "top_complex": [
+        {
+          "name": "main",
+          "line": 17,
+          "length": 123,
+          "complexity": 23,
+          "nesting_depth": 15,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/validate_a2a_agent.py"
+        },
+        {
+          "name": "register_work_items_tools",
+          "line": 74,
+          "length": 59,
+          "complexity": 20,
+          "nesting_depth": 2,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py"
+        },
+        {
+          "name": "plane_work_items",
+          "line": 76,
+          "length": 57,
+          "complexity": 20,
+          "nesting_depth": 2,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py"
+        },
+        {
+          "name": "main",
+          "line": 177,
+          "length": 99,
+          "complexity": 19,
+          "nesting_depth": 4,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/verify_api_integration.py"
+        },
+        {
+          "name": "get_mcp_instance",
+          "line": 530,
+          "length": 61,
+          "complexity": 15,
+          "nesting_depth": 1,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py"
+        }
+      ],
+      "top_long": [
+        {
+          "name": "main",
+          "line": 17,
+          "length": 123,
+          "complexity": 23,
+          "nesting_depth": 15,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/validate_a2a_agent.py"
+        },
+        {
+          "name": "main",
+          "line": 177,
+          "length": 99,
+          "complexity": 19,
+          "nesting_depth": 4,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/verify_api_integration.py"
+        },
+        {
+          "name": "get_mcp_instance",
+          "line": 530,
+          "length": 61,
+          "complexity": 15,
+          "nesting_depth": 1,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py"
+        },
+        {
+          "name": "register_work_items_tools",
+          "line": 74,
+          "length": 59,
+          "complexity": 20,
+          "nesting_depth": 2,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py"
+        },
+        {
+          "name": "plane_work_items",
+          "line": 76,
+          "length": 57,
+          "complexity": 20,
+          "nesting_depth": 2,
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py"
+        }
+      ],
+      "structural_issues": [
+        {
+          "file": "mcp_server.py",
+          "path": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "lines": 612,
+          "issues": [
+            "1 functions with high complexity (worst: register_work_items_tools at 59L, CC=20)",
+            "Low cohesion: 18 distinct concepts in one file"
+          ],
+          "func_issues": [
+            {
+              "name": "register_work_items_tools",
+              "lines": 59,
+              "complexity": 20,
+              "nesting": 2
+            }
+          ],
+          "classification": "monolithic"
+        }
+      ],
+      "flat_directories": []
+    },
+    {
+      "domain": "Security Analysis",
+      "score": 100,
+      "grade": "A",
+      "findings": [],
+      "justifications": [
+        {
+          "criterion": "security_posture",
+          "points": 100,
+          "evidence": "high=0 med=0 low=0 attack_surface={\"subprocess_calls\": 0, \"file_io_calls\": 4, \"network_endpoints\": 0, \"eval_exec_usage\": 0, \"sql_usage\": 0}",
+          "reasoning": "Scanned 26 files. Found 0 security findings. High: -0pts, Med: -0pts, Low: -0pts."
+        }
+      ],
+      "vulnerabilities": [],
+      "attack_surface": {
+        "subprocess_calls": 0,
+        "file_io_calls": 4,
+        "network_endpoints": 0,
+        "eval_exec_usage": 0,
+        "sql_usage": 0
+      }
+    },
+    {
+      "domain": "Test Coverage",
+      "score": 75,
+      "grade": "C",
+      "findings": [
+        "Test suite lacks intent diversity (only one type)",
+        "15 potential doc-test drift items"
+      ],
+      "justifications": [
+        {
+          "criterion": "test_coverage_quality",
+          "points": 75,
+          "evidence": "{\"test_file_count\": 4, \"test_count\": 14, \"source_file_count\": 26, \"test_to_source_ratio\": 0.54, \"intent_distribution\": {\"unit\": 14}, \"tests_without_assertions\": 0, \"concept_traced_tests\": 0, \"drift_items\": 15}",
+          "reasoning": "14 tests across 4 files. Ratio: 0.54. Intent: {'unit': 14}. 0 without assertions, 15 drift items."
+        }
+      ],
+      "metrics": {
+        "test_file_count": 4,
+        "test_count": 14,
+        "source_file_count": 26,
+        "test_to_source_ratio": 0.54,
+        "intent_distribution": {
+          "unit": 14
+        },
+        "tests_without_assertions": 0,
+        "concept_traced_tests": 0,
+        "drift_items": 15
+      },
+      "tests": [
+        {
+          "name": "test_concept_parity",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_concept_parity.py",
+          "line": 58,
+          "length": 30,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_server_startup",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_startup.py",
+          "line": 1,
+          "length": 8,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_mcp_instance_creation",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_init.py",
+          "line": 6,
+          "length": 5,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_import_plane_agent",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_init.py",
+          "line": 13,
+          "length": 5,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_auth_edge_cases",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 22,
+          "length": 28,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_all_api_client_methods",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 52,
+          "length": 38,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_all_mcp_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 123,
+          "length": 55,
+          "intent": "unit",
+          "markers": [
+            "parametrize"
+          ],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_mcp_server_run_options",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 180,
+          "length": 31,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_agent_server_coverage",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 213,
+          "length": 9,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_main_execution",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 224,
+          "length": 40,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_requests_dependency_warning_fallback",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 266,
+          "length": 18,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_sse_healthcheck",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 287,
+          "length": 38,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_create_epic_edge_cases",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 327,
+          "length": 26,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        },
+        {
+          "name": "test_get_workspace_coverage",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 355,
+          "length": 13,
+          "intent": "unit",
+          "markers": [],
+          "concept_id": "",
+          "has_assertions": true
+        }
+      ],
+      "drift": [
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "table of contents",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "overview",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "key features",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "cli or api",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "mcp",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "mcp configuration examples",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "stdio transport (recommended for local ides e.g., cursor, claude desktop)",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "streamable-http transport (recommended for production deployments)",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "docker compose orchestration",
+          "detail": "Feature heading in README has no corresponding test"
+        },
+        {
+          "type": "untested_feature",
+          "source": "README.md",
+          "feature": "security & governance",
+          "detail": "Feature heading in README has no corresponding test"
+        }
+      ]
+    },
+    {
+      "domain": "Documentation & Governance",
+      "score": 97,
+      "grade": "A",
+      "findings": [
+        "README.md missing sections: usage|quick start",
+        "README missing: Has usage examples with code blocks"
+      ],
+      "justifications": [
+        {
+          "criterion": "documentation_quality",
+          "points": 97,
+          "evidence": "{\"README.md\": {\"exists\": true, \"missing\": [\"usage|quick start\"]}, \"AGENTS.md\": {\"exists\": true, \"missing\": []}, \"STANDARDS.md\": {\"exists\": false, \"missing\": []}, \"CONTRIBUTING.md\": {\"exists\": false, \"missing\": []}, \"CHANGELOG.md\": {\"exists\": true, \"missing\": []}, \"LICENSE\": {\"exists\": true, \"missing\": []}, \"docs/\": {\"exists\": true, \"missing\": []}}",
+          "reasoning": "Audited 6 standard docs + docs/ directory. 0 broken references, 5 docs present. README industry grade: A (90.6%)."
+        }
+      ],
+      "doc_results": {
+        "README.md": {
+          "exists": true,
+          "size": 12348,
+          "headings": [
+            "Plane Agent",
+            "CLI or API | MCP | Agent",
+            "Table of Contents",
+            "Overview",
+            "Key Features",
+            "CLI or API",
+            "MCP",
+            "Available MCP Tools",
+            "MCP Configuration Examples",
+            "stdio Transport (Recommended for local IDEs e.g., Cursor, Claude Desktop)",
+            "Streamable-HTTP Transport (Recommended for production deployments)",
+            "Agent",
+            "Running the Agent CLI",
+            "Set credentials",
+            "Run the agent server",
+            "Docker Compose Orchestration",
+            "Security & Governance",
+            "Access Control & Policy Enforcement",
+            "Runtime Security Grid",
+            "Installation"
+          ],
+          "missing_sections": [
+            "usage|quick start"
+          ],
+          "heading_count": 24,
+          "stale": false,
+          "last_modified": "2026-05-22 08:19:44 -0500",
+          "category": "project_overview"
+        },
+        "AGENTS.md": {
+          "exists": true,
+          "size": 4139,
+          "headings": [
+            "AGENTS.md",
+            "Tech Stack & Architecture",
+            "Architecture Diagram",
+            "Workflow Diagram",
+            "Commands (run these exactly)",
+            "Installation",
+            "Quality & Linting (run from project root)",
+            "Execution Commands",
+            "plane-agent\\nplane_agent.plane_agent:agent_server",
+            "Project Structure Quick Reference",
+            "File Tree",
+            "Code Style & Conventions",
+            "Dos and Don'ts",
+            "Safety & Boundaries",
+            "When Stuck",
+            "Testing with Timeout"
+          ],
+          "missing_sections": [],
+          "heading_count": 16,
+          "stale": false,
+          "last_modified": "2026-05-05 09:28:17 -0500",
+          "category": "agentic_metadata"
+        },
+        "STANDARDS.md": {
+          "exists": false,
+          "missing_sections": [],
+          "size": 0,
+          "headings": [],
+          "stale": true,
+          "last_modified": "unknown",
+          "category": "standards"
+        },
+        "CONTRIBUTING.md": {
+          "exists": false,
+          "missing_sections": [],
+          "size": 0,
+          "headings": [],
+          "stale": true,
+          "last_modified": "unknown",
+          "category": "contributing"
+        },
+        "CHANGELOG.md": {
+          "exists": true,
+          "size": 365,
+          "headings": [
+            "Changelog",
+            "[Unreleased]",
+            "Added",
+            "Changed",
+            "Fixed",
+            "[0.1.45] - 2026-04-29",
+            "Added"
+          ],
+          "missing_sections": [],
+          "heading_count": 7,
+          "stale": false,
+          "last_modified": "2026-04-30 01:12:44 -0500",
+          "category": "changelog"
+        },
+        "LICENSE": {
+          "exists": true,
+          "size": 1070,
+          "headings": [],
+          "missing_sections": [],
+          "heading_count": 0,
+          "stale": false,
+          "last_modified": "2026-02-14 08:50:49 -0600",
+          "category": "license"
+        },
+        "docs/": {
+          "exists": true,
+          "file_count": 3,
+          "files": [
+            "docs/legacy_readme.md",
+            "docs/overview.md",
+            "docs/index.md"
+          ]
+        }
+      },
+      "drift": [
+        {
+          "type": "info",
+          "doc": "README.md",
+          "reference": "plane-agent[all], plane-agent[all]",
+          "detail": "README references 2 install commands"
+        }
+      ],
+      "readme_grade": {
+        "score": 29,
+        "max_score": 32,
+        "percentage": 90.6,
+        "grade": "A",
+        "criteria": {
+          "has_title": true,
+          "has_badges": true,
+          "has_description": true,
+          "has_toc": true,
+          "has_installation": true,
+          "has_usage": false,
+          "has_api_docs": true,
+          "has_architecture": true,
+          "has_contributing": true,
+          "has_license": false,
+          "has_code_blocks": true,
+          "has_docs_refs": true,
+          "no_broken_links": true,
+          "reasonable_length": true,
+          "has_cli_api_details": true,
+          "has_mcp_configs": true,
+          "has_agent_configs": true,
+          "has_env_var_docs": true,
+          "has_mcp_tool_table": true,
+          "has_deployment_docs": true
+        },
+        "findings": [
+          "README missing: Has usage examples with code blocks"
+        ]
+      }
+    },
+    {
+      "domain": "Architecture & Design Patterns",
+      "score": 65,
+      "grade": "D",
+      "findings": [
+        "SRP: 1 modules exceed 500 lines (god modules)",
+        "SRP: 2 classes have >15 methods",
+        "No discernible layer architecture (no domain/service/adapter separation)",
+        "Low dependency injection ratio: 6%"
+      ],
+      "justifications": [
+        {
+          "criterion": "architecture_quality",
+          "points": 65,
+          "evidence": "{\"layers\": 0, \"di_ratio\": 0.06, \"solid_violations\": 2}",
+          "reasoning": "Analyzed 26 files. 0/5 architecture layers present, DI ratio: 6%, 2 SOLID violations."
+        }
+      ],
+      "analysis": {
+        "solid_findings": [
+          {
+            "principle": "SRP",
+            "status": "violation",
+            "detail": "1 modules exceed 500 lines (god modules)",
+            "items": [
+              {
+                "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+                "lines": 612
+              }
+            ]
+          },
+          {
+            "principle": "SRP",
+            "status": "violation",
+            "detail": "2 classes have >15 methods",
+            "items": [
+              {
+                "class": "Api",
+                "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/api/api_client_work_items.py",
+                "method_count": 37
+              },
+              {
+                "class": "Api",
+                "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/api/api_client_modules_states.py",
+                "method_count": 16
+              }
+            ]
+          }
+        ],
+        "layer_architecture": {
+          "has_domain_layer": false,
+          "has_adapter_layer": false,
+          "has_port_interfaces": false,
+          "has_service_layer": false,
+          "has_model_layer": false
+        },
+        "dependency_injection": {
+          "total_classes": 18,
+          "di_classes": 1,
+          "di_ratio": 0.06
+        },
+        "event_driven": {
+          "event_classes": 0,
+          "callback_patterns": 0,
+          "observer_patterns": 0,
+          "signal_patterns": 0
+        },
+        "file_count": 26
+      }
+    },
+    {
+      "domain": "Concept Traceability",
+      "score": 30,
+      "grade": "F",
+      "findings": [
+        "Low traceability ratio: 0% concepts fully traced",
+        "14 test functions missing concept markers",
+        "56 significant functions (>10 lines) missing concept markers in docstrings"
+      ],
+      "justifications": [
+        {
+          "criterion": "concept_traceability",
+          "points": 30,
+          "evidence": "{\"total_concepts\": 6, \"well_traced\": 0, \"orphans\": 4, \"drift\": 2, \"code_concepts\": 5, \"doc_concepts\": 7, \"test_concepts\": 0, \"decorator_concepts\": 0, \"tests_missing_markers\": 14, \"functions_missing_docstrings\": 56, \"registry_concepts\": 0, \"unimplemented_concepts\": 0}",
+          "reasoning": "6 unique concepts found. 0 fully traced (code+docs+tests), 4 orphans, 2 drifted. 14 tests without concept markers. 56 functions without concept docstrings."
+        }
+      ],
+      "metrics": {
+        "total_concepts": 6,
+        "well_traced": 0,
+        "orphans": 4,
+        "drift": 2,
+        "code_concepts": 5,
+        "doc_concepts": 7,
+        "test_concepts": 0,
+        "decorator_concepts": 0,
+        "tests_missing_markers": 14,
+        "functions_missing_docstrings": 56,
+        "registry_concepts": 0,
+        "unimplemented_concepts": 0
+      },
+      "concept_map": {
+        "ECO-4.1": {
+          "code": 2,
+          "docs": 0,
+          "test": 0,
+          "test_decorator": 0,
+          "test_docstring": 0
+        },
+        "OS-5.3": {
+          "code": 2,
+          "docs": 2,
+          "test": 0,
+          "test_decorator": 0,
+          "test_docstring": 0
+        },
+        "OS-5.1": {
+          "code": 1,
+          "docs": 1,
+          "test": 0,
+          "test_decorator": 0,
+          "test_docstring": 0
+        },
+        "OS-5.4": {
+          "code": 0,
+          "docs": 2,
+          "test": 0,
+          "test_decorator": 0,
+          "test_docstring": 0
+        },
+        "ORCH-1.4": {
+          "code": 0,
+          "docs": 1,
+          "test": 0,
+          "test_decorator": 0,
+          "test_docstring": 0
+        },
+        "OS-5.2": {
+          "code": 0,
+          "docs": 1,
+          "test": 0,
+          "test_decorator": 0,
+          "test_docstring": 0
+        }
+      },
+      "orphans": [
+        {
+          "concept_id": "ECO-4.1",
+          "present_in": [
+            "code"
+          ],
+          "missing_from": [
+            "docs",
+            "test"
+          ]
+        },
+        {
+          "concept_id": "OS-5.4",
+          "present_in": [
+            "docs"
+          ],
+          "missing_from": [
+            "code",
+            "test"
+          ]
+        },
+        {
+          "concept_id": "ORCH-1.4",
+          "present_in": [
+            "docs"
+          ],
+          "missing_from": [
+            "code",
+            "test"
+          ]
+        },
+        {
+          "concept_id": "OS-5.2",
+          "present_in": [
+            "docs"
+          ],
+          "missing_from": [
+            "code",
+            "test"
+          ]
+        }
+      ],
+      "drift": [
+        {
+          "concept_id": "OS-5.3",
+          "present_in": [
+            "code",
+            "docs"
+          ],
+          "missing_from": [
+            "test"
+          ]
+        },
+        {
+          "concept_id": "OS-5.1",
+          "present_in": [
+            "code",
+            "docs"
+          ],
+          "missing_from": [
+            "test"
+          ]
+        }
+      ],
+      "tests_missing_markers": [
+        {
+          "test_name": "test_concept_parity",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_concept_parity.py",
+          "line": 58
+        },
+        {
+          "test_name": "test_server_startup",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_startup.py",
+          "line": 1
+        },
+        {
+          "test_name": "test_mcp_instance_creation",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_init.py",
+          "line": 6
+        },
+        {
+          "test_name": "test_import_plane_agent",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_init.py",
+          "line": 13
+        },
+        {
+          "test_name": "test_auth_edge_cases",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 22
+        },
+        {
+          "test_name": "test_all_api_client_methods",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 52
+        },
+        {
+          "test_name": "test_all_mcp_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 123
+        },
+        {
+          "test_name": "test_mcp_server_run_options",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 180
+        },
+        {
+          "test_name": "test_agent_server_coverage",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 213
+        },
+        {
+          "test_name": "test_main_execution",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 224
+        },
+        {
+          "test_name": "test_requests_dependency_warning_fallback",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 266
+        },
+        {
+          "test_name": "test_sse_healthcheck",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 287
+        },
+        {
+          "test_name": "test_create_epic_edge_cases",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 327
+        },
+        {
+          "test_name": "test_get_workspace_coverage",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/test_coverage_gap_fillers.py",
+          "line": 355
+        }
+      ],
+      "functions_missing_docstrings": [
+        {
+          "function": "parse_api_client",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/verify_api_integration.py",
+          "line": 33,
+          "length": 26
+        },
+        {
+          "function": "parse_mcp_server",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/verify_api_integration.py",
+          "line": 94,
+          "length": 41
+        },
+        {
+          "function": "verify_agent",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/verify_api_integration.py",
+          "line": 137,
+          "length": 38
+        },
+        {
+          "function": "main",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/verify_api_integration.py",
+          "line": 177,
+          "length": 99
+        },
+        {
+          "function": "main",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/validate_agent.py",
+          "line": 20,
+          "length": 39
+        },
+        {
+          "function": "main",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/scripts/validate_a2a_agent.py",
+          "line": 17,
+          "length": 123
+        },
+        {
+          "function": "mock_session",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/conftest.py",
+          "line": 7,
+          "length": 37
+        },
+        {
+          "function": "mock_request",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/tests/conftest.py",
+          "line": 20,
+          "length": 18
+        },
+        {
+          "function": "register_projects_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 41,
+          "length": 31
+        },
+        {
+          "function": "register_work_items_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 74,
+          "length": 59
+        },
+        {
+          "function": "register_cycles_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 135,
+          "length": 41
+        },
+        {
+          "function": "register_epics_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 178,
+          "length": 37
+        },
+        {
+          "function": "register_milestones_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 217,
+          "length": 37
+        },
+        {
+          "function": "register_modules_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 256,
+          "length": 37
+        },
+        {
+          "function": "register_states_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 295,
+          "length": 31
+        },
+        {
+          "function": "register_users_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 328,
+          "length": 31
+        },
+        {
+          "function": "register_workspaces_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 361,
+          "length": 35
+        },
+        {
+          "function": "register_initiatives_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 398,
+          "length": 31
+        },
+        {
+          "function": "register_intake_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 431,
+          "length": 31
+        },
+        {
+          "function": "register_labels_tools",
+          "file": "/home/apps/workspace/agent-packages/agents/plane-agent/plane_agent/mcp_server.py",
+          "line": 464,
+          "length": 31
+        }
+      ],
+      "unimplemented_concepts": []
+    },
+    {
+      "domain": "Linting & Formatting",
+      "score": 100,
+      "grade": "A",
+      "findings": [
+        "Total lint findings: 0 (high/error: 0, medium/warning: 0, low: 0)"
+      ],
+      "justifications": [
+        {
+          "criterion": "lint_compliance",
+          "points": 100,
+          "evidence": "ruff=0, bandit=0, mypy=0",
+          "reasoning": "0 total findings across 3 tools. High/error: -0pts, Med/warning: -0pts, Low: -0pt."
+        }
+      ],
+      "tool_results": {
+        "ruff": {
+          "available": true,
+          "finding_count": 0,
+          "returncode": 0
+        },
+        "bandit": {
+          "available": true,
+          "finding_count": 0,
+          "returncode": 1
+        },
+        "mypy": {
+          "available": true,
+          "finding_count": 0,
+          "returncode": 1
+        }
+      },
+      "all_findings": []
+    },
+    {
+      "domain": "Pre-Commit Compliance",
+      "score": 84,
+      "grade": "B",
+      "findings": [
+        "2/27 pre-commit hooks failed: don't commit to branch, mypy",
+        "2 hook(s) may be outdated: ruff-pre-commit, uv-pre-commit",
+        "Pytest hooks skipped (handled by CE-016 Test Execution): local-pytest, pytest"
+      ],
+      "justifications": [
+        {
+          "criterion": "precommit_compliance",
+          "points": 84,
+          "evidence": "{\"total_hooks\": 27, \"passed\": 24, \"failed\": 2, \"skipped\": 1, \"outdated_hooks\": 2, \"pytest_hooks_skipped\": 2, \"exit_code\": 1}",
+          "reasoning": "Ran pre-commit with 27 hooks: 24 passed, 2 failed, 1 skipped. 2 potentially outdated. 2 pytest hooks deferred to CE-016."
+        }
+      ],
+      "hook_results": [
+        {
+          "hook": "check for added large files",
+          "status": "passed"
+        },
+        {
+          "hook": "check python ast",
+          "status": "passed"
+        },
+        {
+          "hook": "check yaml",
+          "status": "passed"
+        },
+        {
+          "hook": "check toml",
+          "status": "passed"
+        },
+        {
+          "hook": "check json",
+          "status": "passed"
+        },
+        {
+          "hook": "fix utf-8 byte order marker",
+          "status": "passed"
+        },
+        {
+          "hook": "check for merge conflicts",
+          "status": "passed"
+        },
+        {
+          "hook": "detect private key",
+          "status": "passed"
+        },
+        {
+          "hook": "trim trailing whitespace",
+          "status": "passed"
+        },
+        {
+          "hook": "fix end of files",
+          "status": "passed"
+        },
+        {
+          "hook": "don't commit to branch",
+          "status": "failed"
+        },
+        {
+          "hook": "ruff check",
+          "status": "passed"
+        },
+        {
+          "hook": "ruff format",
+          "status": "passed"
+        },
+        {
+          "hook": "mypy",
+          "status": "failed"
+        },
+        {
+          "hook": "vulture",
+          "status": "passed"
+        },
+        {
+          "hook": "codespell",
+          "status": "passed"
+        },
+        {
+          "hook": "bandit",
+          "status": "passed"
+        },
+        {
+          "hook": "nbqa-ruff",
+          "status": "passed"
+        },
+        {
+          "hook": "uv-lock",
+          "status": "passed"
+        },
+        {
+          "hook": "mermaid-validate",
+          "status": "passed"
+        },
+        {
+          "hook": "check agent standards",
+          "status": "passed"
+        },
+        {
+          "hook": "check cli help",
+          "status": "passed"
+        },
+        {
+          "hook": "validate bumpversion config",
+          "status": "passed"
+        },
+        {
+          "hook": "pytest",
+          "status": "skipped"
+        },
+        {
+          "hook": "Hadolint",
+          "status": "passed"
+        },
+        {
+          "hook": "Validate docker compose files",
+          "status": "passed"
+        },
+        {
+          "hook": "Verify API-to-MCP Integration Coverage",
+          "status": "passed"
+        }
+      ],
+      "pytest_hooks_skipped": [
+        "local-pytest",
+        "pytest"
+      ],
+      "outdated_hooks": [
+        {
+          "repo": "https://github.com/astral-sh/ruff-pre-commit",
+          "current_rev": "v0.15.12",
+          "issue": "Pre-1.0 version \u2014 check for updates"
+        },
+        {
+          "repo": "https://github.com/astral-sh/uv-pre-commit",
+          "current_rev": "0.11.8",
+          "issue": "Pre-1.0 version \u2014 check for updates"
+        }
+      ],
+      "metrics": {
+        "total_hooks": 27,
+        "passed": 24,
+        "failed": 2,
+        "skipped": 1,
+        "outdated_hooks": 2,
+        "pytest_hooks_skipped": 2,
+        "exit_code": 1
+      }
+    },
+    {
+      "domain": "Test Execution",
+      "score": 25,
+      "grade": "F",
+      "findings": [
+        "No tests were executed (test framework detected but no tests found)"
+      ],
+      "justifications": [
+        {
+          "criterion": "test_execution",
+          "points": 25,
+          "evidence": "{\"frameworks_detected\": 1, \"total_passed\": 0, \"total_failed\": 0, \"total_errors\": 0, \"pass_rate\": 0.0, \"timeout\": 300}",
+          "reasoning": "Executed 1 framework(s). 0 passed, 0 failed, 0 errors. Pass rate: 0%."
+        }
+      ],
+      "framework_results": [
+        {
+          "language": "python",
+          "framework": "pytest",
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "--tb=line",
+            "-q",
+            "--timeout=300",
+            "--no-header"
+          ],
+          "status": "failed",
+          "exit_code": 4,
+          "parsed": {
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "warnings": 0,
+            "skipped": 0,
+            "failures": []
+          }
+        }
+      ],
+      "metrics": {
+        "frameworks_detected": 1,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_errors": 0,
+        "pass_rate": 0.0,
+        "timeout": 300
+      }
+    },
+    {
+      "domain": "Directory Organization",
+      "score": 94,
+      "grade": "A",
+      "findings": [
+        "2 rogue/throwaway scripts detected (fix_*, validate_*, patch_*, etc.): scripts/validate_agent.py, scripts/validate_a2a_agent.py"
+      ],
+      "justifications": [
+        {
+          "criterion": "directory_organization",
+          "points": 94,
+          "evidence": "{\"total_source_files\": 57, \"total_directories\": 10, \"max_depth\": 3, \"avg_depth\": 1.4, \"crowded_dirs_20plus\": 0, \"severely_crowded_40plus\": 0, \"monolithic_dirs\": 0, \"empty_dirs\": 1, \"avg_files_per_dir\": 5.7, \"rogue_scripts\": 2}",
+          "reasoning": "57 files across 10 directories. Max depth: 3, avg files/dir: 5.7. 0 crowded, 0 severely crowded, 0 monolithic, 2 rogue scripts."
+        }
+      ],
+      "metrics": {
+        "total_source_files": 57,
+        "total_directories": 10,
+        "max_depth": 3,
+        "avg_depth": 1.4,
+        "crowded_dirs_20plus": 0,
+        "severely_crowded_40plus": 0,
+        "monolithic_dirs": 0,
+        "empty_dirs": 1,
+        "avg_files_per_dir": 5.7,
+        "rogue_scripts": 2
+      },
+      "crowded_dirs": [],
+      "monolithic_dirs": [],
+      "suggestions": [],
+      "rogue_scripts": [
+        {
+          "file": "scripts/validate_agent.py",
+          "prefix": "validate",
+          "recommendation": "Remove or integrate into project modules"
+        },
+        {
+          "file": "scripts/validate_a2a_agent.py",
+          "prefix": "validate",
+          "recommendation": "Remove or integrate into project modules"
+        }
+      ]
+    },
+    {
+      "domain": "Version Sync Analysis",
+      "score": 100,
+      "grade": "A",
+      "findings": [
+        "All version '0.14.0' declarations appear to be tracked correctly."
+      ],
+      "justifications": [
+        {
+          "criterion": "bumpversion_exists",
+          "points": 20,
+          "evidence": "/home/apps/workspace/agent-packages/agents/plane-agent/.bumpversion.cfg",
+          "reasoning": ".bumpversion.cfg found"
+        },
+        {
+          "criterion": "current_version_defined",
+          "points": 20,
+          "evidence": "0.14.0",
+          "reasoning": "Current version tracked is 0.14.0"
+        },
+        {
+          "criterion": "files_tracked",
+          "points": 20,
+          "evidence": "4 files tracked",
+          "reasoning": "Found 4 files tracked in .bumpversion.cfg"
+        },
+        {
+          "criterion": "version_drift_check",
+          "points": 40,
+          "evidence": "0 drifted files",
+          "reasoning": "No version drift detected in codebase files"
+        }
+      ],
+      "details": {
+        "tracked_files": [
+          "pyproject.toml",
+          "README.md",
+          "docker/Dockerfile",
+          "plane_agent/agent_server.py"
+        ],
+        "drifted_files": []
+      }
+    },
+    {
+      "domain": "Changelog Audit",
+      "score": 75,
+      "grade": "C",
+      "findings": [
+        "CHANGELOG.md exists but could not be parsed \u2014 check format compliance",
+        "No changelog entries within the last 30 days",
+        "keepachangelog not installed \u2014 pip install 'universal-skills[code-enhancer]'"
+      ],
+      "justifications": [
+        {
+          "criterion": "changelog_quality",
+          "points": 75,
+          "evidence": "{\"exists\": true, \"parseable\": false, \"version_count\": 0, \"has_drift\": false, \"dep_deltas_found\": 0}",
+          "reasoning": "CHANGELOG.md exists. 0 versions tracked. 0 dependency changelogs analyzed."
+        }
+      ],
+      "format_validation": {
+        "exists": true,
+        "parseable": false,
+        "has_unreleased": false,
+        "version_count": 0,
+        "uses_semver": true,
+        "valid_categories": true,
+        "has_dates": true,
+        "has_header": true,
+        "issues": [
+          "keepachangelog not installed \u2014 pip install 'universal-skills[code-enhancer]'"
+        ]
+      },
+      "version_drift": {
+        "has_drift": false,
+        "changelog_version": null,
+        "pyproject_version": "0.14.0"
+      },
+      "dependency_deltas": {}
+    },
+    {
+      "domain": "Pytest Quality",
+      "score": 96,
+      "grade": "A",
+      "findings": [],
+      "justifications": [
+        {
+          "criterion": "pytest_quality",
+          "points": 96,
+          "evidence": "{\"test_files\": 4, \"total_tests\": 14, \"descriptive_name_ratio\": 1.0, \"generic_names\": 0, \"fixture_usage_ratio\": 0.36, \"parametrize_users\": 1, \"conftest_fixtures\": 1, \"no_assertion_tests\": 0, \"weak_assertion_tests\": 0, \"duplicate_groups\": 0, \"large_files\": 0, \"over_mocked_tests\": 1, \"very_long_tests\": 0, \"subscores\": {\"naming\": 20, \"structure\": 20, \"fixtures\": 16, \"assertions\": 20, \"ai_slop\": 20}}",
+          "reasoning": "14 tests across 4 files. Naming: 20/20, Structure: 20/20, Fixtures: 16/20, Assertions: 20/20, AI Slop: 20/20."
+        }
+      ],
+      "metrics": {
+        "test_files": 4,
+        "total_tests": 14,
+        "descriptive_name_ratio": 1.0,
+        "generic_names": 0,
+        "fixture_usage_ratio": 0.36,
+        "parametrize_users": 1,
+        "conftest_fixtures": 1,
+        "no_assertion_tests": 0,
+        "weak_assertion_tests": 0,
+        "duplicate_groups": 0,
+        "large_files": 0,
+        "over_mocked_tests": 1,
+        "very_long_tests": 0,
+        "subscores": {
+          "naming": 20,
+          "structure": 20,
+          "fixtures": 16,
+          "assertions": 20,
+          "ai_slop": 20
+        }
+      },
+      "conftest": {
+        "conftest_count": 1,
+        "total_shared_fixtures": 1,
+        "has_root_conftest": true
+      },
+      "duplicates": [],
+      "large_files": []
+    },
+    {
+      "domain": "Environment Variables",
+      "score": 81,
+      "grade": "B",
+      "findings": [
+        "Partial env var documentation: 33% coverage",
+        "Undocumented env vars: AGENT_UTILITIES_TESTING, AUTH_TYPE, CYCLESTOOL, DEFAULT_AGENT_NAME, EPICSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, GRAPH_BACKEND, INITIATIVESTOOL, INTAKETOOL",
+        "2 Python env vars not in .env.example: MCP_URL, MODEL_ID"
+      ],
+      "justifications": [
+        {
+          "criterion": "env_var_documentation",
+          "points": 81,
+          "evidence": "{\"total_vars\": 33, \"python_vars\": 23, \"dockerfile_vars\": 4, \"compose_vars\": 0, \"dotenv_vars\": 30, \"readme_documented\": 11, \"readme_undocumented\": 22, \"documentation_coverage\": 0.33}",
+          "reasoning": "Found 33 unique env vars across 86 occurrences. README documents 11/33. Has .env.example."
+        }
+      ],
+      "metrics": {
+        "total_vars": 33,
+        "python_vars": 23,
+        "dockerfile_vars": 4,
+        "compose_vars": 0,
+        "dotenv_vars": 30,
+        "readme_documented": 11,
+        "readme_undocumented": 22,
+        "documentation_coverage": 0.33
+      },
+      "variables": {
+        "MODEL_ID": {
+          "name": "MODEL_ID",
+          "sources": [
+            "scripts/validate_agent.py:25"
+          ],
+          "defaults": [
+            "nvidia/nemotron-3-super"
+          ],
+          "source_types": [
+            "python"
+          ]
+        },
+        "LLM_BASE_URL": {
+          "name": "LLM_BASE_URL",
+          "sources": [
+            "scripts/validate_agent.py:26",
+            ".env.example:49"
+          ],
+          "defaults": [
+            "http://host.docker.internal:1234/v1"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "LLM_API_KEY": {
+          "name": "LLM_API_KEY",
+          "sources": [
+            "scripts/validate_agent.py:27",
+            ".env.example:48"
+          ],
+          "defaults": [
+            "llama"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "MCP_URL": {
+          "name": "MCP_URL",
+          "sources": [
+            "scripts/validate_agent.py:28"
+          ],
+          "defaults": [
+            "http://localhost:8005/mcp"
+          ],
+          "source_types": [
+            "python"
+          ]
+        },
+        "GRAPH_BACKEND": {
+          "name": "GRAPH_BACKEND",
+          "sources": [
+            "tests/test_coverage_gap_fillers.py:5",
+            ".env.example:47"
+          ],
+          "defaults": [
+            "networkx"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "AGENT_UTILITIES_TESTING": {
+          "name": "AGENT_UTILITIES_TESTING",
+          "sources": [
+            "tests/test_coverage_gap_fillers.py:6",
+            ".env.example:46"
+          ],
+          "defaults": [
+            "False"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "PROJECTSTOOL": {
+          "name": "PROJECTSTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:548",
+            ".env:30",
+            ".env.example:30"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "WORK_ITEMSTOOL": {
+          "name": "WORK_ITEMSTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:551",
+            ".env:31",
+            ".env.example:31"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "CYCLESTOOL": {
+          "name": "CYCLESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:554",
+            ".env:32",
+            ".env.example:32"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "EPICSTOOL": {
+          "name": "EPICSTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:557",
+            ".env:33",
+            ".env.example:33"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "MILESTONESTOOL": {
+          "name": "MILESTONESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:560",
+            ".env:34",
+            ".env.example:34"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "MODULESTOOL": {
+          "name": "MODULESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:563",
+            ".env:35",
+            ".env.example:35"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "STATESTOOL": {
+          "name": "STATESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:566",
+            ".env:36",
+            ".env.example:36"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "USERSTOOL": {
+          "name": "USERSTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:569",
+            ".env:37",
+            ".env.example:37"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "WORKSPACESTOOL": {
+          "name": "WORKSPACESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:572",
+            ".env:38",
+            ".env.example:38"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "INITIATIVESTOOL": {
+          "name": "INITIATIVESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:575",
+            ".env:39",
+            ".env.example:39"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "INTAKETOOL": {
+          "name": "INTAKETOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:578",
+            ".env:40",
+            ".env.example:40"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "LABELSTOOL": {
+          "name": "LABELSTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:581",
+            ".env:41",
+            ".env.example:41"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "PAGESTOOL": {
+          "name": "PAGESTOOL",
+          "sources": [
+            "plane_agent/mcp_server.py:584",
+            ".env:42",
+            ".env.example:42"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "PLANE_BASE_URL": {
+          "name": "PLANE_BASE_URL",
+          "sources": [
+            "plane_agent/auth.py:14",
+            ".env:23",
+            ".env.example:23"
+          ],
+          "defaults": [
+            "https://api.plane.so"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "PLANE_API_KEY": {
+          "name": "PLANE_API_KEY",
+          "sources": [
+            "plane_agent/auth.py:15",
+            ".env:27"
+          ],
+          "defaults": [
+            "None"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "PLANE_WORKSPACE_SLUG": {
+          "name": "PLANE_WORKSPACE_SLUG",
+          "sources": [
+            "plane_agent/auth.py:16",
+            ".env:24",
+            ".env.example:24"
+          ],
+          "defaults": [
+            "None"
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "DEFAULT_AGENT_NAME": {
+          "name": "DEFAULT_AGENT_NAME",
+          "sources": [
+            "plane_agent/agent_server.py:27",
+            ".env.example:45"
+          ],
+          "defaults": [
+            "plane-agent",
+            "meta.get("
+          ],
+          "source_types": [
+            "dotenv",
+            "python"
+          ]
+        },
+        "HOST": {
+          "name": "HOST",
+          "sources": [
+            "docker/Dockerfile:8",
+            "docker/Dockerfile:3",
+            "docker/debug.Dockerfile:8",
+            "docker/debug.Dockerfile:3",
+            ".env:6"
+          ],
+          "defaults": [
+            "0.0.0.0"
+          ],
+          "source_types": [
+            "dockerfile",
+            "dotenv"
+          ]
+        },
+        "PORT": {
+          "name": "PORT",
+          "sources": [
+            "docker/Dockerfile:4",
+            "docker/debug.Dockerfile:4",
+            ".env:7",
+            ".env.example:7"
+          ],
+          "defaults": [
+            "8000"
+          ],
+          "source_types": [
+            "dockerfile",
+            "dotenv"
+          ]
+        },
+        "TRANSPORT": {
+          "name": "TRANSPORT",
+          "sources": [
+            "docker/Dockerfile:5",
+            "docker/debug.Dockerfile:5",
+            ".env:8",
+            ".env.example:8"
+          ],
+          "defaults": [
+            "stdio # options: stdio, streamable-http, sse",
+            "stdio"
+          ],
+          "source_types": [
+            "dockerfile",
+            "dotenv"
+          ]
+        },
+        "AUTH_TYPE": {
+          "name": "AUTH_TYPE",
+          "sources": [
+            "docker/Dockerfile:6",
+            "docker/debug.Dockerfile:6"
+          ],
+          "defaults": [],
+          "source_types": [
+            "dockerfile"
+          ]
+        },
+        "ENABLE_OTEL": {
+          "name": "ENABLE_OTEL",
+          "sources": [
+            ".env:11",
+            ".env.example:11"
+          ],
+          "defaults": [
+            "True"
+          ],
+          "source_types": [
+            "dotenv"
+          ]
+        },
+        "OTEL_EXPORTER_OTLP_ENDPOINT": {
+          "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+          "sources": [
+            ".env:12"
+          ],
+          "defaults": [
+            "http://langfuse.arpa/api/public/otel"
+          ],
+          "source_types": [
+            "dotenv"
+          ]
+        },
+        "EUNOMIA_TYPE": {
+          "name": "EUNOMIA_TYPE",
+          "sources": [
+            ".env:18",
+            ".env.example:18"
+          ],
+          "defaults": [
+            "none",
+            "none # options: none, embedded, remote"
+          ],
+          "source_types": [
+            "dotenv"
+          ]
+        },
+        "EUNOMIA_POLICY_FILE": {
+          "name": "EUNOMIA_POLICY_FILE",
+          "sources": [
+            ".env:19",
+            ".env.example:19"
+          ],
+          "defaults": [
+            "mcp_policies.json"
+          ],
+          "source_types": [
+            "dotenv"
+          ]
+        },
+        "DEBUG": {
+          "name": "DEBUG",
+          "sources": [
+            ".env:25",
+            ".env.example:25"
+          ],
+          "defaults": [
+            "False"
+          ],
+          "source_types": [
+            "dotenv"
+          ]
+        },
+        "PYTHONUNBUFFERED": {
+          "name": "PYTHONUNBUFFERED",
+          "sources": [
+            ".env:26",
+            ".env.example:26"
+          ],
+          "defaults": [
+            "1"
+          ],
+          "source_types": [
+            "dotenv"
+          ]
+        }
+      },
+      "readme_coverage": {
+        "documented": [
+          "DEBUG",
+          "ENABLE_OTEL",
+          "HOST",
+          "MCP_URL",
+          "MODEL_ID",
+          "PLANE_API_KEY",
+          "PLANE_BASE_URL",
+          "PLANE_WORKSPACE_SLUG",
+          "PORT",
+          "PYTHONUNBUFFERED",
+          "TRANSPORT"
+        ],
+        "undocumented": [
+          "AGENT_UTILITIES_TESTING",
+          "AUTH_TYPE",
+          "CYCLESTOOL",
+          "DEFAULT_AGENT_NAME",
+          "EPICSTOOL",
+          "EUNOMIA_POLICY_FILE",
+          "EUNOMIA_TYPE",
+          "GRAPH_BACKEND",
+          "INITIATIVESTOOL",
+          "INTAKETOOL",
+          "LABELSTOOL",
+          "LLM_API_KEY",
+          "LLM_BASE_URL",
+          "MILESTONESTOOL",
+          "MODULESTOOL",
+          "OTEL_EXPORTER_OTLP_ENDPOINT",
+          "PAGESTOOL",
+          "PROJECTSTOOL",
+          "STATESTOOL",
+          "USERSTOOL",
+          "WORKSPACESTOOL",
+          "WORK_ITEMSTOOL"
+        ],
+        "coverage": 0.3333333333333333
+      }
+    }
+  ],
+  "gpa": 2.69,
+  "domain_count": 16,
+  "timing": {
+    "analyze_project": 0.07,
+    "audit_dependencies": 0.18,
+    "analyze_codebase": 0.33,
+    "analyze_security": 0.25,
+    "analyze_tests": 0.21,
+    "audit_documentation": 0.22,
+    "analyze_architecture": 0.1,
+    "trace_concepts": 0.69,
+    "run_linters": 0.5,
+    "run_precommit": 20.42,
+    "run_tests": 1.04,
+    "analyze_directory_density": 0.74,
+    "analyze_ui": 0.84,
+    "analyze_version_sync": 0.46,
+    "audit_changelog": 0.0,
+    "grade_pytest": 0.07,
+    "scan_env_vars": 0.5
+  }
+}

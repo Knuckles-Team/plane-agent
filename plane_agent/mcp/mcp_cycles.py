@@ -1,0 +1,55 @@
+"""MCP tools for cycles operations.
+
+Auto-generated from mcp_server.py during ecosystem standardization.
+"""
+
+from fastmcp import Context, FastMCP
+from fastmcp.dependencies import Depends
+from pydantic import Field
+
+from plane_agent.auth import get_client
+
+
+def register_cycles_tools(mcp: FastMCP):
+    # CONCEPT:ECO-4.1
+    @mcp.tool(tags={"cycles"})
+    async def plane_cycles(
+        # CONCEPT:ECO-4.1
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_cycles', 'create_cycle', 'retrieve_cycle', 'update_cycle', 'delete_cycle', 'list_cycle_work_items', 'add_work_items_to_cycle'"
+        ),
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
+        ),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """Manage plane cycles operations."""
+        if ctx:
+            await ctx.info("Executing tool...")
+        import json
+
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        if action == "list_cycles":
+            return client.list_cycles(**kwargs)
+        if action == "create_cycle":
+            return client.create_cycle(**kwargs)
+        if action == "retrieve_cycle":
+            return client.retrieve_cycle(**kwargs)
+        if action == "update_cycle":
+            return client.update_cycle(**kwargs)
+        if action == "delete_cycle":
+            return client.delete_cycle(**kwargs)
+        if action == "list_cycle_work_items":
+            return client.list_cycle_work_items(**kwargs)
+        if action == "add_work_items_to_cycle":
+            return client.add_work_items_to_cycle(**kwargs)
+        raise ValueError(f"Unknown action: {action}")

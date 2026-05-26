@@ -39,7 +39,15 @@ DEFAULT_AGENT_SYSTEM_PROMPT = os.getenv(
 
 
 def agent_server():
+    """Starts the agent server.
+
+    Ecosystem Concepts:
+        - CONCEPT:ECO-4.1 (MCP & Universal Skills)
+        - CONCEPT:OS-5.1 (Prompt Injection Defense)
+        - CONCEPT:OS-5.3 (Guardrail Engine)
+    """
     warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
+
     warnings.filterwarnings("ignore", category=DeprecationWarning, module="fastmcp")
 
     print(f"{DEFAULT_AGENT_NAME} v{__version__}", file=sys.stderr)

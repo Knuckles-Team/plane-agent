@@ -1,12 +1,15 @@
+import pytest
+
+
+@pytest.mark.concept("ECO-4.1")
 def test_server_startup():
-    """Validates that the server module can start successfully."""
-    # If this is not an agent, just pass
-    import os
+    """Validates that the server module can start successfully.
 
-    if not os.path.exists("agent_server.py") and not any(
-        os.path.exists(os.path.join(d, "agent_server.py")) for d in ["src", "agent"]
-    ):
-        return
+    CONCEPT:ECO-4.1
+    """
+    from plane_agent.agent_server import agent_server
+    from plane_agent.mcp_server import get_mcp_instance
 
+    assert agent_server is not None
+    assert get_mcp_instance is not None
     print("Startup tests handled correctly.")
-    pass
