@@ -37,6 +37,7 @@ __version__ = "0.1.37"
 logger = get_logger(name="plane-agent")
 logger.setLevel(logging.INFO)
 
+
 def register_projects_tools(mcp: FastMCP):
     @mcp.tool(tags={"projects"})
     async def plane_projects(
@@ -68,6 +69,7 @@ def register_projects_tools(mcp: FastMCP):
         if action == "retrieve_project":
             return client.retrieve_project(**kwargs)
         raise ValueError(f"Unknown action: {action}")
+
 
 def register_work_items_tools(mcp: FastMCP):
     @mcp.tool(tags={"work_items"})
@@ -129,6 +131,7 @@ def register_work_items_tools(mcp: FastMCP):
             return client.create_work_log(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_cycles_tools(mcp: FastMCP):
     @mcp.tool(tags={"cycles"})
     async def plane_cycles(
@@ -171,6 +174,7 @@ def register_cycles_tools(mcp: FastMCP):
             return client.add_work_items_to_cycle(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_epics_tools(mcp: FastMCP):
     @mcp.tool(tags={"epics"})
     async def plane_epics(
@@ -208,6 +212,7 @@ def register_epics_tools(mcp: FastMCP):
         if action == "delete_epic":
             return client.delete_epic(**kwargs)
         raise ValueError(f"Unknown action: {action}")
+
 
 def register_milestones_tools(mcp: FastMCP):
     @mcp.tool(tags={"milestones"})
@@ -247,6 +252,7 @@ def register_milestones_tools(mcp: FastMCP):
             return client.delete_milestone(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_modules_tools(mcp: FastMCP):
     @mcp.tool(tags={"modules"})
     async def plane_modules(
@@ -285,6 +291,7 @@ def register_modules_tools(mcp: FastMCP):
             return client.delete_module(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_states_tools(mcp: FastMCP):
     @mcp.tool(tags={"states"})
     async def plane_states(
@@ -317,6 +324,7 @@ def register_states_tools(mcp: FastMCP):
             return client.create_state(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_users_tools(mcp: FastMCP):
     @mcp.tool(tags={"users"})
     async def plane_users(
@@ -348,6 +356,7 @@ def register_users_tools(mcp: FastMCP):
         if action == "get_me":
             return client.get_me(**kwargs)
         raise ValueError(f"Unknown action: {action}")
+
 
 def register_workspaces_tools(mcp: FastMCP):
     @mcp.tool(tags={"workspaces"})
@@ -385,6 +394,7 @@ def register_workspaces_tools(mcp: FastMCP):
             return client.update_workspace_features(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_initiatives_tools(mcp: FastMCP):
     @mcp.tool(tags={"initiatives"})
     async def plane_initiatives(
@@ -416,6 +426,7 @@ def register_initiatives_tools(mcp: FastMCP):
         if action == "create_initiative":
             return client.create_initiative(**kwargs)
         raise ValueError(f"Unknown action: {action}")
+
 
 def register_intake_tools(mcp: FastMCP):
     @mcp.tool(tags={"intake"})
@@ -449,6 +460,7 @@ def register_intake_tools(mcp: FastMCP):
             return client.create_intake_work_item(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def register_labels_tools(mcp: FastMCP):
     @mcp.tool(tags={"labels"})
     async def plane_labels(
@@ -480,6 +492,7 @@ def register_labels_tools(mcp: FastMCP):
         if action == "create_label":
             return client.create_label(**kwargs)
         raise ValueError(f"Unknown action: {action}")
+
 
 def register_pages_tools(mcp: FastMCP):
     @mcp.tool(tags={"pages"})
@@ -513,12 +526,13 @@ def register_pages_tools(mcp: FastMCP):
             return client.create_project_page(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
+
 def get_mcp_instance() -> tuple[Any, ...]:
     """Initialize and return the MCP instance.
 
-    Ecosystem Concepts:
-(MCP & Universal Skills)
-(Guardrail Engine)
+        Ecosystem Concepts:
+    (MCP & Universal Skills)
+    (Guardrail Engine)
     """
     load_dotenv(find_dotenv())
     args, mcp, middlewares = create_mcp_server(
@@ -575,6 +589,7 @@ def get_mcp_instance() -> tuple[Any, ...]:
         mcp.add_middleware(mw)
     return mcp, args, middlewares
 
+
 def mcp_server() -> None:
     mcp, args, middlewares = get_mcp_instance()
     print(f"plane-agent MCP v{__version__}", file=sys.stderr)
@@ -591,6 +606,7 @@ def mcp_server() -> None:
     else:
         logger.error("Invalid transport", extra={"transport": args.transport})
         sys.exit(1)
+
 
 if __name__ == "__main__":
     mcp_server()
