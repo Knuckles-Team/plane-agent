@@ -22,6 +22,10 @@
 
 *Version: 0.28.0*
 
+> **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
+> interfaces, and guidance for provisioning a self-hosted Plane instance are
+> maintained in the [official documentation](https://knuckles-team.github.io/plane-agent/).
+
 ---
 
 ## Table of Contents
@@ -38,6 +42,7 @@
 - [Security & Governance](#security-governance)
 - [Environment Variables](#environment-variables)
 - [Installation](#installation)
+- [Documentation](#documentation)
 - [Repository Owners](#repository-owners)
 - [Contribute](#contribute)
 
@@ -347,6 +352,23 @@ uv pip install plane-agent[all]
 # Using standard pip
 python -m pip install plane-agent[all]
 ```
+
+---
+
+## Documentation
+
+The complete documentation is published as the
+[official documentation site](https://knuckles-team.github.io/plane-agent/) and is the
+recommended reference for installation, deployment, and day-to-day operation.
+
+| Page | Contents |
+|---|---|
+| [Installation](https://knuckles-team.github.io/plane-agent/installation/) | pip, source, uv, prebuilt Docker image |
+| [Deployment](https://knuckles-team.github.io/plane-agent/deployment/) | run the MCP server and agent, Compose, Caddy + Technitium, env config |
+| [Usage](https://knuckles-team.github.io/plane-agent/usage/) | the MCP tools, the `Api` client, the CLI |
+| [Backing Platform](https://knuckles-team.github.io/plane-agent/platform/) | deploy a self-hosted Plane instance with Docker |
+| [Overview](https://knuckles-team.github.io/plane-agent/overview/) | ecosystem role, enterprise posture, architecture |
+| [Concepts](https://knuckles-team.github.io/plane-agent/concepts/) | concept registry (`CONCEPT:PLANE-*`) |
 
 ---
 
