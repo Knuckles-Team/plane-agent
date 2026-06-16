@@ -3,7 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -63,35 +63,35 @@ def register_work_items_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_work_items":
-            return client.list_work_items(**kwargs)
+            return await run_blocking(client.list_work_items, **kwargs)
         if action == "create_work_item":
-            return client.create_work_item(**kwargs)
+            return await run_blocking(client.create_work_item, **kwargs)
         if action == "update_work_item":
-            return client.update_work_item(**kwargs)
+            return await run_blocking(client.update_work_item, **kwargs)
         if action == "delete_work_item":
-            return client.delete_work_item(**kwargs)
+            return await run_blocking(client.delete_work_item, **kwargs)
         if action == "search_work_items":
-            return client.search_work_items(**kwargs)
+            return await run_blocking(client.search_work_items, **kwargs)
         if action == "retrieve_work_item_by_identifier":
-            return client.retrieve_work_item_by_identifier(**kwargs)
+            return await run_blocking(client.retrieve_work_item_by_identifier, **kwargs)
         if action == "retrieve_work_item":
-            return client.retrieve_work_item(**kwargs)
+            return await run_blocking(client.retrieve_work_item, **kwargs)
         if action == "list_work_item_activities":
-            return client.list_work_item_activities(**kwargs)
+            return await run_blocking(client.list_work_item_activities, **kwargs)
         if action == "list_work_item_comments":
-            return client.list_work_item_comments(**kwargs)
+            return await run_blocking(client.list_work_item_comments, **kwargs)
         if action == "create_work_item_comment":
-            return client.create_work_item_comment(**kwargs)
+            return await run_blocking(client.create_work_item_comment, **kwargs)
         if action == "list_work_item_links":
-            return client.list_work_item_links(**kwargs)
+            return await run_blocking(client.list_work_item_links, **kwargs)
         if action == "create_work_item_link":
-            return client.create_work_item_link(**kwargs)
+            return await run_blocking(client.create_work_item_link, **kwargs)
         if action == "list_work_item_relations":
-            return client.list_work_item_relations(**kwargs)
+            return await run_blocking(client.list_work_item_relations, **kwargs)
         if action == "list_work_item_types":
-            return client.list_work_item_types(**kwargs)
+            return await run_blocking(client.list_work_item_types, **kwargs)
         if action == "list_work_logs":
-            return client.list_work_logs(**kwargs)
+            return await run_blocking(client.list_work_logs, **kwargs)
         if action == "create_work_log":
-            return client.create_work_log(**kwargs)
+            return await run_blocking(client.create_work_log, **kwargs)
         raise ValueError(f"Unknown action: {action}")

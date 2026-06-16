@@ -3,7 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -54,17 +54,17 @@ def register_cycles_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_cycles":
-            return client.list_cycles(**kwargs)
+            return await run_blocking(client.list_cycles, **kwargs)
         if action == "create_cycle":
-            return client.create_cycle(**kwargs)
+            return await run_blocking(client.create_cycle, **kwargs)
         if action == "retrieve_cycle":
-            return client.retrieve_cycle(**kwargs)
+            return await run_blocking(client.retrieve_cycle, **kwargs)
         if action == "update_cycle":
-            return client.update_cycle(**kwargs)
+            return await run_blocking(client.update_cycle, **kwargs)
         if action == "delete_cycle":
-            return client.delete_cycle(**kwargs)
+            return await run_blocking(client.delete_cycle, **kwargs)
         if action == "list_cycle_work_items":
-            return client.list_cycle_work_items(**kwargs)
+            return await run_blocking(client.list_cycle_work_items, **kwargs)
         if action == "add_work_items_to_cycle":
-            return client.add_work_items_to_cycle(**kwargs)
+            return await run_blocking(client.add_work_items_to_cycle, **kwargs)
         raise ValueError(f"Unknown action: {action}")

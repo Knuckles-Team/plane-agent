@@ -3,7 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -52,13 +52,13 @@ def register_modules_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_modules":
-            return client.list_modules(**kwargs)
+            return await run_blocking(client.list_modules, **kwargs)
         if action == "create_module":
-            return client.create_module(**kwargs)
+            return await run_blocking(client.create_module, **kwargs)
         if action == "retrieve_module":
-            return client.retrieve_module(**kwargs)
+            return await run_blocking(client.retrieve_module, **kwargs)
         if action == "update_module":
-            return client.update_module(**kwargs)
+            return await run_blocking(client.update_module, **kwargs)
         if action == "delete_module":
-            return client.delete_module(**kwargs)
+            return await run_blocking(client.delete_module, **kwargs)
         raise ValueError(f"Unknown action: {action}")
