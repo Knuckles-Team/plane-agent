@@ -3,7 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -51,11 +51,11 @@ def register_workspaces_tools(mcp: FastMCP):
         action = resolved
 
         if action == "get_workspace":
-            return client.get_workspace(**kwargs)
+            return await run_blocking(client.get_workspace, **kwargs)
         if action == "get_workspace_members":
-            return client.get_workspace_members(**kwargs)
+            return await run_blocking(client.get_workspace_members, **kwargs)
         if action == "get_workspace_features":
-            return client.get_workspace_features(**kwargs)
+            return await run_blocking(client.get_workspace_features, **kwargs)
         if action == "update_workspace_features":
-            return client.update_workspace_features(**kwargs)
+            return await run_blocking(client.update_workspace_features, **kwargs)
         raise ValueError(f"Unknown action: {action}")

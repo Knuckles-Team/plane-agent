@@ -3,7 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -46,7 +46,7 @@ def register_initiatives_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_initiatives":
-            return client.list_initiatives(**kwargs)
+            return await run_blocking(client.list_initiatives, **kwargs)
         if action == "create_initiative":
-            return client.create_initiative(**kwargs)
+            return await run_blocking(client.create_initiative, **kwargs)
         raise ValueError(f"Unknown action: {action}")

@@ -3,7 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -46,7 +46,7 @@ def register_pages_tools(mcp: FastMCP):
         action = resolved
 
         if action == "retrieve_project_page":
-            return client.retrieve_project_page(**kwargs)
+            return await run_blocking(client.retrieve_project_page, **kwargs)
         if action == "create_project_page":
-            return client.create_project_page(**kwargs)
+            return await run_blocking(client.create_project_page, **kwargs)
         raise ValueError(f"Unknown action: {action}")
