@@ -25,7 +25,7 @@ import sys
 from typing import Any
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import create_mcp_server
+from agent_utilities.mcp_utilities import create_mcp_server, resolve_action
 from dotenv import find_dotenv, load_dotenv
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -64,6 +64,12 @@ def register_projects_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = ("list_projects", "retrieve_project")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_projects":
             return client.list_projects(**kwargs)
         if action == "retrieve_project":
@@ -96,6 +102,29 @@ def register_work_items_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = (
+            "list_work_items",
+            "create_work_item",
+            "update_work_item",
+            "delete_work_item",
+            "search_work_items",
+            "retrieve_work_item_by_identifier",
+            "retrieve_work_item",
+            "list_work_item_activities",
+            "list_work_item_comments",
+            "create_work_item_comment",
+            "list_work_item_links",
+            "create_work_item_link",
+            "list_work_item_relations",
+            "list_work_item_types",
+            "list_work_logs",
+            "create_work_log",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_work_items":
             return client.list_work_items(**kwargs)
@@ -158,6 +187,20 @@ def register_cycles_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = (
+            "list_cycles",
+            "create_cycle",
+            "retrieve_cycle",
+            "update_cycle",
+            "delete_cycle",
+            "list_cycle_work_items",
+            "add_work_items_to_cycle",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_cycles":
             return client.list_cycles(**kwargs)
         if action == "create_cycle":
@@ -201,6 +244,18 @@ def register_epics_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = (
+            "list_epics",
+            "create_epic",
+            "retrieve_epic",
+            "update_epic",
+            "delete_epic",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_epics":
             return client.list_epics(**kwargs)
         if action == "create_epic":
@@ -239,6 +294,18 @@ def register_milestones_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = (
+            "list_milestones",
+            "create_milestone",
+            "retrieve_milestone",
+            "update_milestone",
+            "delete_milestone",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_milestones":
             return client.list_milestones(**kwargs)
@@ -279,6 +346,18 @@ def register_modules_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = (
+            "list_modules",
+            "create_module",
+            "retrieve_module",
+            "update_module",
+            "delete_module",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_modules":
             return client.list_modules(**kwargs)
         if action == "create_module":
@@ -318,6 +397,12 @@ def register_states_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = ("list_states", "create_state")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_states":
             return client.list_states(**kwargs)
         if action == "create_state":
@@ -351,6 +436,12 @@ def register_users_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = ("list_users", "get_me")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_users":
             return client.list_users(**kwargs)
         if action == "get_me":
@@ -383,6 +474,17 @@ def register_workspaces_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = (
+            "get_workspace",
+            "get_workspace_members",
+            "get_workspace_features",
+            "update_workspace_features",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "get_workspace":
             return client.get_workspace(**kwargs)
@@ -421,6 +523,12 @@ def register_initiatives_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = ("list_initiatives", "create_initiative")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_initiatives":
             return client.list_initiatives(**kwargs)
         if action == "create_initiative":
@@ -453,6 +561,12 @@ def register_intake_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = ("list_intake_work_items", "create_intake_work_item")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_intake_work_items":
             return client.list_intake_work_items(**kwargs)
@@ -487,6 +601,12 @@ def register_labels_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        valid_actions = ("list_labels", "create_label")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_labels":
             return client.list_labels(**kwargs)
         if action == "create_label":
@@ -519,6 +639,12 @@ def register_pages_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = ("retrieve_project_page", "create_project_page")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "retrieve_project_page":
             return client.retrieve_project_page(**kwargs)

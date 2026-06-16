@@ -3,6 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
+from agent_utilities.mcp_utilities import resolve_action
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -37,6 +38,29 @@ def register_work_items_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = (
+            "list_work_items",
+            "create_work_item",
+            "update_work_item",
+            "delete_work_item",
+            "search_work_items",
+            "retrieve_work_item_by_identifier",
+            "retrieve_work_item",
+            "list_work_item_activities",
+            "list_work_item_comments",
+            "create_work_item_comment",
+            "list_work_item_links",
+            "create_work_item_link",
+            "list_work_item_relations",
+            "list_work_item_types",
+            "list_work_logs",
+            "create_work_log",
+        )
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_work_items":
             return client.list_work_items(**kwargs)
