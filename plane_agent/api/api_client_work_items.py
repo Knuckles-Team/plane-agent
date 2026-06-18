@@ -10,13 +10,17 @@ from plane_agent.plane_models import Response, WorkItem
 class Api(BaseApiClient):
     @require_auth
     def list_work_items(self, project_id: str, **kwargs) -> Response:
-        """List work items in a project."""
+        """List work items in a project.
+
+        Returns the raw Plane envelope (``{results, next_cursor, prev_cursor,
+        next_page_results, count, total_pages, ...}``) so cursor pagination and the
+        full per-item fields (``updated_at``, ``sequence_id``, ``description_html``,
+        ``assignees``) survive — both required by the KG ingestion connector. The
+        previous ``[WorkItem(...)]`` projection dropped them.
+        """
         response = self._get(f"/projects/{project_id}/work-items/", params=kwargs)
         response.raise_for_status()
-        data = response.json()
-        results = data.get("results", data) if isinstance(data, dict) else data
-        parsed_data = [WorkItem(**item) for item in results]
-        return Response(response=response, data=parsed_data)
+        return Response(response=response, data=response.json())
 
     @require_auth
     def retrieve_work_item(self, project_id: str, work_item_id: str) -> Response:
