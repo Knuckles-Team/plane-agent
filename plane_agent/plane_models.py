@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Response(BaseModel):
@@ -43,9 +43,19 @@ class Project(BaseModel):
 
 
 class WorkItem(BaseModel):
+    # Preserve the full Plane work-item record: the KG ingestion connector and any
+    # downstream consumer need ``updated_at`` (delta watermark), ``sequence_id``,
+    # ``description_html`` and ``assignees``, which a fixed projection would drop.
+    model_config = ConfigDict(extra="allow")
+
     id: str
     name: str = ""
     project: str | None = None
     state: str | None = None
     priority: str | None = None
     description: str | None = None
+    description_html: str | None = None
+    sequence_id: int | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    assignees: list[Any] | None = None
