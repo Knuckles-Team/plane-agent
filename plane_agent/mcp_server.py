@@ -20,20 +20,20 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
-import os
 import sys
 from typing import Any
 
-from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
     load_config,
+    register_tool_surface,
     resolve_action,
     run_blocking,
 )
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from plane_agent.api_client import Api
 from plane_agent.auth import get_client
 
 __version__ = "0.1.37"
@@ -675,45 +675,13 @@ def get_mcp_instance() -> tuple[Any, ...]:
     async def health_check(request: Request) -> JSONResponse:
         return JSONResponse({"status": "OK"})
 
-    DEFAULT_PROJECTSTOOL = to_boolean(os.getenv("PROJECTSTOOL", "True"))
-    if DEFAULT_PROJECTSTOOL:
-        register_projects_tools(mcp)
-    DEFAULT_WORK_ITEMSTOOL = to_boolean(os.getenv("WORK_ITEMSTOOL", "True"))
-    if DEFAULT_WORK_ITEMSTOOL:
-        register_work_items_tools(mcp)
-    DEFAULT_CYCLESTOOL = to_boolean(os.getenv("CYCLESTOOL", "True"))
-    if DEFAULT_CYCLESTOOL:
-        register_cycles_tools(mcp)
-    DEFAULT_EPICSTOOL = to_boolean(os.getenv("EPICSTOOL", "True"))
-    if DEFAULT_EPICSTOOL:
-        register_epics_tools(mcp)
-    DEFAULT_MILESTONESTOOL = to_boolean(os.getenv("MILESTONESTOOL", "True"))
-    if DEFAULT_MILESTONESTOOL:
-        register_milestones_tools(mcp)
-    DEFAULT_MODULESTOOL = to_boolean(os.getenv("MODULESTOOL", "True"))
-    if DEFAULT_MODULESTOOL:
-        register_modules_tools(mcp)
-    DEFAULT_STATESTOOL = to_boolean(os.getenv("STATESTOOL", "True"))
-    if DEFAULT_STATESTOOL:
-        register_states_tools(mcp)
-    DEFAULT_USERSTOOL = to_boolean(os.getenv("USERSTOOL", "True"))
-    if DEFAULT_USERSTOOL:
-        register_users_tools(mcp)
-    DEFAULT_WORKSPACESTOOL = to_boolean(os.getenv("WORKSPACESTOOL", "True"))
-    if DEFAULT_WORKSPACESTOOL:
-        register_workspaces_tools(mcp)
-    DEFAULT_INITIATIVESTOOL = to_boolean(os.getenv("INITIATIVESTOOL", "True"))
-    if DEFAULT_INITIATIVESTOOL:
-        register_initiatives_tools(mcp)
-    DEFAULT_INTAKETOOL = to_boolean(os.getenv("INTAKETOOL", "True"))
-    if DEFAULT_INTAKETOOL:
-        register_intake_tools(mcp)
-    DEFAULT_LABELSTOOL = to_boolean(os.getenv("LABELSTOOL", "True"))
-    if DEFAULT_LABELSTOOL:
-        register_labels_tools(mcp)
-    DEFAULT_PAGESTOOL = to_boolean(os.getenv("PAGESTOOL", "True"))
-    if DEFAULT_PAGESTOOL:
-        register_pages_tools(mcp)
+    register_tool_surface(
+        mcp,
+        client_cls=Api,
+        get_client=get_client,
+        service="plane-agent",
+        tools_module=sys.modules[__name__],
+    )
 
     for mw in middlewares:
         mcp.add_middleware(mw)
