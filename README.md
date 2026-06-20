@@ -76,21 +76,29 @@ Detailed instructions on how to use the underlying API wrappers, extended schema
 This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
 ### Available MCP Tools
-| Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
-|-------------|----------------|--------------------|------------------------------|
-| **Projects** | `PROJECTS_TOOL` | `True` | Manage plane projects operations. Action-routed methods: `list_projects`, `retrieve_project`. |
-| **Work Items** | `WORK_ITEMS_TOOL` | `True` | Manage plane work items operations. Action-routed methods: `create_work_item`, `create_work_item_comment`, `create_work_item_link`, `create_work_log`, `delete_work_item`, `list_work_item_activities`, `list_work_item_comments`, `list_work_item_links`, `list_work_item_relations`, `list_work_item_types`, `list_work_items`, `list_work_logs`, `retrieve_work_item`, `retrieve_work_item_by_identifier`, `search_work_items`, `update_work_item`. |
-| **Cycles** | `CYCLES_TOOL` | `True` | Manage plane cycles operations. Action-routed methods: `add_work_items_to_cycle`, `create_cycle`, `delete_cycle`, `list_cycle_work_items`, `list_cycles`, `retrieve_cycle`, `update_cycle`. |
-| **Epics** | `EPICS_TOOL` | `True` | Manage plane epics operations. Action-routed methods: `create_epic`, `delete_epic`, `list_epics`, `retrieve_epic`, `update_epic`. |
-| **Milestones** | `MILESTONES_TOOL` | `True` | Manage plane milestones operations. Action-routed methods: `create_milestone`, `delete_milestone`, `list_milestones`, `retrieve_milestone`, `update_milestone`. |
-| **Modules** | `MODULES_TOOL` | `True` | Manage plane modules operations. Action-routed methods: `create_module`, `delete_module`, `list_modules`, `retrieve_module`, `update_module`. |
-| **States** | `STATES_TOOL` | `True` | Manage plane states operations. Action-routed methods: `create_state`, `list_states`. |
-| **Users** | `USERS_TOOL` | `True` | Manage plane users operations. Action-routed methods: `get_me`, `list_users`. |
-| **Workspaces** | `WORKSPACES_TOOL` | `True` | Manage plane workspaces operations. Action-routed methods: `get_workspace`, `get_workspace_features`, `get_workspace_members`, `update_workspace_features`. |
-| **Initiatives** | `INITIATIVES_TOOL` | `True` | Manage plane initiatives operations. Action-routed methods: `create_initiative`, `list_initiatives`. |
-| **Intake** | `INTAKE_TOOL` | `True` | Manage plane intake operations. Action-routed methods: `create_intake_work_item`, `list_intake_work_items`. |
-| **Labels** | `LABELS_TOOL` | `True` | Manage plane labels operations. Action-routed methods: `create_label`, `list_labels`. |
-| **Pages** | `PAGES_TOOL` | `True` | Manage plane pages operations. Action-routed methods: `create_project_page`, `retrieve_project_page`. |
+
+This table is auto-generated from the live server — do not edit by hand.
+
+<!-- MCP-TOOLS-TABLE:START -->
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `plane_cycles` | `CYCLESTOOL` | Manage plane cycles operations. |
+| `plane_epics` | `EPICSTOOL` | Manage plane epics operations. |
+| `plane_initiatives` | `INITIATIVESTOOL` | Manage plane initiatives operations. |
+| `plane_intake` | `INTAKETOOL` | Manage plane intake operations. |
+| `plane_labels` | `LABELSTOOL` | Manage plane labels operations. |
+| `plane_milestones` | `MILESTONESTOOL` | Manage plane milestones operations. |
+| `plane_modules` | `MODULESTOOL` | Manage plane modules operations. |
+| `plane_pages` | `PAGESTOOL` | Manage plane pages operations. |
+| `plane_projects` | `PROJECTSTOOL` | Manage plane projects operations. |
+| `plane_states` | `STATESTOOL` | Manage plane states operations. |
+| `plane_users` | `USERSTOOL` | Manage plane users operations. |
+| `plane_work_items` | `WORK_ITEMSTOOL` | Manage plane work items operations. |
+| `plane_workspaces` | `WORKSPACESTOOL` | Manage plane workspaces operations. |
+
+_13 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+<!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/index.md](docs/index.md).
 
