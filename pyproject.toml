@@ -25,6 +25,12 @@ plane-agent = "plane_agent.agent_server:agent_server"
 test = [
     "pytest-xdist>=3.6.0", "pytest", "pytest-asyncio", "pytest-cov",]
 
+[project.entry-points."agent_utilities.skill_providers"]
+plane-agent = "plane_agent.skills"
+
+[project.entry-points."agent_utilities.prompt_providers"]
+plane-agent = "plane_agent.prompts"
+
 [tool.setuptools]
 include-package-data = true
 
@@ -43,7 +49,7 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-plane_agent = [ "mcp_config.json", "agent_data/**",]
+plane_agent = [ "mcp_config.json", "agent_data/**", "prompts/**", "skills/**",]
 
 [tool.ruff.lint]
 select = [ "E", "F", "I", "UP", "B",]
