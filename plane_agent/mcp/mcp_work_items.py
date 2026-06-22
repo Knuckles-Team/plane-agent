@@ -4,6 +4,8 @@ Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
 from agent_utilities.mcp_utilities import resolve_action, run_blocking
+from typing import Any
+
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -46,7 +48,7 @@ def register_work_items_tools(mcp: FastMCP):
         ctx: Context | None = Field(
             default=None, description="MCP context for progress reporting"
         ),
-    ) -> dict:
+    ) -> Any:
         """Manage plane work items operations."""
         if ctx:
             await ctx.info("Executing tool...")
