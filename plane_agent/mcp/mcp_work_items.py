@@ -15,13 +15,20 @@ def _struct(result):
     """Serialize a raw requests.Response to a structured dict so FastMCP can
     return structured output (plane client methods return requests.Response,
     unlike the structured-model clients). CONCEPT:ECO-4.1"""
-    if hasattr(result, "status_code") and callable(getattr(result, "json", None)):
+    if isinstance(result, dict):
+        return result
+    # plane client Response model: `.data` (parsed payload) + `.response` (raw)
+    data = getattr(result, "data", None)
+    if data is not None:
+        raw = getattr(result, "response", None)
+        return {"status_code": getattr(raw, "status_code", 200), "data": data}
+    # raw requests.Response fallback
+    if callable(getattr(result, "json", None)):
         try:
-            data = result.json()
+            return {"status_code": getattr(result, "status_code", 200), "data": result.json()}
         except Exception:
-            data = getattr(result, "text", None)
-        return {"status_code": result.status_code, "data": data}
-    return result
+            return {"status_code": getattr(result, "status_code", 200), "data": getattr(result, "text", None)}
+    return {"data": result}
 
 
 def register_work_items_tools(mcp: FastMCP):
