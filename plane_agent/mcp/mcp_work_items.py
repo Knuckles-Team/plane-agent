@@ -11,6 +11,19 @@ from pydantic import Field
 from plane_agent.auth import get_client
 
 
+def _struct(result):
+    """Serialize a raw requests.Response to a structured dict so FastMCP can
+    return structured output (plane client methods return requests.Response,
+    unlike the structured-model clients). CONCEPT:ECO-4.1"""
+    if hasattr(result, "status_code") and callable(getattr(result, "json", None)):
+        try:
+            data = result.json()
+        except Exception:
+            data = getattr(result, "text", None)
+        return {"status_code": result.status_code, "data": data}
+    return result
+
+
 def register_work_items_tools(mcp: FastMCP):
     # CONCEPT:ECO-4.1
     @mcp.tool(tags={"work_items"})
@@ -63,35 +76,35 @@ def register_work_items_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_work_items":
-            return await run_blocking(client.list_work_items, **kwargs)
+            return _struct(await run_blocking(client.list_work_items, **kwargs))
         if action == "create_work_item":
-            return await run_blocking(client.create_work_item, **kwargs)
+            return _struct(await run_blocking(client.create_work_item, **kwargs))
         if action == "update_work_item":
-            return await run_blocking(client.update_work_item, **kwargs)
+            return _struct(await run_blocking(client.update_work_item, **kwargs))
         if action == "delete_work_item":
-            return await run_blocking(client.delete_work_item, **kwargs)
+            return _struct(await run_blocking(client.delete_work_item, **kwargs))
         if action == "search_work_items":
-            return await run_blocking(client.search_work_items, **kwargs)
+            return _struct(await run_blocking(client.search_work_items, **kwargs))
         if action == "retrieve_work_item_by_identifier":
-            return await run_blocking(client.retrieve_work_item_by_identifier, **kwargs)
+            return _struct(await run_blocking(client.retrieve_work_item_by_identifier, **kwargs))
         if action == "retrieve_work_item":
-            return await run_blocking(client.retrieve_work_item, **kwargs)
+            return _struct(await run_blocking(client.retrieve_work_item, **kwargs))
         if action == "list_work_item_activities":
-            return await run_blocking(client.list_work_item_activities, **kwargs)
+            return _struct(await run_blocking(client.list_work_item_activities, **kwargs))
         if action == "list_work_item_comments":
-            return await run_blocking(client.list_work_item_comments, **kwargs)
+            return _struct(await run_blocking(client.list_work_item_comments, **kwargs))
         if action == "create_work_item_comment":
-            return await run_blocking(client.create_work_item_comment, **kwargs)
+            return _struct(await run_blocking(client.create_work_item_comment, **kwargs))
         if action == "list_work_item_links":
-            return await run_blocking(client.list_work_item_links, **kwargs)
+            return _struct(await run_blocking(client.list_work_item_links, **kwargs))
         if action == "create_work_item_link":
-            return await run_blocking(client.create_work_item_link, **kwargs)
+            return _struct(await run_blocking(client.create_work_item_link, **kwargs))
         if action == "list_work_item_relations":
-            return await run_blocking(client.list_work_item_relations, **kwargs)
+            return _struct(await run_blocking(client.list_work_item_relations, **kwargs))
         if action == "list_work_item_types":
-            return await run_blocking(client.list_work_item_types, **kwargs)
+            return _struct(await run_blocking(client.list_work_item_types, **kwargs))
         if action == "list_work_logs":
-            return await run_blocking(client.list_work_logs, **kwargs)
+            return _struct(await run_blocking(client.list_work_logs, **kwargs))
         if action == "create_work_log":
-            return await run_blocking(client.create_work_log, **kwargs)
+            return _struct(await run_blocking(client.create_work_log, **kwargs))
         raise ValueError(f"Unknown action: {action}")
