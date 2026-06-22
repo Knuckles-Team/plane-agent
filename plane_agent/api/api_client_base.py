@@ -47,7 +47,10 @@ class BaseApiClient:
     def _validate_auth(self):
         """Verify the API key and workspace slug are valid."""
         response = self._session.get(
-            url=f"{self.url}/workspaces/{self.workspace_slug}/",
+            # The bare workspace-detail endpoint 401s even for a valid API key;
+            # validate against a key-accessible endpoint that still proves the slug
+            # (404 on a bad slug, 401 on a bad key). CONCEPT:ECO-4.1
+            url=f"{self.url}/workspaces/{self.workspace_slug}/projects/",
             headers=self.headers,
             verify=self.verify,
             proxies=self.proxies,
