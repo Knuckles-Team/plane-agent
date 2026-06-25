@@ -347,6 +347,68 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 
 ## Environment Variables
 
+<!-- ENV-VARS-TABLE:START -->
+
+#### Package environment variables
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `HOST` | `0.0.0.0` |  |
+| `PORT` | `8000` |  |
+| `TRANSPORT` | `stdio` | options: stdio, streamable-http, sse |
+| `ENABLE_OTEL` | `True` |  |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:8080/api/public/otel` |  |
+| `OTEL_EXPORTER_OTLP_PUBLIC_KEY` | `pk-...` |  |
+| `OTEL_EXPORTER_OTLP_SECRET_KEY` | `sk-...` |  |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` |  |
+| `EUNOMIA_TYPE` | `none` | options: none, embedded, remote |
+| `EUNOMIA_POLICY_FILE` | `mcp_policies.json` |  |
+| `EUNOMIA_REMOTE_URL` | `http://eunomia-server:8000` |  |
+| `PLANE_BASE_URL` | `https://api.plane.so` |  |
+| `PLANE_WORKSPACE_SLUG` | — |  |
+| `DEBUG` | `False` |  |
+| `PYTHONUNBUFFERED` | `1` |  |
+| `PLANE_API_KEY` | `your_plane_api_key_here` |  |
+| `PROJECTSTOOL` | `True` |  |
+| `WORK_ITEMSTOOL` | `True` |  |
+| `CYCLESTOOL` | `True` |  |
+| `EPICSTOOL` | `True` |  |
+| `MILESTONESTOOL` | `True` |  |
+| `MODULESTOOL` | `True` |  |
+| `STATESTOOL` | `True` |  |
+| `USERSTOOL` | `True` |  |
+| `WORKSPACESTOOL` | `True` |  |
+| `INITIATIVESTOOL` | `True` |  |
+| `INTAKETOOL` | `True` |  |
+| `LABELSTOOL` | `True` |  |
+| `PAGESTOOL` | `True` |  |
+| `DEFAULT_AGENT_NAME` | `plane-agent` |  |
+| `AGENT_UTILITIES_TESTING` | `False` |  |
+| `GRAPH_BACKEND` | `networkx` |  |
+| `LLM_API_KEY` | — |  |
+| `LLM_BASE_URL` | — |  |
+| `MCP_URL` | `http://localhost:8000/mcp` |  |
+| `MODEL_ID` | `gpt-4o` |  |
+
+#### Inherited agent-utilities variables (apply to every connector)
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `MCP_TOOL_MODE` | `condensed` | Tool surface: `condensed` | `verbose` | `both` |
+| `MCP_ENABLED_TOOLS` | — | Comma-separated tool allow-list |
+| `MCP_DISABLED_TOOLS` | — | Comma-separated tool deny-list |
+| `MCP_ENABLED_TAGS` | — | Comma-separated tag allow-list |
+| `MCP_DISABLED_TAGS` | — | Comma-separated tag deny-list |
+| `MCP_CLIENT_AUTH` | — | Outbound MCP auth (`oidc-client-credentials` for fleet calls) |
+| `OIDC_CLIENT_ID` | — | OIDC client id (service-account auth) |
+| `OIDC_CLIENT_SECRET` | — | OIDC client secret (service-account auth) |
+| `PROVIDER` | `openai` | LLM provider for the agent |
+| `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
+
+_36 package + 10 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+<!-- ENV-VARS-TABLE:END -->
+
+
 The Plane Agent supports the following environment variables for configuration and integration:
 
 | Variable | Description |
