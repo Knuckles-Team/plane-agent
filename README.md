@@ -125,6 +125,14 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 ### MCP Configuration Examples
 
+> **Install the slim `[mcp]` extra.** All examples below install
+> `plane-agent[mcp]` — the MCP-server extra that pulls only the FastMCP /
+> FastAPI tooling (`agent-utilities[mcp]`). It deliberately **excludes** the heavy
+> agent runtime (the epistemic-graph engine, `pydantic-ai`, `dspy`, `llama-index`,
+> `tree-sitter`), so `uvx`/container installs are dramatically smaller and faster.
+> Use the full `[agent]` extra only when you need the integrated Pydantic AI agent
+> (see [Installation](#installation)).
+
 #### stdio Transport (Recommended for local IDEs e.g., Cursor, Claude Desktop)
 Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
 
@@ -135,7 +143,7 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
       "command": "uvx",
       "args": [
         "--from",
-        "plane-agent",
+        "plane-agent[mcp]",
         "plane-mcp"
       ],
       "env": {
@@ -160,7 +168,7 @@ Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx
       "command": "uvx",
       "args": [
         "--from",
-        "plane-agent",
+        "plane-agent[mcp]",
         "plane-mcp"
       ],
       "env": {
@@ -203,8 +211,15 @@ docker run -d \
   -e DEBUG="your_value" \
   -e PYTHONUNBUFFERED="your_value" \
   -e PLANE_API_KEY="your_value" \
-  knucklessg1/plane-agent:latest
+  knucklessg1/plane-agent:mcp
 ```
+
+> The `:mcp` tag is the **slim MCP-server image** (built from
+> `docker/Dockerfile --target mcp`, installing `plane-agent[mcp]`). The default
+> `:latest` tag is the **full agent image** (`--target agent`, `plane-agent[agent]`)
+> which also bundles the Pydantic AI agent and the epistemic-graph engine — use it
+> when you run `plane-agent` (the agent), not just the MCP server. See
+> [Container images](#container-images-mcp-vs-agent).
 
 ---
 
@@ -250,7 +265,7 @@ version: '3.8'
 
 services:
   plane-agent-mcp:
-    image: knucklessg1/plane-agent:latest
+    image: knucklessg1/plane-agent:mcp
     container_name: plane-agent-mcp
     hostname: plane-agent-mcp
     restart: always
@@ -366,15 +381,51 @@ The Plane Agent supports the following environment variables for configuration a
 
 ## Installation
 
-Install the Python package locally:
+Pick the extra that matches what you want to run:
+
+| Extra | Installs | Use when |
+|-------|----------|----------|
+| `plane-agent[mcp]` | Slim MCP server only (`agent-utilities[mcp]` — FastMCP/FastAPI) | You only run the **MCP server** (smallest install / image) |
+| `plane-agent[agent]` | Full agent runtime (`agent-utilities[agent,logfire]` — Pydantic AI + the epistemic-graph engine) | You run the **integrated agent** |
+| `plane-agent[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
 
 ```bash
-# Using uv (highly recommended)
-uv pip install plane-agent[all]
+# MCP server only (recommended for tool hosting — slim deps)
+uv pip install "plane-agent[mcp]"
 
-# Using standard pip
-python -m pip install plane-agent[all]
+# Full agent runtime (Pydantic AI + epistemic-graph engine)
+uv pip install "plane-agent[agent]"
+
+# Everything (development)
+uv pip install "plane-agent[all]"      # or: python -m pip install "plane-agent[all]"
 ```
+
+### Container images (`:mcp` vs `:agent`)
+
+One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `--target`:
+
+| Image tag | Build target | Contents | Entrypoint |
+|-----------|--------------|----------|------------|
+| `knucklessg1/plane-agent:mcp` | `--target mcp` | `plane-agent[mcp]` — **slim**, no engine/`pydantic-ai`/`dspy`/`llama-index`/`tree-sitter` | `plane-mcp` |
+| `knucklessg1/plane-agent:latest` | `--target agent` (default) | `plane-agent[agent]` — **full** agent runtime + epistemic-graph engine | `plane-agent` |
+
+```bash
+docker build --target mcp   -t knucklessg1/plane-agent:mcp    docker/   # slim MCP server
+docker build --target agent -t knucklessg1/plane-agent:latest docker/   # full agent
+```
+
+`docker/mcp.compose.yml` runs the slim `:mcp` server; `docker/agent.compose.yml` runs the
+agent (`:latest`) with a co-located `:mcp` sidecar.
+
+### Knowledge-graph database (`epistemic-graph`)
+
+The **full agent** (`[agent]` / `:latest`) embeds the **epistemic-graph** engine (pulled in
+transitively via `agent-utilities[agent]`). For production — or to share one knowledge graph
+across multiple agents — run **epistemic-graph as its own database container** and point the
+agent at it instead of embedding it. Deployment recipes (single-node + Raft HA), connection
+config, and the full database architecture (with diagrams) are documented in the
+[epistemic-graph deployment guide](https://knuckles-team.github.io/epistemic-graph/deployment/).
+The slim `[mcp]` server does **not** require the database.
 
 ---
 
