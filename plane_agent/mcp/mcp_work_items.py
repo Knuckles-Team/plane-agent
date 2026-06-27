@@ -3,9 +3,9 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
-from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from typing import Any
 
+from agent_utilities.mcp_utilities import resolve_action, run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -27,9 +27,15 @@ def _struct(result):
     # raw requests.Response fallback
     if callable(getattr(result, "json", None)):
         try:
-            return {"status_code": getattr(result, "status_code", 200), "data": result.json()}
+            return {
+                "status_code": getattr(result, "status_code", 200),
+                "data": result.json(),
+            }
         except Exception:
-            return {"status_code": getattr(result, "status_code", 200), "data": getattr(result, "text", None)}
+            return {
+                "status_code": getattr(result, "status_code", 200),
+                "data": getattr(result, "text", None),
+            }
     return {"data": result}
 
 
@@ -95,21 +101,29 @@ def register_work_items_tools(mcp: FastMCP):
         if action == "search_work_items":
             return _struct(await run_blocking(client.search_work_items, **kwargs))
         if action == "retrieve_work_item_by_identifier":
-            return _struct(await run_blocking(client.retrieve_work_item_by_identifier, **kwargs))
+            return _struct(
+                await run_blocking(client.retrieve_work_item_by_identifier, **kwargs)
+            )
         if action == "retrieve_work_item":
             return _struct(await run_blocking(client.retrieve_work_item, **kwargs))
         if action == "list_work_item_activities":
-            return _struct(await run_blocking(client.list_work_item_activities, **kwargs))
+            return _struct(
+                await run_blocking(client.list_work_item_activities, **kwargs)
+            )
         if action == "list_work_item_comments":
             return _struct(await run_blocking(client.list_work_item_comments, **kwargs))
         if action == "create_work_item_comment":
-            return _struct(await run_blocking(client.create_work_item_comment, **kwargs))
+            return _struct(
+                await run_blocking(client.create_work_item_comment, **kwargs)
+            )
         if action == "list_work_item_links":
             return _struct(await run_blocking(client.list_work_item_links, **kwargs))
         if action == "create_work_item_link":
             return _struct(await run_blocking(client.create_work_item_link, **kwargs))
         if action == "list_work_item_relations":
-            return _struct(await run_blocking(client.list_work_item_relations, **kwargs))
+            return _struct(
+                await run_blocking(client.list_work_item_relations, **kwargs)
+            )
         if action == "list_work_item_types":
             return _struct(await run_blocking(client.list_work_item_types, **kwargs))
         if action == "list_work_logs":
