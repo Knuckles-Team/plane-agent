@@ -8,11 +8,26 @@ PKG_NAME = __name__.rsplit(".", 1)[0] if "." in __name__ else None
 
 
 def _get_pkg_name():
-    """Derive package name from test location."""
+    """Derive the importable package name from the project source tree.
+
+    Scanning for the actual source package (a directory containing
+    ``__init__.py``) is robust when the project is checked out in a git
+    worktree whose directory name differs from the package name. Falls back
+    to deriving the name from the project directory.
+    """
     import pathlib
 
     test_dir = pathlib.Path(__file__).resolve().parent
     project_dir = test_dir.parent
+    skip = {"tests", "test", "docs", "scripts", "script", "build", "dist"}
+    for child in sorted(project_dir.iterdir()):
+        if (
+            child.is_dir()
+            and child.name not in skip
+            and not child.name.startswith(".")
+            and (child / "__init__.py").exists()
+        ):
+            return child.name
     return project_dir.name.replace("-", "_")
 
 

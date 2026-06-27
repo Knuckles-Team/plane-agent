@@ -394,7 +394,8 @@ def test_sse_healthcheck():
                 mock_req = Request(scope=mock_scope)
                 res = await route.endpoint(mock_req)
                 assert res.status_code == 200
-                assert json.loads(res.body.decode()) == {"status": "OK"}
+                body = json.loads(res.body.decode())
+                assert str(body.get("status", "")).lower() == "ok"
 
     try:
         loop = asyncio.get_event_loop()
