@@ -8,14 +8,22 @@
       ],
       "env": {
         "MCP_TOOL_MODE": "condensed",
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
-        "MCP_URL": "<YOUR_MCP_URL>",
-        "PLANE_API_KEY": "<YOUR_PLANE_API_KEY>",
-        "PLANE_BASE_URL": "<YOUR_PLANE_BASE_URL>",
-        "PLANE_URL": "<YOUR_PLANE_URL>",
-        "PLANE_WORKSPACE_SLUG": "<YOUR_PLANE_WORKSPACE_SLUG>"
+        "CYCLESTOOL": "True",
+        "EPICSTOOL": "True",
+        "INITIATIVESTOOL": "True",
+        "INTAKETOOL": "True",
+        "LABELSTOOL": "True",
+        "MILESTONESTOOL": "True",
+        "MODULESTOOL": "True",
+        "PAGESTOOL": "True",
+        "PLANE_API_KEY": "your_plane_api_key_here",
+        "PLANE_BASE_URL": "https://api.plane.so",
+        "PLANE_WORKSPACE_SLUG": "",
+        "PROJECTSTOOL": "True",
+        "STATESTOOL": "True",
+        "USERSTOOL": "True",
+        "WORKSPACESTOOL": "True",
+        "WORK_ITEMSTOOL": "True"
       }
     }
   }
