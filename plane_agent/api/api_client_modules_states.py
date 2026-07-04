@@ -60,7 +60,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def add_work_items_to_module(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         module_id: str,
@@ -87,7 +87,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_module_work_items(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         module_id: str,

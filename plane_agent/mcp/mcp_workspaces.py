@@ -12,10 +12,10 @@ from plane_agent.auth import get_client
 
 
 def register_workspaces_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"workspaces"})
     async def plane_workspaces(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'get_workspace', 'get_workspace_members', 'get_workspace_features', 'update_workspace_features'"
         ),

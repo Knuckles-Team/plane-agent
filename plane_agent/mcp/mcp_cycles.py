@@ -12,10 +12,10 @@ from plane_agent.auth import get_client
 
 
 def register_cycles_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"cycles"})
     async def plane_cycles(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'list_cycles', 'create_cycle', 'retrieve_cycle', 'update_cycle', 'delete_cycle', 'list_cycle_work_items', 'add_work_items_to_cycle'"
         ),

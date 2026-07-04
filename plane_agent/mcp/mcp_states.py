@@ -12,10 +12,10 @@ from plane_agent.auth import get_client
 
 
 def register_states_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"states"})
     async def plane_states(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'list_states', 'create_state'"
         ),

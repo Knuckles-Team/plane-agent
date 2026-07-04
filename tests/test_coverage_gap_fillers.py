@@ -19,11 +19,11 @@ import pytest
 from agent_utilities.core.exceptions import AuthError
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_auth_edge_cases(mock_session):
     """Test auth edge cases.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     from plane_agent.auth import get_client
 
@@ -55,11 +55,11 @@ def test_auth_edge_cases(mock_session):
     assert client.api_key == "xyz"
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_all_api_client_methods(mock_session):
     """Test all API client methods.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     from plane_agent.api_client import Api
 
@@ -135,12 +135,12 @@ def get_all_mcp_tools_and_actions():
     return test_cases
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 @pytest.mark.parametrize("tool_name, action", get_all_mcp_tools_and_actions())
 def test_all_mcp_tools(tool_name, action):
     """Test all MCP tools.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
 
     async def run_test():
@@ -195,11 +195,11 @@ def test_all_mcp_tools(tool_name, action):
     loop.run_until_complete(run_test())
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_mcp_server_run_options():
     """Test MCP server run options.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     from plane_agent.mcp_server import mcp_server
 
@@ -238,11 +238,11 @@ def test_mcp_server_run_options():
             mock_exit.assert_called_with(1)
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_agent_server_coverage():
     """Test agent server coverage.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     with (
         patch("agent_utilities.initialize_workspace"),
@@ -260,11 +260,11 @@ def test_agent_server_coverage():
             mock_create.assert_called_once()
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_main_execution():
     """Test main module execution paths.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     import runpy
 
@@ -331,11 +331,11 @@ def test_main_execution():
             assert mock_create1.called or mock_create2.called
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_requests_dependency_warning_fallback():
     """Test requests dependency warning fallback path.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     # Remove module from cache to trigger reload and warning import check
     if "plane_agent.mcp_server" in sys.modules:
@@ -357,11 +357,11 @@ def test_requests_dependency_warning_fallback():
         assert plane_agent.mcp_server is not None
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_sse_healthcheck():
     """Test SSE healthcheck endpoint.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
 
     async def run_test():
@@ -405,11 +405,11 @@ def test_sse_healthcheck():
     loop.run_until_complete(run_test())
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_create_epic_edge_cases(mock_session):
     """Test create epic edge cases.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     from agent_utilities.core.exceptions import ParameterError
 
@@ -440,11 +440,11 @@ def test_create_epic_edge_cases(mock_session):
         client.create_epic(project_id="proj-id", data={"name": "New Epic"})
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_get_workspace_coverage(mock_session):
     """Test get workspace coverage.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     from plane_agent.api_client import Api
 

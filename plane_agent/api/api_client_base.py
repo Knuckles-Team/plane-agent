@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class BaseApiClient:
     def __init__(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         url: str | None,
         api_key: str,
@@ -49,7 +49,7 @@ class BaseApiClient:
         response = self._session.get(
             # The bare workspace-detail endpoint 401s even for a valid API key;
             # validate against a key-accessible endpoint that still proves the slug
-            # (404 on a bad slug, 401 on a bad key). CONCEPT:ECO-4.1
+            # (404 on a bad slug, 401 on a bad key). CONCEPT:AU-ECO.mcp.fastmcp-middleware
             url=f"{self.url}/workspaces/{self.workspace_slug}/projects/",
             headers=self.headers,
             verify=self.verify,

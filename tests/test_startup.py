@@ -1,11 +1,11 @@
 import pytest
 
 
-@pytest.mark.concept("ECO-4.1")
+@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_server_startup():
     """Validates that the server module can start successfully.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
     from plane_agent.agent_server import agent_server
     from plane_agent.mcp_server import get_mcp_instance

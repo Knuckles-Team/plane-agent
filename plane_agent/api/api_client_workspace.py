@@ -50,7 +50,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def get_workspace(self) -> Response:
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         """Get current workspace details."""
         response = self._session.get(
             url=f"{self.url}/workspaces/{self.workspace_slug}/",

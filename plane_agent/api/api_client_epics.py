@@ -20,7 +20,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def create_epic(self, project_id: str, data: dict[str, Any]) -> Response:
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         """Create a new epic (technically a work item with epic type)."""
 
         if "type_id" not in data:

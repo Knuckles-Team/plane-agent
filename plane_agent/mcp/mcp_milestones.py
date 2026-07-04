@@ -12,10 +12,10 @@ from plane_agent.auth import get_client
 
 
 def register_milestones_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"milestones"})
     async def plane_milestones(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'list_milestones', 'create_milestone', 'retrieve_milestone', 'update_milestone', 'delete_milestone'"
         ),

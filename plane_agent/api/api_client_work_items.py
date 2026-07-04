@@ -82,7 +82,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_work_item_activities(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,
@@ -110,7 +110,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_work_item_comments(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,
@@ -149,7 +149,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def update_work_item_comment(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,
@@ -177,7 +177,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_work_item_links(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,
@@ -205,7 +205,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def retrieve_work_item_link(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,
@@ -243,7 +243,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_work_item_properties(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         type_id: str,
@@ -282,7 +282,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def update_work_item_property(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         type_id: str,
@@ -328,7 +328,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def remove_work_item_relation(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,
@@ -401,7 +401,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def update_work_log(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         work_item_id: str,

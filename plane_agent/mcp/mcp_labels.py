@@ -12,10 +12,10 @@ from plane_agent.auth import get_client
 
 
 def register_labels_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"labels"})
     async def plane_labels(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'list_labels', 'create_label'"
         ),

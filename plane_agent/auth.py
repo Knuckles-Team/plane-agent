@@ -19,7 +19,7 @@ def get_client(
     """
     Initialize and return a Plane API client.
 
-    CONCEPT:ECO-4.1
+    CONCEPT:AU-ECO.mcp.fastmcp-middleware
 
     Args:
         url: Plane API base URL.

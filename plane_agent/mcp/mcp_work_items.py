@@ -16,7 +16,7 @@ from plane_agent.auth import get_client
 def _struct(result):
     """Serialize a raw requests.Response to a structured dict so FastMCP can
     return structured output (plane client methods return requests.Response,
-    unlike the structured-model clients). CONCEPT:ECO-4.1"""
+    unlike the structured-model clients). CONCEPT:AU-ECO.mcp.fastmcp-middleware"""
     if isinstance(result, dict):
         return result
     # plane client Response model: `.data` (parsed payload) + `.response` (raw)
@@ -40,10 +40,10 @@ def _struct(result):
 
 
 def register_work_items_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"work_items"})
     async def plane_work_items(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'list_work_items', 'create_work_item', 'update_work_item', 'delete_work_item', 'search_work_items', 'retrieve_work_item_by_identifier', 'retrieve_work_item', 'list_work_item_activities', 'list_work_item_comments', 'create_work_item_comment', 'list_work_item_links', 'create_work_item_link', 'list_work_item_relations', 'list_work_item_types', 'list_work_logs', 'create_work_log'"
         ),

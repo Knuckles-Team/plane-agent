@@ -51,7 +51,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def add_work_items_to_milestone(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         milestone_id: str,
@@ -67,7 +67,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def remove_work_items_from_milestone(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         milestone_id: str,
@@ -84,7 +84,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_milestone_work_items(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         milestone_id: str,

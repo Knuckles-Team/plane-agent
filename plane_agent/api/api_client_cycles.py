@@ -58,7 +58,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def add_work_items_to_cycle(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         cycle_id: str,
@@ -85,7 +85,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def list_cycle_work_items(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         cycle_id: str,
@@ -102,7 +102,7 @@ class Api(BaseApiClient):
 
     @require_auth
     def transfer_cycle_work_items(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         self,
         project_id: str,
         cycle_id: str,

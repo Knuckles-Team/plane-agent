@@ -12,10 +12,10 @@ from plane_agent.auth import get_client
 
 
 def register_pages_tools(mcp: FastMCP):
-    # CONCEPT:ECO-4.1
+    # CONCEPT:AU-ECO.mcp.fastmcp-middleware
     @mcp.tool(tags={"pages"})
     async def plane_pages(
-        # CONCEPT:ECO-4.1
+        # CONCEPT:AU-ECO.mcp.fastmcp-middleware
         action: str = Field(
             description="Action to perform. Must be one of: 'retrieve_project_page', 'create_project_page'"
         ),
