@@ -23,6 +23,7 @@ import logging
 import sys
 from typing import Any
 
+from agent_utilities.core.config import setting
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
     load_config,
@@ -40,6 +41,46 @@ __version__ = "0.1.37"
 
 logger = get_logger(name="plane-agent")
 logger.setLevel(logging.INFO)
+
+# Native KG ingestion is default-on; set PLANE_KG_INGEST=false to disable the
+# best-effort push that rides the list_* fetch flow. CONCEPT:AU-KG.ingest.enterprise-source-extractor.
+_KG_AUTO_INGEST = str(setting("PLANE_KG_INGEST", "true")).lower() not in (
+    "0",
+    "false",
+    "no",
+)
+
+
+def _kg_records(result: Any, key: str = "results") -> list[dict[str, Any]]:
+    """Normalize a client Response/list into a list of plain record dicts."""
+    data = getattr(result, "data", result)
+    if isinstance(data, dict):
+        data = data.get(key, data.get("data", data))
+    records = data if isinstance(data, list) else [data]
+    out: list[dict[str, Any]] = []
+    for r in records:
+        if r is None:
+            continue
+        out.append(r.model_dump() if hasattr(r, "model_dump") else r)
+    return [r for r in out if isinstance(r, dict)]
+
+
+def _auto_ingest(kind: str, result: Any, **ctx: Any) -> None:
+    """Best-effort push of freshly-listed records into the KG (never raises)."""
+    if not _KG_AUTO_INGEST:
+        return
+    try:
+        from plane_agent import kg_ingest
+
+        records = _kg_records(result)
+        if kind == "projects":
+            kg_ingest.ingest_projects(records, workspace_slug=ctx.get("workspace_slug"))
+        elif kind == "work_items":
+            kg_ingest.ingest_work_items(records, project_id=ctx.get("project_id"))
+        elif kind == "cycles":
+            kg_ingest.ingest_cycles(records, project_id=ctx.get("project_id"))
+    except Exception as e:  # noqa: BLE001 — ingestion is best-effort
+        logger.debug("KG auto-ingest skipped (%s): %s", kind, e)
 
 
 def register_projects_tools(mcp: FastMCP):
@@ -75,7 +116,13 @@ def register_projects_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_projects":
-            return await run_blocking(client.list_projects, **kwargs)
+            result = await run_blocking(client.list_projects, **kwargs)
+            _auto_ingest(
+                "projects",
+                result,
+                workspace_slug=getattr(client, "workspace_slug", None),
+            )
+            return result
         if action == "retrieve_project":
             return await run_blocking(client.retrieve_project, **kwargs)
         raise ValueError(f"Unknown action: {action}")
@@ -131,7 +178,9 @@ def register_work_items_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_work_items":
-            return await run_blocking(client.list_work_items, **kwargs)
+            result = await run_blocking(client.list_work_items, **kwargs)
+            _auto_ingest("work_items", result, project_id=kwargs.get("project_id"))
+            return result
         if action == "create_work_item":
             return await run_blocking(client.create_work_item, **kwargs)
         if action == "update_work_item":
@@ -206,7 +255,9 @@ def register_cycles_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_cycles":
-            return await run_blocking(client.list_cycles, **kwargs)
+            result = await run_blocking(client.list_cycles, **kwargs)
+            _auto_ingest("cycles", result, project_id=kwargs.get("project_id"))
+            return result
         if action == "create_cycle":
             return await run_blocking(client.create_cycle, **kwargs)
         if action == "retrieve_cycle":
@@ -655,6 +706,75 @@ def register_pages_tools(mcp: FastMCP):
         if action == "create_project_page":
             return await run_blocking(client.create_project_page, **kwargs)
         raise ValueError(f"Unknown action: {action}")
+
+
+def register_kg_tools(mcp: FastMCP):
+    @mcp.tool(tags={"kg"})
+    async def plane_ingest(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'ingest_projects', 'ingest_work_items', 'ingest_cycles'"
+        ),
+        params_json: str = Field(
+            default="{}",
+            description="JSON string of the underlying list_* params (ingest_work_items / ingest_cycles require 'project_id').",
+        ),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """Natively ingest Plane records into epistemic-graph as typed OWL nodes.
+
+        Lists records via the Plane API, then pushes them as typed nodes + links via the
+        fast engine client (best-effort — returns ``{"ingested": null}`` with no engine):
+        'ingest_projects' → :SoftwareProject (+ :Workspace / :inWorkspace);
+        'ingest_work_items' → :Issue (+ :belongsToProject / :assignedTo / :hasState / :inCycle);
+        'ingest_cycles' → :Cycle (+ :belongsToProject).
+        CONCEPT:AU-KG.ingest.enterprise-source-extractor.
+        """
+        if ctx:
+            await ctx.info("Executing tool...")
+        import json
+
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        valid_actions = ("ingest_projects", "ingest_work_items", "ingest_cycles")
+        resolved = resolve_action(action, valid_actions, service="plane-agent")
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
+        from plane_agent import kg_ingest
+
+        if action == "ingest_projects":
+            result = await run_blocking(client.list_projects, **kwargs)
+            records = _kg_records(result)
+            ingested = kg_ingest.ingest_projects(
+                records, workspace_slug=getattr(client, "workspace_slug", None)
+            )
+            return {"listed": len(records), "ingested": ingested}
+        if action == "ingest_work_items":
+            result = await run_blocking(client.list_work_items, **kwargs)
+            records = _kg_records(result)
+            ingested = kg_ingest.ingest_work_items(
+                records, project_id=kwargs.get("project_id")
+            )
+            return {"listed": len(records), "ingested": ingested}
+        if action == "ingest_cycles":
+            result = await run_blocking(client.list_cycles, **kwargs)
+            records = _kg_records(result)
+            ingested = kg_ingest.ingest_cycles(
+                records, project_id=kwargs.get("project_id")
+            )
+            return {"listed": len(records), "ingested": ingested}
+        raise ValueError(f"Unknown action: {action}")
+
+    return None
 
 
 def get_mcp_instance() -> tuple[Any, ...]:

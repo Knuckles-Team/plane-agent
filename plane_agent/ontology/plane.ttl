@@ -1,0 +1,123 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix : <http://knuckles.team/kg#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Plane project-and-issue-tracking ontology — workspaces, software projects, work items
+# (issues), cycles (sprints), modules, states and labels. All classes and properties live
+# in the shared `:` (kg#) namespace; only the owl:Ontology node gets the per-package IRI.
+# Backs the plane-agent MCP tool surface (plane_projects / plane_work_items / plane_cycles /
+# plane_modules / plane_states / …). The shared :Person class is REUSED, never redefined.
+
+:Workspace a owl:Class ;
+    rdfs:label "Workspace" ;
+    rdfs:comment "A Plane workspace — the top-level tenant that owns projects and members (plane_workspaces)." .
+
+:SoftwareProject a owl:Class ;
+    rdfs:label "Software Project" ;
+    rdfs:comment "A Plane project: a container of work items, cycles and modules within a workspace (plane_projects). Named :SoftwareProject to stay distinct from other sources' generic :Project." .
+
+:Issue a owl:Class ;
+    rdfs:label "Issue" ;
+    rdfs:comment "A Plane work item / issue — the unit of tracked work with a state, priority and assignees (plane_work_items)." .
+
+:Cycle a owl:Class ;
+    rdfs:label "Cycle" ;
+    rdfs:comment "A time-boxed cycle (sprint) grouping work items over a start/end window (plane_cycles)." .
+
+:Module a owl:Class ;
+    rdfs:label "Module" ;
+    rdfs:comment "A feature grouping of work items within a project (plane_modules)." .
+
+:ProjectState a owl:Class ;
+    rdfs:label "Project State" ;
+    rdfs:comment "A workflow state a work item can occupy (e.g. Backlog, Todo, In Progress, Done) within a project (plane_states)." .
+
+:Label a owl:Class ;
+    rdfs:label "Label" ;
+    rdfs:comment "A tag applied to work items for classification within a project (plane_labels)." .
+
+# --- links (owl:ObjectProperty) ---
+
+:inWorkspace a owl:ObjectProperty ;
+    rdfs:label "in workspace" ;
+    rdfs:comment "Links a SoftwareProject to the Workspace that owns it." ;
+    rdfs:domain :SoftwareProject ;
+    rdfs:range :Workspace .
+
+:belongsToProject a owl:ObjectProperty ;
+    rdfs:label "belongs to project" ;
+    rdfs:comment "Links an Issue, Cycle, Module, ProjectState or Label to its owning SoftwareProject." ;
+    rdfs:range :SoftwareProject .
+
+:inCycle a owl:ObjectProperty ;
+    rdfs:label "in cycle" ;
+    rdfs:comment "Links an Issue to the Cycle it is scheduled in." ;
+    rdfs:domain :Issue ;
+    rdfs:range :Cycle .
+
+:inModule a owl:ObjectProperty ;
+    rdfs:label "in module" ;
+    rdfs:comment "Links an Issue to the Module it is grouped under." ;
+    rdfs:domain :Issue ;
+    rdfs:range :Module .
+
+:hasState a owl:ObjectProperty ;
+    rdfs:label "has state" ;
+    rdfs:comment "Links an Issue to its current ProjectState." ;
+    rdfs:domain :Issue ;
+    rdfs:range :ProjectState .
+
+:hasLabel a owl:ObjectProperty ;
+    rdfs:label "has label" ;
+    rdfs:comment "Links an Issue to a Label applied to it." ;
+    rdfs:domain :Issue ;
+    rdfs:range :Label .
+
+:assignedTo a owl:ObjectProperty ;
+    rdfs:label "assigned to" ;
+    rdfs:comment "Links an Issue to a Person responsible for it." ;
+    rdfs:domain :Issue ;
+    rdfs:range :Person .
+
+# --- fields (owl:DatatypeProperty) ---
+
+:sequenceId a owl:DatatypeProperty ;
+    rdfs:label "sequence id" ;
+    rdfs:comment "Project-scoped human-readable sequence number of a work item (e.g. PROJ-42)." ;
+    rdfs:domain :Issue ;
+    rdfs:range xsd:integer .
+
+:priority a owl:DatatypeProperty ;
+    rdfs:label "priority" ;
+    rdfs:comment "Priority of a work item (urgent, high, medium, low, none)." ;
+    rdfs:domain :Issue ;
+    rdfs:range xsd:string .
+
+:identifier a owl:DatatypeProperty ;
+    rdfs:label "identifier" ;
+    rdfs:comment "Short project identifier / key used to prefix work-item sequence ids (e.g. PROJ)." ;
+    rdfs:domain :SoftwareProject ;
+    rdfs:range xsd:string .
+
+:startDate a owl:DatatypeProperty ;
+    rdfs:label "start date" ;
+    rdfs:comment "Start of a Cycle's time box (ISO-8601 date)." ;
+    rdfs:domain :Cycle ;
+    rdfs:range xsd:string .
+
+:endDate a owl:DatatypeProperty ;
+    rdfs:label "end date" ;
+    rdfs:comment "End of a Cycle's time box (ISO-8601 date)." ;
+    rdfs:domain :Cycle ;
+    rdfs:range xsd:string .
+
+<http://knuckles.team/kg/plane> a owl:Ontology ;
+    rdfs:label "Plane Project Tracking Ontology" ;
+    rdfs:comment """Plane project-and-issue-tracking model — workspaces, software projects,
+    work items (issues), cycles, modules, states and labels, with their containment and
+    assignment relationships — federated into the agent-utilities knowledge-graph hub.""" ;
+    owl:imports <http://knuckles.team/kg> .
