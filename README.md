@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/plane-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/plane-agent)
 
-*Version: 1.0.1*
+*Version: 1.1.0*
 
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning a self-hosted Plane instance are
