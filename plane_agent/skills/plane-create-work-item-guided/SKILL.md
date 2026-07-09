@@ -1,5 +1,6 @@
 ---
 name: plane-create-work-item-guided
+skill_type: skill
 description: >-
   Create a Plane work item after discovering, from the live instance, which
   work-item type to use and which custom properties that type defines — plus the

@@ -1,5 +1,6 @@
 ---
 name: plane-my-priority-queue
+skill_type: skill
 description: >-
   Surface the Plane work items assigned to the current user across the workspace,
   rank them by a combined priority + staleness score (highest priority at the top,

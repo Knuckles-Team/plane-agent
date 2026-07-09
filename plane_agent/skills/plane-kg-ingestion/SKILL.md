@@ -1,5 +1,6 @@
 ---
 name: plane-kg-ingestion
+skill_type: skill
 description: >-
   Natively mirror Plane data into the epistemic-graph knowledge graph as typed
   OWL nodes via the plane-agent MCP server — push projects (:SoftwareProject),

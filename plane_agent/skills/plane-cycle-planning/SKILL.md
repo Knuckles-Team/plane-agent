@@ -1,5 +1,6 @@
 ---
 name: plane-cycle-planning
+skill_type: skill
 description: >-
   Plan and run Plane cycles (sprints) and modules via the plane-agent MCP server —
   create/read/update cycles and modules, assign or transfer work items between

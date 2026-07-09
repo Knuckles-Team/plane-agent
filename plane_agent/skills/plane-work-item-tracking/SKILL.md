@@ -1,5 +1,6 @@
 ---
 name: plane-work-item-tracking
+skill_type: skill
 description: >-
   Track and manage Plane work items (issues) via the plane-agent MCP server —
   list, search, read, create, update and delete work items, and manage their
