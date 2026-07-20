@@ -1,5 +1,6 @@
 ---
 name: plane-agent-operations
+skill_type: skill
 description: >-
   Operate plane-agent through its governed MCP and GraphOS capabilities, including plane create work item guided, plane cycle planning, plane kg ingestion, plane my priority queue, plane work item tracking. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
 ---
