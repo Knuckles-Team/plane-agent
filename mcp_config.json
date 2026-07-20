@@ -7,7 +7,7 @@
         "plane-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "CYCLESTOOL": "True",
         "EPICSTOOL": "True",
         "INITIATIVESTOOL": "True",
@@ -20,7 +20,7 @@
         "PLANE_API_KEY": "your_plane_api_key_here",
         "PLANE_BASE_URL": "https://api.plane.so",
         "PLANE_KG_INGEST": "true",
-        "PLANE_WORKSPACE_SLUG": "",
+        "PLANE_TLS_PROFILE": "system",
         "PROJECTSTOOL": "True",
         "STATESTOOL": "True",
         "USERSTOOL": "True",

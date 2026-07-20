@@ -24,7 +24,7 @@ services:
   plane-aio:
     image: artifacts.plane.so/makeplane/plane-aio-community:stable
     environment:
-      DOMAIN_NAME: "plane.arpa"
+      DOMAIN_NAME: "plane.example.invalid"
       DATABASE_URL: "postgresql://plane:plane@plane-db:5432/plane"
       REDIS_URL: "redis://plane-redis:6379"
       AMQP_URL: "amqp://plane:plane@plane-mq:5672/plane"
@@ -39,7 +39,7 @@ services:
     depends_on: [ plane-db, plane-redis, plane-mq, minio ]
 
   minio:
-    image: docker.io/minio/minio:latest
+    image: docker.io/minio/minio@sha256:<digest>
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
@@ -109,7 +109,7 @@ services:
     # …database / redis / mq / minio as above…
 
   plane-agent-mcp:
-    image: knucklessg1/plane-agent:latest
+    image: example/plane-agent@sha256:<digest>
     depends_on: [ plane-aio ]
     environment:
       - PLANE_BASE_URL=http://plane-aio

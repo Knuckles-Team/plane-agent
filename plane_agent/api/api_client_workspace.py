@@ -55,8 +55,6 @@ class Api(BaseApiClient):
         response = self._session.get(
             url=f"{self.url}/workspaces/{self.workspace_slug}/",
             headers=self.headers,
-            verify=self.verify,
-            proxies=self.proxies,
         )
         response.raise_for_status()
         return Response(response=response, data=response.json())

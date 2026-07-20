@@ -16,7 +16,7 @@ path that matches how you want to run it.
 pip install plane-agent
 ```
 
-The base install already pulls in `agent-utilities[agent,logfire]`, so both the
+The base install already pulls in `agent-utilities[agent-runtime,logfire]`, so both the
 **MCP server** (`plane-mcp`) and the **A2A agent** (`plane-agent`) console scripts
 are available immediately, with Logfire tracing enabled.
 
@@ -48,16 +48,16 @@ uv run plane-mcp
 
 ## Prebuilt Docker image
 
-A multi-stage, slim image is published on every release (entrypoint `plane-mcp`):
+A multi-stage runtime image is published on every release (entrypoint `plane-mcp`):
 
 ```bash
-docker pull knucklessg1/plane-agent:latest
+docker pull example/plane-agent@sha256:<digest>
 
 docker run --rm -i \
   -e PLANE_BASE_URL=https://api.plane.so \
   -e PLANE_API_KEY=your_plane_api_key \
   -e PLANE_WORKSPACE_SLUG=your-workspace \
-  knucklessg1/plane-agent:latest        # stdio transport (default)
+  example/plane-agent@sha256:<digest>        # stdio transport (default)
 ```
 
 For an HTTP server with a published port and the agent server, see

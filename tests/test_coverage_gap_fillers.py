@@ -1,8 +1,7 @@
 import os
 import sys
 
-# Set environment variables for isolated memory graph and testing mode
-os.environ["GRAPH_BACKEND"] = "memory"
+# Keep AgentConfig hermetic during this module's startup coverage.
 os.environ["AGENT_UTILITIES_TESTING"] = "true"
 
 # Set dummy sys.argv before importing anything to prevent create_mcp_server parsing issues
@@ -69,7 +68,6 @@ def test_all_api_client_methods(mock_session):
         url="https://api.plane.so",
         api_key="mock_key",
         workspace_slug="mock_slug",
-        verify=False,
     )
 
     # Introspect all methods to achieve brute force API coverage
@@ -97,7 +95,7 @@ def test_all_api_client_methods(mock_session):
             assert res is not None
         except Exception as e:
             # We print but don't fail, to gracefully handle any strict types we didn't mock
-            print(f"Calling API method {name} failed: {e}")
+            print(f"Operation failed: {type(e).__name__}")
 
 
 class MockApiClient:
@@ -108,6 +106,9 @@ class MockApiClient:
             return {"status": "success", "method": name, "args": args, "kwargs": kwargs}
 
         return mock_method
+
+
+_MCP_TOOLS_BY_NAME = {}
 
 
 def get_all_mcp_tools_and_actions():
@@ -122,6 +123,7 @@ def get_all_mcp_tools_and_actions():
     mcp, _, _ = get_mcp_instance()
     tools = loop.run_until_complete(mcp.list_tools())
 
+    _MCP_TOOLS_BY_NAME.update({tool.name: tool for tool in tools})
     test_cases = []
     for t in tools:
         desc = (
@@ -137,18 +139,14 @@ def get_all_mcp_tools_and_actions():
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 @pytest.mark.parametrize("tool_name, action", get_all_mcp_tools_and_actions())
-def test_all_mcp_tools(tool_name, action):
+async def test_all_mcp_tools(tool_name, action):
     """Test all MCP tools.
 
     CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
 
     async def run_test():
-        from plane_agent.mcp_server import get_mcp_instance
-
-        mcp, _, _ = get_mcp_instance()
-        tools = await mcp.list_tools()
-        tool = next((t for t in tools if t.name == tool_name), None)
+        tool = _MCP_TOOLS_BY_NAME.get(tool_name)
         assert tool is not None
 
         mock_client = MockApiClient()
@@ -158,41 +156,57 @@ def test_all_mcp_tools(tool_name, action):
 
         mock_ctx = MagicMock()
         mock_ctx.info = AsyncMock()
-        res = await tool.fn(
-            action=action,
-            params_json='{"query": "mock"}',
-            client=mock_client,
-            ctx=mock_ctx,
-        )
-        assert isinstance(res, dict)
 
-        # Test tool execution without Context
-        res2 = await tool.fn(
-            action=action, params_json="{}", client=mock_client, ctx=None
-        )
-        assert isinstance(res2, dict)
+        async def run_inline(func, /, *args, **kwargs):
+            return func(*args, **kwargs)
 
-        # Test error handling when params_json is invalid
-        res_err = await tool.fn(
-            action=action, params_json="{invalid_json", client=mock_client, ctx=None
-        )
-        assert "error" in res_err
-
-        # Test ValueError for unknown action
-        with pytest.raises(ValueError):
-            await tool.fn(
-                action="unknown_action_xyz",
-                params_json="{}",
-                client=mock_client,
-                ctx=None,
+        # This is a dispatch-contract test; exercise provider concurrency in its
+        # dedicated suite instead of binding AnyIO worker state at collection.
+        ingest_patch = None
+        if tool_name == "plane_ingest":
+            ingest_patch = patch(
+                f"plane_agent.kg_ingest.{action}",
+                return_value={"nodes": 1, "edges": 0},
             )
+            ingest_patch.start()
+        try:
+            with patch.dict(tool.fn.__globals__, {"run_blocking": run_inline}):
+                res = await tool.fn(
+                    action=action,
+                    params_json='{"query": "mock"}',
+                    client=mock_client,
+                    ctx=mock_ctx,
+                )
+                assert isinstance(res, dict)
 
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    loop.run_until_complete(run_test())
+                # Test tool execution without Context
+                res2 = await tool.fn(
+                    action=action, params_json="{}", client=mock_client, ctx=None
+                )
+                assert isinstance(res2, dict)
+
+                # Test error handling when params_json is invalid
+                res_err = await tool.fn(
+                    action=action,
+                    params_json="{invalid_json",
+                    client=mock_client,
+                    ctx=None,
+                )
+                assert "error" in res_err
+
+                # Test ValueError for unknown action
+                with pytest.raises(ValueError):
+                    await tool.fn(
+                        action="unknown_action_xyz",
+                        params_json="{}",
+                        client=mock_client,
+                        ctx=None,
+                    )
+        finally:
+            if ingest_patch is not None:
+                ingest_patch.stop()
+
+    await run_test()
 
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
@@ -295,7 +309,7 @@ def test_main_execution():
     # Block 2: Run plane_agent.mcp_server module main
     with patch("sys.argv", ["mcp_server.py"]):
         with patch(
-            "agent_utilities.mcp_utilities.create_mcp_server"
+            "agent_utilities.mcp.server_factory.create_mcp_server"
         ) as mock_create_mcp:
             mock_mcp = MagicMock()
             mock_args = MagicMock()

@@ -4,6 +4,10 @@ import logging
 
 from agent_utilities.core.config import setting
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
+from agent_utilities.core.transport_security import (
+    ResolvedTLSProfile,
+    resolve_configured_tls_profile,
+)
 
 from plane_agent.api_client import Api
 
@@ -14,7 +18,7 @@ def get_client(
     url: str | None = None,
     api_key: str | None = None,
     workspace_slug: str | None = None,
-    verify: bool | None = True,
+    tls_profile: ResolvedTLSProfile | None = None,
 ) -> Api:
     """
     Initialize and return a Plane API client.
@@ -25,8 +29,7 @@ def get_client(
         url: Plane API base URL.
         api_key: Plane API key.
         workspace_slug: Plane workspace slug.
-        verify: Whether to verify SSL certificates.
-        config: Optional configuration object.
+        tls_profile: Resolved mandatory-verification transport policy.
 
     Returns:
         An instance of the Plane Api wrapper.
@@ -34,6 +37,11 @@ def get_client(
     url = url or setting("PLANE_BASE_URL", "https://api.plane.so")
     api_key = api_key or setting("PLANE_API_KEY", None)
     workspace_slug = workspace_slug or setting("PLANE_WORKSPACE_SLUG", None)
+    profile = tls_profile or resolve_configured_tls_profile(
+        "plane",
+        profile_name=setting("PLANE_TLS_PROFILE", "") or None,
+        profile_ref=setting("PLANE_TLS_PROFILE_REF", "") or None,
+    )
 
     if not api_key:
         raise AuthError("PLANE_API_KEY is required")
@@ -46,13 +54,13 @@ def get_client(
             url=url,
             api_key=api_key,
             workspace_slug=workspace_slug,
-            verify=verify,
+            tls_profile=profile,
         )
         return client
     except (AuthError, UnauthorizedError) as e:
-        logger.error(f"Failed to authenticate with Plane: {e}")
+        logger.error("Operation failed: error_type=%s", type(e).__name__)
         raise RuntimeError(
-            f"AUTHENTICATION ERROR: The Plane credentials provided are not valid for '{url}'. "
+            "AUTHENTICATION ERROR: The configured credentials were rejected. "
             f"Please check your PLANE_API_KEY and PLANE_WORKSPACE_SLUG environment variables. "
-            f"Error details: {str(e)}"
+            f"Error details: {type(e).__name__}"
         ) from e

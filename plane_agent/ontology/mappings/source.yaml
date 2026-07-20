@@ -1,0 +1,20 @@
+schema_version: '1'
+connector: plane-agent
+ontology_source: plane
+sync:
+- preset: plane-projects
+  server: plane-agent
+  tool: plane_projects
+  action: list_projects
+  records_path: data
+  id_field: id
+  title_field: name
+  text_field: description
+  updated_field: updated_at
+  doc_type: project
+  tool_schema_sha256: d9f601a73357bfa53b4bc761c1d72175f8b0f15cfc707191b5be4c0e4342873b
+governance:
+  default_acl: quarantine
+  identity: opaque-reference
+  tenant: required-at-materialization
+  provenance: required-at-materialization

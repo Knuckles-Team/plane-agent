@@ -8,6 +8,9 @@ mapping. CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 
 from __future__ import annotations
 
+import pytest
+from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+
 from plane_agent.kg_ingest import (
     ingest_cycles,
     ingest_entities,
@@ -19,6 +22,7 @@ from plane_agent.kg_ingest import (
 class _FakeTxn:
     def __init__(self):
         self.nodes = {}
+        self.edges = []
         self.committed = False
 
     def begin(self, graph=None):
@@ -28,33 +32,27 @@ class _FakeTxn:
     def add_node(self, txn, node_id, props):
         self.nodes[node_id] = props
 
+    def add_edge(self, txn, source, target, props):
+        self.edges.append((source, target, props))
+
     def commit(self, txn):
         self.committed = True
         return True
 
 
-class _FakeEdges:
-    def __init__(self):
-        self.edges = []
-
-    def add(self, src, dst, props):
-        self.edges.append((src, dst, props))
-
-
 class _FakeClient:
     def __init__(self):
         self.txn = _FakeTxn()
-        self.edges = _FakeEdges()
 
 
 def test_ingest_entities_writes_nodes_and_edges():
     c = _FakeClient()
     res = ingest_entities(
         [
-            {"id": "a", "type": "SoftwareProject", "name": "p"},
-            {"id": "b", "type": "Workspace"},
+            {"id": "a", "node_type": "SoftwareProject", "name": "p"},
+            {"id": "b", "node_type": "Workspace"},
         ],
-        [{"source": "a", "target": "b", "type": "inWorkspace"}],
+        [{"source": "a", "target": "b", "relationship": "inWorkspace"}],
         client=c,
         graph="__commons__",
     )
@@ -64,7 +62,7 @@ def test_ingest_entities_writes_nodes_and_edges():
     # provenance is stamped
     assert c.txn.nodes["a"]["source"] == "plane-agent"
     assert c.txn.nodes["a"]["domain"] == "plane"
-    assert c.edges.edges == [("a", "b", {"type": "inWorkspace"})]
+    assert c.txn.edges == [("a", "b", {"relationship": "inWorkspace"})]
 
 
 def test_ingest_projects_maps_project_and_workspace():
@@ -84,12 +82,12 @@ def test_ingest_projects_maps_project_and_workspace():
     )
     assert res == {"nodes": 2, "edges": 1}
     proj = c.txn.nodes["plane:softwareproject:p1"]
-    assert proj["type"] == "SoftwareProject"
+    assert proj["node_type"] == "SoftwareProject"
     assert proj["identifier"] == "DEMO"
     assert proj["externalToolId"] == "p1"
-    assert c.txn.nodes["plane:workspace:acme"]["type"] == "Workspace"
-    assert c.edges.edges == [
-        ("plane:softwareproject:p1", "plane:workspace:acme", {"type": "inWorkspace"})
+    assert c.txn.nodes["plane:workspace:acme"]["node_type"] == "Workspace"
+    assert c.txn.edges == [
+        ("plane:softwareproject:p1", "plane:workspace:acme", {"relationship": "inWorkspace"})
     ]
 
 
@@ -113,13 +111,13 @@ def test_ingest_work_items_maps_issue_and_links():
     # 1 issue + 1 state + 2 persons
     assert res == {"nodes": 4, "edges": 5}
     issue = c.txn.nodes["plane:issue:wi1"]
-    assert issue["type"] == "Issue"
+    assert issue["node_type"] == "Issue"
     assert issue["sequenceId"] == 42
     assert issue["priority"] == "high"
-    assert c.txn.nodes["plane:state:s1"]["type"] == "ProjectState"
-    assert c.txn.nodes["plane:person:u1"]["type"] == "Person"
-    assert c.txn.nodes["plane:person:u2"]["type"] == "Person"
-    edge_types = sorted(p["type"] for _, _, p in c.edges.edges)
+    assert c.txn.nodes["plane:state:s1"]["node_type"] == "ProjectState"
+    assert c.txn.nodes["plane:person:u1"]["node_type"] == "Person"
+    assert c.txn.nodes["plane:person:u2"]["node_type"] == "Person"
+    edge_types = sorted(p["node_type"] for _, _, p in c.txn.edges)
     assert edge_types == [
         "assignedTo",
         "assignedTo",
@@ -135,8 +133,8 @@ def test_ingest_work_items_uses_fallback_project_id():
     assert (
         "plane:issue:wi9",
         "plane:softwareproject:pX",
-        {"type": "belongsToProject"},
-    ) in c.edges.edges
+        {"relationship": "belongsToProject"},
+    ) in c.txn.edges
 
 
 def test_ingest_cycles_maps_cycle_and_project_link():
@@ -155,21 +153,19 @@ def test_ingest_cycles_maps_cycle_and_project_link():
     )
     assert res == {"nodes": 1, "edges": 1}
     cyc = c.txn.nodes["plane:cycle:cy1"]
-    assert cyc["type"] == "Cycle"
+    assert cyc["node_type"] == "Cycle"
     assert cyc["startDate"] == "2026-07-07"
     assert cyc["endDate"] == "2026-07-20"
-    assert c.edges.edges == [
-        ("plane:cycle:cy1", "plane:softwareproject:p1", {"type": "belongsToProject"})
+    assert c.txn.edges == [
+        ("plane:cycle:cy1", "plane:softwareproject:p1", {"relationship": "belongsToProject"})
     ]
 
 
-def test_ingest_noops_without_engine():
-    # No injected client + no reachable engine -> clean no-op.
-    assert ingest_entities([{"id": "a", "type": "Issue"}]) is None
+def test_retired_structural_alias_is_rejected():
+    with pytest.raises(NativeIngestError, match="canonical node_type"):
+        ingest_entities([{"id": "a", "type": "Issue"}], client=_FakeClient())
 
 
-def test_ingest_empty_is_noop():
-    assert ingest_entities([], client=_FakeClient()) is None
-    assert ingest_projects([], client=_FakeClient()) is None
-    assert ingest_work_items([], client=_FakeClient()) is None
-    assert ingest_cycles([], client=_FakeClient()) is None
+def test_empty_native_ingest_is_rejected():
+    with pytest.raises(NativeIngestError, match="at least one entity"):
+        ingest_entities([], client=_FakeClient())

@@ -2,11 +2,14 @@
 import logging
 
 import requests
-import urllib3
 from agent_utilities.core.exceptions import (
     AuthError,
     ParameterError,
     UnauthorizedError,
+)
+from agent_utilities.core.transport_security import (
+    ResolvedTLSProfile,
+    resolve_configured_tls_profile,
 )
 
 logger = logging.getLogger(__name__)
@@ -19,8 +22,7 @@ class BaseApiClient:
         url: str | None,
         api_key: str,
         workspace_slug: str,
-        verify: bool | None = True,
-        proxies: dict | None = None,
+        tls_profile: ResolvedTLSProfile | None = None,
         debug: bool = False,
     ):
         self.url = (url or "").rstrip("/")
@@ -29,18 +31,15 @@ class BaseApiClient:
 
         self.api_key = api_key
         self.workspace_slug = workspace_slug
-        self.verify = verify
-        self.proxies = proxies
+        self.tls_profile = tls_profile or resolve_configured_tls_profile("plane")
         self.debug = debug
 
         self._session = requests.Session()
+        self.tls_profile.configure_requests_session(self._session)
         self.headers = {
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
         }
-
-        if not self.verify:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         self._validate_auth()
 
@@ -52,8 +51,6 @@ class BaseApiClient:
             # (404 on a bad slug, 401 on a bad key). CONCEPT:AU-ECO.mcp.fastmcp-middleware
             url=f"{self.url}/workspaces/{self.workspace_slug}/projects/",
             headers=self.headers,
-            verify=self.verify,
-            proxies=self.proxies,
         )
         if response.status_code in (401, 403):
             raise AuthError if response.status_code == 401 else UnauthorizedError
@@ -67,8 +64,6 @@ class BaseApiClient:
             url,
             headers=self.headers,
             params=params,
-            verify=self.verify,
-            proxies=self.proxies,
         )
 
     def _post(self, endpoint: str, data: dict | None = None) -> requests.Response:
@@ -77,8 +72,6 @@ class BaseApiClient:
             url,
             headers=self.headers,
             json=data,
-            verify=self.verify,
-            proxies=self.proxies,
         )
 
     def _patch(self, endpoint: str, data: dict | None = None) -> requests.Response:
@@ -87,8 +80,6 @@ class BaseApiClient:
             url,
             headers=self.headers,
             json=data,
-            verify=self.verify,
-            proxies=self.proxies,
         )
 
     def _delete(self, endpoint: str, json: dict | None = None) -> requests.Response:
@@ -97,6 +88,4 @@ class BaseApiClient:
             url,
             headers=self.headers,
             json=json,
-            verify=self.verify,
-            proxies=self.proxies,
         )

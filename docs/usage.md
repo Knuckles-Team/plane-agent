@@ -45,7 +45,6 @@ api = Api(
     url="https://api.plane.so",
     api_key="your_plane_api_key",
     workspace_slug="your-workspace",
-    verify=True,
 )
 
 # Reads

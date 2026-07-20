@@ -1,0 +1,8 @@
+{
+  "algorithm": "agent-utilities:mcp-tool-schema-compat:v1",
+  "connector": "plane-agent",
+  "schema_version": "1",
+  "tools": {
+    "plane_projects": "d9f601a73357bfa53b4bc761c1d72175f8b0f15cfc707191b5be4c0e4342873b"
+  }
+}
