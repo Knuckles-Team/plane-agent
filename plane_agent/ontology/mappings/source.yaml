@@ -3,7 +3,7 @@ connector: plane-agent
 ontology_source: plane
 sync:
 - preset: plane-projects
-  server: plane-agent
+  server: plane-mcp
   tool: plane_projects
   action: list_projects
   records_path: data

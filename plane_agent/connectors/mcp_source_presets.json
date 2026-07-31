@@ -1,7 +1,7 @@
 {
   "_comment": "Tier-1 mcp_tool source presets for plane-agent (AU-KG.ingest.mcp-tool-connector). Syncs Plane projects into the KG as project documents via the plane-agent MCP server. Contributed presets win over the central MCP_TOOL_PRESETS. Native typed-node ingestion (plane_ingest_* tools + auto-ingest on the list_* fetch flow) is the primary path; this preset covers the generic document-sync surface.",
   "plane-projects": {
-    "server": "plane-agent",
+    "server": "plane-mcp",
     "tool": "plane_projects",
     "action": "list_projects",
     "records_path": "data",
