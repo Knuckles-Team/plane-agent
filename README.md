@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/plane-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/plane-agent)
 
-*Version: 2.0.0*
+*Version: 2.1.0*
 
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning a self-hosted Plane instance are
@@ -81,12 +81,13 @@ This table is auto-generated from the live server — do not edit by hand.
 
 <!-- MCP-TOOLS-TABLE:START -->
 
-#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+#### Condensed action-routed tools (`MCP_TOOL_MODE=condensed`)
 
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
 | `plane_cycles` | `CYCLESTOOL` | Manage plane cycles operations. |
 | `plane_epics` | `EPICSTOOL` | Manage plane epics operations. |
+| `plane_ingest` | `KGTOOL` | Natively ingest Plane records into epistemic-graph as typed OWL nodes. |
 | `plane_initiatives` | `INITIATIVESTOOL` | Manage plane initiatives operations. |
 | `plane_intake` | `INTAKETOOL` | Manage plane intake operations. |
 | `plane_labels` | `LABELSTOOL` | Manage plane labels operations. |
@@ -211,7 +212,7 @@ This table is auto-generated from the live server — do not edit by hand.
 
 </details>
 
-_13 action-routed tool(s) (default) · 102 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
+_14 action-routed tool(s) · 102 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (**`intent` default** — the six verb-tools, granular set loaded on demand · `condensed` action-routed · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/index.md](docs/index.md).
