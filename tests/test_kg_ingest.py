@@ -8,8 +8,14 @@ mapping. CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 
 from __future__ import annotations
 
+from typing import Any
+
+import msgpack
 import pytest
 from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+from agent_utilities.security.brain_context import ActorContext, use_actor
+from agent_utilities.models.company_brain import ActorType
+from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
 
 from plane_agent.kg_ingest import (
     ingest_cycles,
@@ -19,30 +25,92 @@ from plane_agent.kg_ingest import (
 )
 
 
-class _FakeTxn:
-    def __init__(self):
-        self.nodes = {}
-        self.edges = []
-        self.committed = False
+@pytest.fixture(autouse=True)
+def _governed_session():
+    actor = ActorContext(
+        actor_id="subject:opaque:synthetic",
+        actor_type=ActorType.AUTOMATED_SERVICE,
+        roles=(),
+        tenant_id="tenant:opaque:synthetic",
+        authenticated=True,
+    )
+    session = GraphSession(
+        actor=actor,
+        tenant=actor.tenant_id,
+        scopes=frozenset({"kg:write"}),
+        graph="graph:opaque:synthetic",
+        policy_version="policy:opaque:synthetic",
+        audience="epistemic-graph",
+    )
+    with use_actor(actor), use_session(session):
+        yield
 
-    def begin(self, graph=None):
-        self.graph = graph
-        return "txn-1"
 
-    def add_node(self, txn, node_id, props):
-        self.nodes[node_id] = props
+class _FakeNodes:
+    def __init__(self) -> None:
+        self.values: dict[str, dict[str, Any]] = {}
 
-    def add_edge(self, txn, source, target, props):
-        self.edges.append((source, target, props))
+    def properties(self, node_id: str) -> dict[str, Any] | None:
+        return self.values.get(node_id)
 
-    def commit(self, txn):
-        self.committed = True
-        return True
+    def list(self) -> list[tuple[str, dict[str, Any]]]:
+        return list(self.values.items())
+
+
+class _FakeChanges:
+    def __init__(self, nodes: _FakeNodes) -> None:
+        self.nodes = nodes
+        self.edges: list[tuple[str, str, dict[str, Any]]] = []
+        self.applied: list[dict[str, Any]] = []
+        self.records: dict[str, dict[str, Any]] = {}
+        self.versions: dict[str, dict[str, Any]] = {}
+
+    def get(self, envelope_id: str) -> dict[str, Any] | None:
+        return self.records.get(envelope_id)
+
+    def content_version(self, object_id: str) -> dict[str, Any] | None:
+        return self.versions.get(object_id)
+
+    def cursor(self, _source: str, _partition: str = "") -> None:
+        return None
+
+    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
+        self.applied.append(envelope)
+        mutation = envelope["mutation"]
+        for operation in mutation["operations"]:
+            method = operation["method"]
+            params = method["params"]
+            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
+            if method["method"] == "AddNode":
+                self.nodes.values[params["node_id"]] = properties
+            elif method["method"] == "AddEdge":
+                self.edges.append(
+                    (params["source_id"], params["target_id"], properties)
+                )
+        version = envelope["content_version"]
+        self.versions[version["object_id"]] = version
+        self.records[envelope["envelope_id"]] = envelope
+        return {
+            "batch_id": mutation["batch_id"],
+            "replayed": False,
+            "projection_pending": False,
+        }
+
+
+class _FakeRdf:
+    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
+        return {"conforms": True, "results": []}
 
 
 class _FakeClient:
-    def __init__(self):
-        self.txn = _FakeTxn()
+    def __init__(self) -> None:
+        self.nodes = _FakeNodes()
+        self.changes = _FakeChanges(self.nodes)
+        self.rdf = _FakeRdf()
+
+    @staticmethod
+    def supports(operation: str) -> bool:
+        return operation == "ApplyChangeEnvelope"
 
 
 def test_ingest_entities_writes_nodes_and_edges():
@@ -54,15 +122,14 @@ def test_ingest_entities_writes_nodes_and_edges():
         ],
         [{"source": "a", "target": "b", "relationship": "inWorkspace"}],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert c.txn.committed is True
-    assert set(c.txn.nodes) == {"a", "b"}
+    assert len(c.changes.applied) == 1
+    assert set(c.nodes.values) == {"a", "b"}
     # provenance is stamped
-    assert c.txn.nodes["a"]["source"] == "plane-agent"
-    assert c.txn.nodes["a"]["domain"] == "plane"
-    assert c.txn.edges == [("a", "b", {"relationship": "inWorkspace"})]
+    assert c.nodes.values["a"]["source"] == "plane-agent"
+    assert c.nodes.values["a"]["domain"] == "plane"
+    assert c.changes.edges == [("a", "b", {"relationship": "inWorkspace"})]
 
 
 def test_ingest_projects_maps_project_and_workspace():
@@ -78,15 +145,14 @@ def test_ingest_projects_maps_project_and_workspace():
             }
         ],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 2, "edges": 1}
-    proj = c.txn.nodes["plane:softwareproject:p1"]
+    proj = c.nodes.values["plane:softwareproject:p1"]
     assert proj["node_type"] == "SoftwareProject"
     assert proj["identifier"] == "DEMO"
     assert proj["externalToolId"] == "p1"
-    assert c.txn.nodes["plane:workspace:acme"]["node_type"] == "Workspace"
-    assert c.txn.edges == [
+    assert c.nodes.values["plane:workspace:acme"]["node_type"] == "Workspace"
+    assert c.changes.edges == [
         ("plane:softwareproject:p1", "plane:workspace:acme", {"relationship": "inWorkspace"})
     ]
 
@@ -110,14 +176,14 @@ def test_ingest_work_items_maps_issue_and_links():
     )
     # 1 issue + 1 state + 2 persons
     assert res == {"nodes": 4, "edges": 5}
-    issue = c.txn.nodes["plane:issue:wi1"]
+    issue = c.nodes.values["plane:issue:wi1"]
     assert issue["node_type"] == "Issue"
     assert issue["sequenceId"] == 42
     assert issue["priority"] == "high"
-    assert c.txn.nodes["plane:state:s1"]["node_type"] == "ProjectState"
-    assert c.txn.nodes["plane:person:u1"]["node_type"] == "Person"
-    assert c.txn.nodes["plane:person:u2"]["node_type"] == "Person"
-    edge_types = sorted(p["node_type"] for _, _, p in c.txn.edges)
+    assert c.nodes.values["plane:state:s1"]["node_type"] == "ProjectState"
+    assert c.nodes.values["plane:person:u1"]["node_type"] == "Person"
+    assert c.nodes.values["plane:person:u2"]["node_type"] == "Person"
+    edge_types = sorted(p["relationship"] for _, _, p in c.changes.edges)
     assert edge_types == [
         "assignedTo",
         "assignedTo",
@@ -134,7 +200,7 @@ def test_ingest_work_items_uses_fallback_project_id():
         "plane:issue:wi9",
         "plane:softwareproject:pX",
         {"relationship": "belongsToProject"},
-    ) in c.txn.edges
+    ) in c.changes.edges
 
 
 def test_ingest_cycles_maps_cycle_and_project_link():
@@ -152,11 +218,11 @@ def test_ingest_cycles_maps_cycle_and_project_link():
         client=c,
     )
     assert res == {"nodes": 1, "edges": 1}
-    cyc = c.txn.nodes["plane:cycle:cy1"]
+    cyc = c.nodes.values["plane:cycle:cy1"]
     assert cyc["node_type"] == "Cycle"
     assert cyc["startDate"] == "2026-07-07"
     assert cyc["endDate"] == "2026-07-20"
-    assert c.txn.edges == [
+    assert c.changes.edges == [
         ("plane:cycle:cy1", "plane:softwareproject:p1", {"relationship": "belongsToProject"})
     ]
 
