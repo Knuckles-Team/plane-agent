@@ -108,7 +108,7 @@ class MockApiClient:
         return mock_method
 
 
-_MCP_TOOLS_BY_NAME = {}
+_MCP_TOOLS_BY_NAME: dict[str, Any] = {}
 
 
 def get_all_mcp_tools_and_actions():
