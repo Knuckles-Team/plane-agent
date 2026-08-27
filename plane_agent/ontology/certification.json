@@ -1,7 +1,7 @@
 {
   "api_version": "graphos.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "df57971a796046a6669e74e5a825e985d9f44032de56a121429cd2efe1c97ed6",
+    "connector_manifest.yml": "5da44a266aac623a98210bacc60c3b4af2b980607b6f16c806ed396cc93530af",
     "plane_agent/connectors/mcp_source_presets.json": "404529255b50bc4e19bd2a6d8a257fc9fb378da898e55186fb4ec0bcf3fecb32",
     "plane_agent/connectors/tool_schema_fingerprints.json": "389a2714307ec752f3d09f4651e6dbee7c6166f3474771df5c64974e25cc2718",
     "plane_agent/ontology/fixtures/records.json": "ad212a2725e246aceb1d2ecdf95db690f31b231888f6789f0c8867f0b70ab6e4",
@@ -18,9 +18,9 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.4.0,<3",
+    "agent_utilities": ">=2.5.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.26.0,<3"
+    "epistemic_graph": ">=2.27.0,<3"
   },
   "connector": "plane-agent",
   "kind": "ConnectorSourceAttestation",
@@ -32,5 +32,5 @@
   "signer": "UNSIGNED-PREVIEW",
   "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-08-21T04:30:39Z"
+  "validated_at": "2026-08-26T13:42:55Z"
 }
