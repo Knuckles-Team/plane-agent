@@ -149,7 +149,7 @@ sync:
   updated_field: updated_at
   pagination: null
   doc_type: project
-  tool_schema_sha256: d9f601a73357bfa53b4bc761c1d72175f8b0f15cfc707191b5be4c0e4342873b
+  tool_schema_sha256: 7efc88b23f624b75432fef613204f0fe466a81878f3c671bd94ce20a87cb7418
   raw:
     server: plane-mcp
     tool: plane_projects

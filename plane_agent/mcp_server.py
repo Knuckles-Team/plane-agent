@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
 import sys
-from typing import Any
+from typing import Any, Literal
 
 from agent_utilities.core.config import load_config, setting
 from agent_utilities.mcp.action_dispatch import resolve_action
@@ -83,7 +83,7 @@ def _auto_ingest(kind: str, result: Any, **ctx: Any) -> None:
 def register_projects_tools(mcp: FastMCP):
     @mcp.tool(tags={"projects"})
     async def plane_projects(
-        action: str = Field(
+        action: Literal["list_projects", "retrieve_project"] = Field(
             description="Action to perform. Must be one of: 'list_projects', 'retrieve_project'"
         ),
         params_json: str = Field(
