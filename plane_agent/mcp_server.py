@@ -81,7 +81,18 @@ def _auto_ingest(kind: str, result: Any, **ctx: Any) -> None:
 
 
 def register_projects_tools(mcp: FastMCP):
-    @mcp.tool(tags={"projects"})
+    @mcp.tool(
+        tags={"projects"},
+        annotations={
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {"modalities_in": ["text"], "modalities_out": ["text"]}
+        },
+    )
     async def plane_projects(
         action: Literal["list_projects", "retrieve_project"] = Field(
             description="Action to perform. Must be one of: 'list_projects', 'retrieve_project'"
