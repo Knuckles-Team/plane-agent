@@ -253,28 +253,6 @@ def test_mcp_server_run_options():
 
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
-def test_agent_server_coverage():
-    """Test agent server coverage.
-
-    CONCEPT:AU-ECO.mcp.fastmcp-middleware
-    """
-    with (
-        patch("agent_utilities.initialize_workspace"),
-        patch("agent_utilities.load_identity", return_value={"name": "Plane Agent"}),
-        patch(
-            "agent_utilities.build_system_prompt_from_workspace",
-            return_value="mock prompt",
-        ),
-        patch("agent_utilities.create_agent_server") as mock_create,
-    ):
-        from plane_agent.agent_server import agent_server
-
-        with patch("sys.argv", ["agent_server.py", "--debug"]):
-            agent_server()
-            mock_create.assert_called_once()
-
-
-@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
 def test_main_execution():
     """Test main module execution paths.
 
@@ -282,31 +260,7 @@ def test_main_execution():
     """
     import runpy
 
-    # Block 1: Run plane_agent.agent_server module main
-    with (
-        patch("plane_agent.agent_server.initialize_workspace"),
-        patch(
-            "plane_agent.agent_server.load_identity",
-            return_value={"name": "Plane Agent"},
-        ),
-        patch(
-            "plane_agent.agent_server.build_system_prompt_from_workspace",
-            return_value="mock prompt",
-        ),
-        patch("plane_agent.agent_server.create_agent_server") as mock_create1,
-        patch("agent_utilities.initialize_workspace"),
-        patch("agent_utilities.load_identity", return_value={"name": "Plane Agent"}),
-        patch(
-            "agent_utilities.build_system_prompt_from_workspace",
-            return_value="mock prompt",
-        ),
-        patch("agent_utilities.create_agent_server") as mock_create2,
-    ):
-        with patch("sys.argv", ["agent_server.py"]):
-            runpy.run_module("plane_agent.agent_server", run_name="__main__")
-            assert mock_create1.called or mock_create2.called
-
-    # Block 2: Run plane_agent.mcp_server module main
+    # Block 1: Run plane_agent.mcp_server module main
     with patch("sys.argv", ["mcp_server.py"]):
         with patch(
             "agent_connector_sdk.mcp.server.create_mcp_server"
@@ -318,31 +272,12 @@ def test_main_execution():
             runpy.run_module("plane_agent.mcp_server", run_name="__main__")
             assert mock_mcp.run.called
 
-    # Block 3: Run plane_agent package main (plane_agent/__main__.py)
-    with patch("sys.argv", ["agent_server.py"]):
-        with (
-            patch("plane_agent.agent_server.initialize_workspace"),
-            patch(
-                "plane_agent.agent_server.load_identity",
-                return_value={"name": "Plane Agent"},
-            ),
-            patch(
-                "plane_agent.agent_server.build_system_prompt_from_workspace",
-                return_value="mock prompt",
-            ),
-            patch("plane_agent.agent_server.create_agent_server") as mock_create1,
-            patch("agent_utilities.initialize_workspace"),
-            patch(
-                "agent_utilities.load_identity", return_value={"name": "Plane Agent"}
-            ),
-            patch(
-                "agent_utilities.build_system_prompt_from_workspace",
-                return_value="mock prompt",
-            ),
-            patch("agent_utilities.create_agent_server") as mock_create2,
-        ):
+    # Block 2: Run plane_agent package main (plane_agent/__main__.py); agent_server
+    # was retired fleet-wide, so __main__.py now runs the MCP server directly.
+    with patch("sys.argv", ["mcp_server.py"]):
+        with patch("plane_agent.mcp_server.mcp_server") as mock_mcp_server:
             runpy.run_module("plane_agent", run_name="__main__")
-            assert mock_create1.called or mock_create2.called
+            mock_mcp_server.assert_called_once()
 
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")

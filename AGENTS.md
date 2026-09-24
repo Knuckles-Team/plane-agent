@@ -50,11 +50,11 @@ pip install .[all]
 pre-commit run --all-files
 
 # Execution Commands
-# plane-agent\nplane_agent.plane_agent:agent_server
+# plane-mcp
+plane_agent.mcp_server:mcp_server
 
 ## Project Structure Quick Reference
 - MCP Entry Point → `mcp_server.py`
-- Agent Entry Point → `agent.py`
 - Source Code → `plane_agent/`
 - Skills → `skills/` (if exists)
 

@@ -167,62 +167,6 @@ docker compose -f docker/mcp.compose.yml up -d
 docker compose -f docker/mcp.compose.yml logs -f
 ```
 
-## Run the agent server
-
-When `server_type` is **mcp+agent**, the A2A agent server is exposed through the
-`plane-agent` console script and the
-[`docker/agent.compose.yml`](https://github.com/Knuckles-Team/plane-agent/blob/main/docker/agent.compose.yml)
-stack. The agent connects to the MCP server over `MCP_URL` and listens on port
-`9004`:
-
-```bash
-# Locally — point the agent at a running MCP server
-export MCP_URL=http://localhost:8000/mcp
-export MODEL_ID=gpt-4o
-export LLM_API_KEY=your_model_api_key
-plane-agent --host 0.0.0.0 --port 9004
-```
-
-The `agent.compose.yml` stack runs both services together — the MCP server on
-`:8000` and the agent on `:9004`, wired by container name:
-
-```yaml
-services:
-  plane-agent-mcp:
-    image: example/plane-agent@sha256:<digest>
-    hostname: plane-agent-mcp
-    env_file: [ ../.env ]
-    environment:
-      - TRANSPORT=streamable-http
-      - HOST=0.0.0.0
-      - PORT=8000
-    ports: ["8000:8000"]
-
-  plane-agent-agent:
-    image: example/plane-agent@sha256:<digest>
-    depends_on: [ plane-agent-mcp ]
-    command: [ "plane-agent" ]
-    env_file: [ ../.env ]
-    environment:
-      - HOST=0.0.0.0
-      - PORT=9004
-      - MCP_URL=http://plane-agent-mcp:8000/mcp
-      - MODEL_ID=${MODEL_ID:-gpt-4o}
-    ports: ["9004:9004"]
-```
-
-```bash
-docker compose -f docker/agent.compose.yml up -d
-```
-
-| Setting | Default | Meaning |
-|---|---|---|
-| `MCP_URL` | `http://localhost:8000/mcp` | MCP server the agent connects to |
-| `MODEL_ID` | `gpt-4o` | Model the agent reasons with |
-| `LLM_API_KEY` | _(unset)_ | Credential for the model provider |
-| `LLM_BASE_URL` | _(unset)_ | Optional custom model endpoint |
-| `PORT` | `9004` | Agent server port |
-
 ## Behind a Caddy reverse proxy
 
 Expose the HTTP server on a hostname with automatic TLS. Add to your `Caddyfile`:
