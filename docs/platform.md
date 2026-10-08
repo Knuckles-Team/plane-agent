@@ -81,7 +81,7 @@ curl -sf http://localhost/ >/dev/null && echo "Plane is up"
 ```
 
 Once the instance is running, sign in to the web UI, create a workspace, and
-generate a personal API key from your account settings — these become
+generate a personal API key from the operator's account settings — these become
 `PLANE_WORKSPACE_SLUG` and `PLANE_API_KEY`.
 
 ## Connect plane-agent

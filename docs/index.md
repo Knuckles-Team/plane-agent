@@ -28,13 +28,13 @@ tools conversationally. It provides:
   server over `MCP_URL` and exposes the tools to a Pydantic-AI agent.
 
 The agent **remains inactive when credentials are absent** — a `PLANE_API_KEY`
-and `PLANE_WORKSPACE_SLUG` are required before any tool will execute.
+and `PLANE_WORKSPACE_SLUG` are required before any tool will run.
 
 ## Explore the documentation
 
 <div class="grid cards" markdown>
 
-- :material-rocket-launch: **[Installation](installation.md)** — pip, source, uv, and the prebuilt Docker image.
+- :material-rocket-start: **[Installation](installation.md)** — pip, source, uv, and the prebuilt Docker image.
 - :material-server-network: **[Deployment](deployment.md)** — run the MCP server and agent, Docker Compose, Caddy + Technitium.
 - :material-console: **[Usage](usage.md)** — the MCP tools, the `Api` client, and the CLI.
 - :material-database-cog: **[Backing Platform](platform.md)** — deploy a self-hosted Plane instance with Docker.
