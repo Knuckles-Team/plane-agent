@@ -1,14 +1,14 @@
 # Usage — API / CLI / MCP
 
 `plane-agent` exposes the same capability three ways: as **MCP tools** an agent calls,
-as a **Python API** (`Api`) you import, and as **CLI** entry points. The ecosystem
+as a **Python API** (`Api`) the operator import, and as **CLI** entry points. The ecosystem
 role and architecture are described in [Overview](overview.md).
 
 ## As an MCP server
 
 Once [deployed](deployment.md), the server registers a tool domain for each Plane
 resource. Every domain is gated by its own `*TOOL` environment toggle (default
-`True`), so you can register only the surface you need.
+`True`), so the operator can register only the surface the operator need.
 
 | Domain | Toggle | Covers |
 |---|---|---|

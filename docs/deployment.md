@@ -115,15 +115,15 @@ curl -s http://localhost:8000/health        # {"status":"OK"}
 | `PORT` | `8000` | Bind port (HTTP transports) |
 | `TRANSPORT` | `stdio` | `stdio`, `streamable-http`, or `sse` |
 
-Each Plane resource domain has its own **tool toggle** (default `True`) so you can
-register only the surface you need: `PROJECTSTOOL`, `WORK_ITEMSTOOL`, `CYCLESTOOL`,
+Each Plane resource domain has its own **tool toggle** (default `True`) so the operator can
+register only the surface the operator need: `PROJECTSTOOL`, `WORK_ITEMSTOOL`, `CYCLESTOOL`,
 `EPICSTOOL`, `MILESTONESTOOL`, `MODULESTOOL`, `STATESTOOL`, `USERSTOOL`,
 `WORKSPACESTOOL`, `INITIATIVESTOOL`, `INTAKETOOL`, `LABELSTOOL`, `PAGESTOOL`.
 
 The full set — including telemetry (OTEL), access governance (Eunomia), and the
 agent settings below — is documented in
 [`.env.example`](https://github.com/Knuckles-Team/plane-agent/blob/main/.env.example).
-Copy it to `.env` and fill in only what you use. The agent
+Copy it to `.env` and fill in only what the operator use. The agent
 **remains inactive when credentials are absent**.
 
 ### Backing Service
@@ -225,7 +225,7 @@ docker compose -f docker/agent.compose.yml up -d
 
 ## Behind a Caddy reverse proxy
 
-Expose the HTTP server on a hostname with automatic TLS. Add to your `Caddyfile`:
+Expose the HTTP server on a hostname with automatic TLS. Add to the operator's `Caddyfile`:
 
 ```caddy
 # Internal (self-signed) — homelab .example.invalid zone
@@ -269,7 +269,7 @@ this as a tool.
 
 ## Register with an MCP client
 
-Add to your client's `mcp_config.json`:
+Add to the operator's client's `mcp_config.json`:
 
 ```json
 {
