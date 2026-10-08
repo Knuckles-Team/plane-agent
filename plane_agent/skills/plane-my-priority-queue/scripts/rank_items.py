@@ -25,7 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 # Plane has a FIXED priority choice set; higher rank floats to the top.
 PRIORITY_RANK = {
@@ -48,7 +48,7 @@ def parse_dt(value: str) -> datetime:
     epoch when it cannot be parsed.
     """
     if not value:
-        return datetime.fromtimestamp(0, tz=timezone.utc)
+        return datetime.fromtimestamp(0, tz=UTC)
     text = value.strip()
     if text.endswith("Z"):
         text = text[:-1] + "+00:00"
@@ -64,10 +64,10 @@ def parse_dt(value: str) -> datetime:
             except ValueError:
                 continue
         else:
-            return datetime.fromtimestamp(0, tz=timezone.utc)
+            return datetime.fromtimestamp(0, tz=UTC)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
 
 
 def extract_items(payload) -> list:
@@ -139,7 +139,7 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     raw = open(args.path, encoding="utf-8").read() if args.path else sys.stdin.read()
-    now = parse_dt(args.now) if args.now else datetime.now(timezone.utc)
+    now = parse_dt(args.now) if args.now else datetime.now(UTC)
     rows = rank(extract_items(json.loads(raw)), now)
 
     if args.json:
