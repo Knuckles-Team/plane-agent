@@ -2,12 +2,10 @@
 
 import logging
 
-from agent_utilities.core.config import setting
-from agent_utilities.core.exceptions import AuthError, UnauthorizedError
-from agent_utilities.core.transport_security import (
-    ResolvedTLSProfile,
-    resolve_configured_tls_profile,
-)
+from agent_connector_sdk.config import setting
+from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
+from agent_connector_sdk.tls.profile import ResolvedTLSProfile
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 from plane_agent.api_client import Api
 
@@ -37,7 +35,7 @@ def get_client(
     url = url or setting("PLANE_BASE_URL", "https://api.plane.so")
     api_key = api_key or setting("PLANE_API_KEY", None)
     workspace_slug = workspace_slug or setting("PLANE_WORKSPACE_SLUG", None)
-    profile = tls_profile or resolve_configured_tls_profile(
+    profile = tls_profile or resolve_tls_profile(
         "plane",
         profile_name=setting("PLANE_TLS_PROFILE", "") or None,
         profile_ref=setting("PLANE_TLS_PROFILE_REF", "") or None,

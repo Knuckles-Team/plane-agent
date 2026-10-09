@@ -23,11 +23,11 @@ import logging
 import sys
 from typing import Any
 
-from agent_utilities.core.config import load_config, setting
-from agent_utilities.mcp.action_dispatch import resolve_action
-from agent_utilities.mcp.concurrency import run_blocking
-from agent_utilities.mcp.server_factory import create_mcp_server
-from agent_utilities.mcp.verbose_tools import register_tool_surface
+from agent_connector_sdk.config import load_config, setting
+from agent_connector_sdk.mcp.action_dispatch import resolve_action
+from agent_connector_sdk.mcp.concurrency import run_blocking
+from agent_connector_sdk.mcp.server import create_mcp_server
+from agent_connector_sdk.mcp.tool_surface import register_tool_surface
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -62,7 +62,7 @@ def _kg_records(result: Any, key: str = "results") -> list[dict[str, Any]]:
     return [r for r in out if isinstance(r, dict)]
 
 
-def _auto_ingest(kind: str, result: Any, **ctx: Any) -> None:
+async def _auto_ingest(kind: str, result: Any, **ctx: Any) -> None:
     """Best-effort push of freshly-listed records into the KG (never raises)."""
     if not _KG_AUTO_INGEST:
         return
@@ -71,11 +71,13 @@ def _auto_ingest(kind: str, result: Any, **ctx: Any) -> None:
 
         records = _kg_records(result)
         if kind == "projects":
-            kg_ingest.ingest_projects(records, workspace_slug=ctx.get("workspace_slug"))
+            await kg_ingest.ingest_projects(
+                records, workspace_slug=ctx.get("workspace_slug")
+            )
         elif kind == "work_items":
-            kg_ingest.ingest_work_items(records, project_id=ctx.get("project_id"))
+            await kg_ingest.ingest_work_items(records, project_id=ctx.get("project_id"))
         elif kind == "cycles":
-            kg_ingest.ingest_cycles(records, project_id=ctx.get("project_id"))
+            await kg_ingest.ingest_cycles(records, project_id=ctx.get("project_id"))
     except Exception as e:  # noqa: BLE001 — ingestion is best-effort
         logger.debug("Operation failed: error_type=%s", type(e).__name__)
 
@@ -114,7 +116,7 @@ def register_projects_tools(mcp: FastMCP):
 
         if action == "list_projects":
             result = await run_blocking(client.list_projects, **kwargs)
-            _auto_ingest(
+            await _auto_ingest(
                 "projects",
                 result,
                 workspace_slug=getattr(client, "workspace_slug", None),
@@ -176,7 +178,7 @@ def register_work_items_tools(mcp: FastMCP):
 
         if action == "list_work_items":
             result = await run_blocking(client.list_work_items, **kwargs)
-            _auto_ingest("work_items", result, project_id=kwargs.get("project_id"))
+            await _auto_ingest("work_items", result, project_id=kwargs.get("project_id"))
             return result
         if action == "create_work_item":
             return await run_blocking(client.create_work_item, **kwargs)
@@ -253,7 +255,7 @@ def register_cycles_tools(mcp: FastMCP):
 
         if action == "list_cycles":
             result = await run_blocking(client.list_cycles, **kwargs)
-            _auto_ingest("cycles", result, project_id=kwargs.get("project_id"))
+            await _auto_ingest("cycles", result, project_id=kwargs.get("project_id"))
             return result
         if action == "create_cycle":
             return await run_blocking(client.create_cycle, **kwargs)
@@ -751,21 +753,21 @@ def register_kg_tools(mcp: FastMCP):
         if action == "ingest_projects":
             result = await run_blocking(client.list_projects, **kwargs)
             records = _kg_records(result)
-            ingested = kg_ingest.ingest_projects(
+            ingested = await kg_ingest.ingest_projects(
                 records, workspace_slug=getattr(client, "workspace_slug", None)
             )
             return {"listed": len(records), "ingested": ingested}
         if action == "ingest_work_items":
             result = await run_blocking(client.list_work_items, **kwargs)
             records = _kg_records(result)
-            ingested = kg_ingest.ingest_work_items(
+            ingested = await kg_ingest.ingest_work_items(
                 records, project_id=kwargs.get("project_id")
             )
             return {"listed": len(records), "ingested": ingested}
         if action == "ingest_cycles":
             result = await run_blocking(client.list_cycles, **kwargs)
             records = _kg_records(result)
-            ingested = kg_ingest.ingest_cycles(
+            ingested = await kg_ingest.ingest_cycles(
                 records, project_id=kwargs.get("project_id")
             )
             return {"listed": len(records), "ingested": ingested}
