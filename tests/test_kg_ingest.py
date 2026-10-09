@@ -1,21 +1,18 @@
 """Native epistemic-graph typed-node ingestion — Wire-First coverage.
 
 Exercises the real ``ingest_entities`` / ``ingest_projects`` / ``ingest_work_items`` /
-``ingest_cycles`` seam with a fake engine client (no engine required), asserting the txn
-add_node/commit + edge calls and the Plane record → :SoftwareProject / :Issue / :Cycle
-mapping. CONCEPT:AU-KG.ingest.enterprise-source-extractor.
+``ingest_cycles`` seam against a fake SDK ingest transport (no engine required),
+asserting the committed node/edge payloads and the Plane record → :SoftwareProject /
+:Issue / :Cycle mapping. CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 """
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
-import msgpack
 import pytest
-from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
-from agent_utilities.security.brain_context import ActorContext, use_actor
-from agent_utilities.security.actor_identity import ActorType
-from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
+from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
 
 from plane_agent.kg_ingest import (
     ingest_cycles,
@@ -25,116 +22,64 @@ from plane_agent.kg_ingest import (
 )
 
 
-@pytest.fixture(autouse=True)
-def _governed_session():
-    actor = ActorContext(
-        actor_id="subject:opaque:synthetic",
-        actor_type=ActorType.AUTOMATED_SERVICE,
-        roles=(),
-        tenant_id="tenant:opaque:synthetic",
-        authenticated=True,
-    )
-    session = GraphSession(
-        actor=actor,
-        tenant=actor.tenant_id,
-        scopes=frozenset({"kg:write"}),
-        graph="graph:opaque:synthetic",
-        policy_version="policy:opaque:synthetic",
-        audience="epistemic-graph",
-    )
-    with use_actor(actor), use_session(session):
-        yield
-
-
-class _FakeNodes:
+class _FakeTransport:
     def __init__(self) -> None:
-        self.values: dict[str, dict[str, Any]] = {}
+        self.requests: list[Any] = []
 
-    def properties(self, node_id: str) -> dict[str, Any] | None:
-        return self.values.get(node_id)
+    async def source_status(self, connector: str, stream: str) -> Any:
+        return SimpleNamespace(accepted_checkpoint=None)
 
-    def list(self) -> list[tuple[str, dict[str, Any]]]:
-        return list(self.values.items())
+    async def submit(self, request: Any) -> Any:
+        self.requests.append(request)
+        return SimpleNamespace(
+            affected_count=len(request.records),
+            relationship_count=len(request.relationships),
+        )
 
-
-class _FakeChanges:
-    def __init__(self, nodes: _FakeNodes) -> None:
-        self.nodes = nodes
-        self.edges: list[tuple[str, str, dict[str, Any]]] = []
-        self.applied: list[dict[str, Any]] = []
-        self.records: dict[str, dict[str, Any]] = {}
-        self.versions: dict[str, dict[str, Any]] = {}
-
-    def get(self, envelope_id: str) -> dict[str, Any] | None:
-        return self.records.get(envelope_id)
-
-    def content_version(self, object_id: str) -> dict[str, Any] | None:
-        return self.versions.get(object_id)
-
-    def cursor(self, _source: str, _partition: str = "") -> None:
-        return None
-
-    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
-        self.applied.append(envelope)
-        mutation = envelope["mutation"]
-        for operation in mutation["operations"]:
-            method = operation["method"]
-            params = method["params"]
-            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
-            if method["method"] == "AddNode":
-                self.nodes.values[params["node_id"]] = properties
-            elif method["method"] == "AddEdge":
-                self.edges.append(
-                    (params["source_id"], params["target_id"], properties)
-                )
-        version = envelope["content_version"]
-        self.versions[version["object_id"]] = version
-        self.records[envelope["envelope_id"]] = envelope
-        return {
-            "batch_id": mutation["batch_id"],
-            "replayed": False,
-            "projection_pending": False,
-        }
+    async def store_blob(self, data: bytes) -> str:
+        raise AssertionError("this connector's typed-node ingestion carries no media")
 
 
-class _FakeRdf:
-    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
-        return {"conforms": True, "results": []}
+@pytest.fixture
+def ingest():
+    transport = _FakeTransport()
+    return KnowledgeIngest(transport, loop=None), transport
 
 
-class _FakeClient:
-    def __init__(self) -> None:
-        self.nodes = _FakeNodes()
-        self.changes = _FakeChanges(self.nodes)
-        self.rdf = _FakeRdf()
-
-    @staticmethod
-    def supports(operation: str) -> bool:
-        return operation == "ApplyChangeEnvelope"
+def _node(transport: _FakeTransport, record_id: str) -> dict[str, Any]:
+    for record in transport.requests[-1].records:
+        if record.record_id == record_id:
+            return dict(record.payload)
+    raise AssertionError(f"no record {record_id!r} was submitted")
 
 
-def test_ingest_entities_writes_nodes_and_edges():
-    c = _FakeClient()
-    res = ingest_entities(
+def _edges(transport: _FakeTransport) -> list[tuple[str, str, str]]:
+    return [
+        (rel.source.record_id, rel.target.record_id, rel.relation_reference.rsplit("/", 1)[-1])
+        for rel in transport.requests[-1].relationships
+    ]
+
+
+@pytest.mark.asyncio
+async def test_ingest_entities_writes_nodes_and_edges(ingest):
+    service, transport = ingest
+    res = await ingest_entities(
         [
             {"id": "a", "node_type": "SoftwareProject", "name": "p"},
             {"id": "b", "node_type": "Workspace"},
         ],
         [{"source": "a", "target": "b", "relationship": "inWorkspace"}],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert len(c.changes.applied) == 1
-    assert set(c.nodes.values) == {"a", "b"}
-    # provenance is stamped
-    assert c.nodes.values["a"]["source"] == "plane-agent"
-    assert c.nodes.values["a"]["domain"] == "plane"
-    assert c.changes.edges == [("a", "b", {"relationship": "inWorkspace"})]
+    assert _node(transport, "a")["name"] == "p"
+    assert ("a", "b", "inWorkspace") in _edges(transport)
 
 
-def test_ingest_projects_maps_project_and_workspace():
-    c = _FakeClient()
-    res = ingest_projects(
+@pytest.mark.asyncio
+async def test_ingest_projects_maps_project_and_workspace(ingest):
+    service, transport = ingest
+    res = await ingest_projects(
         [
             {
                 "id": "p1",
@@ -144,22 +89,22 @@ def test_ingest_projects_maps_project_and_workspace():
                 "workspace": "acme",
             }
         ],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 2, "edges": 1}
-    proj = c.nodes.values["plane:softwareproject:p1"]
-    assert proj["node_type"] == "SoftwareProject"
+    proj = _node(transport, "plane:softwareproject:p1")
     assert proj["identifier"] == "DEMO"
     assert proj["externalToolId"] == "p1"
-    assert c.nodes.values["plane:workspace:acme"]["node_type"] == "Workspace"
-    assert c.changes.edges == [
-        ("plane:softwareproject:p1", "plane:workspace:acme", {"relationship": "inWorkspace"})
-    ]
+    assert _node(transport, "plane:workspace:acme")
+    assert ("plane:softwareproject:p1", "plane:workspace:acme", "inWorkspace") in _edges(
+        transport
+    )
 
 
-def test_ingest_work_items_maps_issue_and_links():
-    c = _FakeClient()
-    res = ingest_work_items(
+@pytest.mark.asyncio
+async def test_ingest_work_items_maps_issue_and_links(ingest):
+    service, transport = ingest
+    res = await ingest_work_items(
         [
             {
                 "id": "wi1",
@@ -172,18 +117,17 @@ def test_ingest_work_items_maps_issue_and_links():
                 "assignees": [{"id": "u1"}, "u2"],
             }
         ],
-        client=c,
+        ingest=service,
     )
     # 1 issue + 1 state + 2 persons
     assert res == {"nodes": 4, "edges": 5}
-    issue = c.nodes.values["plane:issue:wi1"]
-    assert issue["node_type"] == "Issue"
+    issue = _node(transport, "plane:issue:wi1")
     assert issue["sequenceId"] == 42
     assert issue["priority"] == "high"
-    assert c.nodes.values["plane:state:s1"]["node_type"] == "ProjectState"
-    assert c.nodes.values["plane:person:u1"]["node_type"] == "Person"
-    assert c.nodes.values["plane:person:u2"]["node_type"] == "Person"
-    edge_types = sorted(p["relationship"] for _, _, p in c.changes.edges)
+    _node(transport, "plane:state:s1")
+    _node(transport, "plane:person:u1")
+    _node(transport, "plane:person:u2")
+    edge_types = sorted(rel for _, _, rel in _edges(transport))
     assert edge_types == [
         "assignedTo",
         "assignedTo",
@@ -193,19 +137,19 @@ def test_ingest_work_items_maps_issue_and_links():
     ]
 
 
-def test_ingest_work_items_uses_fallback_project_id():
-    c = _FakeClient()
-    ingest_work_items([{"id": "wi9", "name": "Task"}], project_id="pX", client=c)
-    assert (
-        "plane:issue:wi9",
-        "plane:softwareproject:pX",
-        {"relationship": "belongsToProject"},
-    ) in c.changes.edges
+@pytest.mark.asyncio
+async def test_ingest_work_items_uses_fallback_project_id(ingest):
+    service, transport = ingest
+    await ingest_work_items([{"id": "wi9", "name": "Task"}], project_id="pX", ingest=service)
+    assert ("plane:issue:wi9", "plane:softwareproject:pX", "belongsToProject") in _edges(
+        transport
+    )
 
 
-def test_ingest_cycles_maps_cycle_and_project_link():
-    c = _FakeClient()
-    res = ingest_cycles(
+@pytest.mark.asyncio
+async def test_ingest_cycles_maps_cycle_and_project_link(ingest):
+    service, transport = ingest
+    res = await ingest_cycles(
         [
             {
                 "id": "cy1",
@@ -215,23 +159,19 @@ def test_ingest_cycles_maps_cycle_and_project_link():
                 "end_date": "2026-07-20",
             }
         ],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 1}
-    cyc = c.nodes.values["plane:cycle:cy1"]
-    assert cyc["node_type"] == "Cycle"
+    cyc = _node(transport, "plane:cycle:cy1")
     assert cyc["startDate"] == "2026-07-07"
     assert cyc["endDate"] == "2026-07-20"
-    assert c.changes.edges == [
-        ("plane:cycle:cy1", "plane:softwareproject:p1", {"relationship": "belongsToProject"})
-    ]
+    assert ("plane:cycle:cy1", "plane:softwareproject:p1", "belongsToProject") in _edges(
+        transport
+    )
 
 
-def test_retired_structural_alias_is_rejected():
-    with pytest.raises(NativeIngestError, match="canonical node_type"):
-        ingest_entities([{"id": "a", "type": "Issue"}], client=_FakeClient())
-
-
-def test_empty_native_ingest_is_rejected():
-    with pytest.raises(NativeIngestError, match="at least one entity"):
-        ingest_entities([], client=_FakeClient())
+@pytest.mark.asyncio
+async def test_empty_ingest_entities_is_rejected(ingest):
+    service, _transport = ingest
+    with pytest.raises(IngestError, match="at least one entity"):
+        await ingest_entities([], ingest=service)

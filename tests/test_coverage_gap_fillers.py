@@ -15,7 +15,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from agent_utilities.core.exceptions import AuthError
+from agent_connector_sdk.exceptions import AuthError
 
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
@@ -42,7 +42,7 @@ def test_auth_edge_cases(mock_session):
     with pytest.raises(RuntimeError, match="AUTHENTICATION ERROR"):
         get_client(api_key="xyz", workspace_slug="abc")
 
-    from agent_utilities.core.exceptions import ParameterError
+    from agent_connector_sdk.exceptions import ParameterError
 
     mock_session.status_code = 404
     with pytest.raises(ParameterError, match="Workspace slug 'abc' not found"):
@@ -309,7 +309,7 @@ def test_main_execution():
     # Block 2: Run plane_agent.mcp_server module main
     with patch("sys.argv", ["mcp_server.py"]):
         with patch(
-            "agent_utilities.mcp.server_factory.create_mcp_server"
+            "agent_connector_sdk.mcp.server.create_mcp_server"
         ) as mock_create_mcp:
             mock_mcp = MagicMock()
             mock_args = MagicMock()
@@ -425,7 +425,7 @@ def test_create_epic_edge_cases(mock_session):
 
     CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
-    from agent_utilities.core.exceptions import ParameterError
+    from agent_connector_sdk.exceptions import ParameterError
 
     from plane_agent.api_client import Api
 

@@ -1,9 +1,9 @@
 """Native epistemic-graph ingestion for Plane work-management records.
 
-All writes use the required ``agent_utilities.knowledge_graph.memory.native_ingest``
-primitive. Nodes use canonical ``node_type`` and edges use canonical ``relationship``;
-nodes and edges commit in one native transaction. Missing engine dependencies, rejected
-records, conflicts, and transaction failures propagate as ``NativeIngestError``.
+All writes go through the ``agent_connector_sdk.ingest`` knowledge-ingest facade. Nodes
+use canonical ``node_type`` and edges use canonical ``relationship``; nodes and edges
+commit in one change set. Missing engine dependencies, rejected records, conflicts, and
+transaction failures propagate as ``IngestError``.
 """
 
 from __future__ import annotations
@@ -11,51 +11,59 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_documents as _native_ingest_documents,
-)
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_entities as _native_ingest_entities,
+from agent_connector_sdk.ingest import (
+    ChangeSet,
+    Entity,
+    IngestBinding,
+    IngestError,
+    KnowledgeIngest,
+    Relationship,
+    current_ingest,
 )
 
 logger = logging.getLogger("plane_agent.kg")
 
 _SOURCE = "plane-agent"
 _DOMAIN = "plane"
+_BINDING = IngestBinding(connector=_SOURCE, stream=_DOMAIN)
 
 
-def ingest_entities(
+def _to_entity(record: dict[str, Any]) -> Entity:
+    return Entity(
+        id=record.get("id"),
+        node_type=record.get("node_type"),
+        properties={k: v for k, v in record.items() if k not in ("id", "node_type")},
+    )
+
+
+def _to_relationship(record: dict[str, Any]) -> Relationship:
+    properties = {
+        k: v for k, v in record.items() if k not in ("source", "target", "relationship")
+    }
+    return Relationship(
+        source=record["source"],
+        target=record["target"],
+        relationship=record["relationship"],
+        properties=properties or None,
+    )
+
+
+async def ingest_entities(
     entities: list[dict[str, Any]],
     relationships: list[dict[str, Any]] | None = None,
     *,
-    source: str = _SOURCE,
-    domain: str = _DOMAIN,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Write canonical typed nodes and relationships in one native transaction."""
-    return _native_ingest_entities(
-        entities,
-        relationships,
-        source=source,
-        domain=domain,
-        client=client,
-        graph=graph,
+    """Write canonical typed nodes and relationships in one change set."""
+    if not entities:
+        raise IngestError("ingest_entities needs at least one entity")
+    change_set = ChangeSet(
+        entities=tuple(_to_entity(e) for e in entities),
+        relationships=tuple(_to_relationship(r) for r in relationships or ()),
     )
-
-
-def ingest_documents(
-    documents: list[dict[str, Any]],
-    *,
-    source: str = _SOURCE,
-    domain: str = _DOMAIN,
-    client: Any | None = None,
-    graph: str | None = None,
-) -> dict[str, int]:
-    """Write text records as canonical Document nodes."""
-    return _native_ingest_documents(
-        documents, source=source, domain=domain, client=client, graph=graph
-    )
+    service = ingest or current_ingest()
+    receipt = await service.submit(_BINDING, change_set)
+    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
 
 
 def _assignee_ids(work_item: dict[str, Any]) -> list[str]:
@@ -68,17 +76,15 @@ def _assignee_ids(work_item: dict[str, Any]) -> list[str]:
     return out
 
 
-def ingest_projects(
+async def ingest_projects(
     projects: list[dict[str, Any]],
     *,
     workspace_slug: str | None = None,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Plane project records → :SoftwareProject (+ :Workspace) nodes and ingest."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
-    ws_slug = None
     for proj in projects or []:
         pid = proj.get("id")
         if pid is None:
@@ -95,7 +101,6 @@ def ingest_projects(
         )
         ws = proj.get("workspace") or workspace_slug
         if ws:
-            ws_slug = ws
             entities.append(
                 {
                     "id": f"plane:workspace:{ws}",
@@ -110,16 +115,14 @@ def ingest_projects(
                     "relationship": "inWorkspace",
                 }
             )
-    logger.debug("ingest_projects workspace=%s", ws_slug)
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_work_items(
+async def ingest_work_items(
     work_items: list[dict[str, Any]],
     *,
     project_id: str | None = None,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Plane work-item records → :Issue nodes (+ :belongsToProject / :assignedTo /
     :hasState / :inCycle links) and ingest."""
@@ -179,15 +182,14 @@ def ingest_work_items(
                     "relationship": "assignedTo",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_cycles(
+async def ingest_cycles(
     cycles: list[dict[str, Any]],
     *,
     project_id: str | None = None,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Plane cycle records → :Cycle nodes (+ :belongsToProject) and ingest."""
     entities: list[dict[str, Any]] = []
@@ -215,4 +217,4 @@ def ingest_cycles(
                     "relationship": "belongsToProject",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)

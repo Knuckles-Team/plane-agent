@@ -1,13 +1,13 @@
 """Action-discovery behavior for plane-agent's action-routed MCP tools.
 
-Verifies the shared agent-utilities ``resolve_action`` helper, wired into every
+Verifies the shared agent-connector-sdk ``resolve_action`` helper, wired into every
 action-routed tool in ``plane_agent.mcp_server``, provides:
   * ``list_actions`` discovery (returns the bounded action names), and
   * a rich did-you-mean ``ValueError`` mentioning ``list_actions`` on an unknown
     action.
 """
 
-from agent_utilities.mcp.action_dispatch import resolve_action
+from agent_connector_sdk.mcp.action_dispatch import resolve_action
 
 # Mirrors the bounded action set declared in plane_projects (mcp_server.py).
 PROJECTS_ACTIONS = ("list_projects", "retrieve_project")

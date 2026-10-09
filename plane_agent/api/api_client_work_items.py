@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from typing import Any
 
-from agent_utilities.core.decorators import require_auth
+from agent_connector_sdk.exceptions import require_auth
 
 from plane_agent.api.api_client_base import BaseApiClient
 from plane_agent.plane_models import Response, WorkItem
