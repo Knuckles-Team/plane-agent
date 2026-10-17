@@ -1,5 +1,5 @@
 # Plane Agent
-## CLI or API | MCP | Agent
+## CLI or API | MCP
 
 ![PyPI - Version](https://img.shields.io/pypi/v/plane-agent)
 ![MCP Server](https://badge.mcpx.dev?type=server 'MCP Server')
@@ -36,7 +36,6 @@
   - [Available MCP Tools](#available-mcp-tools)
   - [MCP Configuration Examples](#mcp-configuration-examples)
   - [Dynamic Tool Selection & Visibility](#dynamic-tool-selection--visibility)
-- [Agent](#agent)
   - [Running the Agent CLI](#running-the-agent-cli)
   - [Docker Compose Orchestration](#docker-compose-orchestration)
 - [Security & Governance](#security-governance)
@@ -58,7 +57,6 @@
 
 - **Consolidated Action-Routed MCP Tools:** Minimizes token overhead and eliminates tool bloat in LLM contexts by grouping methods into optimized, togglable tool modules.
 - **Enterprise-Grade Security:** Complete support for Eunomia policies, OIDC token delegation, and granular execution context tracking.
-- **Integrated Graph Agent:** Built-in Pydantic AI agent supporting the Agent Control Protocol (ACP) and standard Web interfaces (AG-UI).
 - **Native Telemetry & Tracing:** Out-of-the-box OpenTelemetry exports and native Langfuse tracing.
 
 ---
@@ -404,12 +402,6 @@ the detailed transport contract.
 
 ## Agent
 
-This repository features a fully integrated Pydantic AI Graph Agent. It communicates over the **Agent Control Protocol (ACP)** and interacts smoothly with the **Agent Web UI (AG-UI)** and Terminal interface.
-
-### Running the Agent CLI
-To start the interactive command-line agent:
-
-```bash
 # Set credentials
 export PLANE_BASE_URL="your_value"
 export PLANE_WORKSPACE_SLUG="your_value"
@@ -417,238 +409,28 @@ export DEBUG="your_value"
 export PYTHONUNBUFFERED="your_value"
 export PLANE_API_KEY="your_value"
 
-# Run the agent server
-plane-agent --provider openai --model-id gpt-4o
-```
-
-### Docker Compose Orchestration
-The following `docker/agent.compose.yml` configures the Agent, Web UI, and Terminal Interface together:
-
-```yaml
-version: '3.8'
-
-services:
-  plane-agent-mcp:
-    image: example/plane-agent:mcp
-    container_name: plane-agent-mcp
-    hostname: plane-agent-mcp
-    restart: always
-    env_file:
-      - ../.env
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=0.0.0.0
-      - PORT=8000
-      - TRANSPORT=streamable-http
-    ports:
-      - "8000:8000"
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  plane-agent-agent:
-    image: example/plane-agent@sha256:<digest>
-    container_name: plane-agent-agent
-    hostname: plane-agent-agent
-    restart: always
-    depends_on:
-      - plane-agent-mcp
-    env_file:
-      - ../.env
-    command: [ "plane-agent" ]
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=0.0.0.0
-      - PORT=9004
-      - MCP_URL=http://plane-agent-mcp:8000/mcp
-      - PROVIDER=${PROVIDER:-openai}
-      - MODEL_ID=${MODEL_ID:-gpt-4o}
-      - ENABLE_WEB_UI=True
-      - ENABLE_OTEL=True
-    ports:
-      - "9004:9004"
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9004/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-```
-
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/overview.md](docs/overview.md) and [docs/index.md](docs/index.md).
-
----
-
-## Security & Governance
-
-Built directly upon the enterprise-ready [`agent-connector-sdk`](https://github.com/Knuckles-Team/agent-connector-sdk) core, standard security parameters are fully supported:
-
-### Access Control & Policy Enforcement
-- **Eunomia Policies:** Fine-grained, policy-driven tool authorization. Supports `none`, local `embedded` (`mcp_policies.json`), or centralized `remote` modes.
-- **OIDC Token Delegation:** Compliant with RFC 8693 token exchange for flowing authenticating user credentials from Web UI / ACP → Agent → MCP.
-- **Scoped Credentials:** Execution context runs restricted to the specific caller identity.
-
-### Runtime Security Grid
-| Feature | Feature | Enablement |
-|---------|---------------|------------|
-| **Tool Guard** | Sensitivity inspection with human-in-the-loop validation | Enabled by default |
-| **Prompt Injection Defense** | Input scanning, repetition monitoring, and recursive loop blocks | Enabled by default |
-| **Context Safety Guard** | Stuck-loop detectors and contextual overflow preemptive alerts | Enabled by default |
-
-## Environment Variables
-
-<!-- ENV-VARS-TABLE:START -->
-
-#### Package environment variables
-
-| Variable | Example | Description |
-|----------|---------|-------------|
-| `HOST` | `0.0.0.0` |  |
-| `PORT` | `8000` |  |
-| `TRANSPORT` | `stdio` | options: stdio, streamable-http, sse |
-| `ENABLE_OTEL` | `True` |  |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:8080/api/public/otel` |  |
-| `OTEL_EXPORTER_OTLP_PUBLIC_KEY` | secret-injected |  |
-| `OTEL_EXPORTER_OTLP_SECRET_KEY` | secret-injected |  |
-| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` |  |
-| `EUNOMIA_TYPE` | `none` | options: none, embedded, remote |
-| `EUNOMIA_POLICY_FILE` | `mcp_policies.json` |  |
-| `EUNOMIA_REMOTE_URL` | `http://eunomia-server:8000` |  |
-| `PLANE_BASE_URL` | `https://api.plane.so` |  |
-| `PLANE_WORKSPACE_SLUG` | — |  |
-| `PLANE_TLS_PROFILE` | `system` | Named outbound TLS policy from AgentConfig. Use a reference for runtime-only trust material; peer and hostname verification remain mandatory. |
-| `PLANE_TLS_PROFILE_REF` | — |  |
-| `PLANE_KG_INGEST` | `true` |  |
-| `DEBUG` | `False` |  |
-| `PYTHONUNBUFFERED` | `1` |  |
-| `PLANE_API_KEY` | secret-injected |  |
-| `PROJECTSTOOL` | `True` |  |
-| `WORK_ITEMSTOOL` | `True` |  |
-| `CYCLESTOOL` | `True` |  |
-| `EPICSTOOL` | `True` |  |
-| `MILESTONESTOOL` | `True` |  |
-| `MODULESTOOL` | `True` |  |
-| `STATESTOOL` | `True` |  |
-| `USERSTOOL` | `True` |  |
-| `WORKSPACESTOOL` | `True` |  |
-| `INITIATIVESTOOL` | `True` |  |
-| `INTAKETOOL` | `True` |  |
-| `LABELSTOOL` | `True` |  |
-| `PAGESTOOL` | `True` |  |
-| `KGTOOL` | `True` |  |
-
-#### Inherited agent-connector-sdk variables (apply to every connector)
-
-| Variable | Example | Description |
-|----------|---------|-------------|
-| `MCP_TOOL_MODE` | `intent` | Tool surface: `intent` \| `condensed` \| `verbose` \| `both` |
-| `MCP_ENABLED_TOOLS` | — | Comma-separated tool allow-list |
-| `MCP_DISABLED_TOOLS` | — | Comma-separated tool deny-list |
-| `MCP_ENABLED_TAGS` | — | Comma-separated tag allow-list |
-| `MCP_DISABLED_TAGS` | — | Comma-separated tag deny-list |
-| `MCP_CLIENT_AUTH` | — | Outbound MCP child auth: `oidc-client-credentials` \| `basic` \| `none` |
-| `OIDC_CLIENT_ID` | — | OIDC client id (service-account auth) |
-| `OIDC_CLIENT_SECRET_REF` | `secret://identity/oidc-client-secret` | Runtime secret reference for the OIDC service account |
-| `MCP_BASIC_AUTH_USERNAME` | — | HTTP Basic username (`MCP_CLIENT_AUTH=basic`) |
-| `MCP_BASIC_AUTH_PASSWORD_REF` | `secret://identity/mcp-basic-password` | Runtime secret reference for HTTP Basic auth (`MCP_CLIENT_AUTH=basic`) |
-| `MCP_URL` | `http://localhost:8000/mcp` | URL of the MCP server the agent connects to |
-| `PROVIDER` | `openai` | LLM provider for the agent |
-| `MODEL_ID` | `gpt-4o` | Model id for the agent |
-| `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
-
-_33 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-connector-sdk set — do not edit._
-<!-- ENV-VARS-TABLE:END -->
-
-
-The Plane Agent supports the following environment variables for configuration and integration:
-
-| Variable | Description |
-|----------|-------------|
-| `PLANE_BASE_URL` | The base URL of the Plane instance. |
-| `PLANE_WORKSPACE_SLUG` | The workspace slug of the Plane workspace. |
-| `PLANE_API_KEY` | The API key for authentication with Plane. |
-| `MCP_URL` | The URL of the MCP server. |
-| `MODEL_ID` | Default LLM model identifier (e.g. `gpt-4o`). |
-| `PROVIDER` | The LLM provider (e.g. `openai`, `anthropic`). |
-| `ENABLE_WEB_UI` | Set to `True` to enable the built-in Web UI. |
-| `ENABLE_OTEL` | Set to `True` to enable OpenTelemetry telemetry. |
-| `AGENT_UTILITIES_TESTING` | Set to `True` during testing to bypass production setups. |
-| `AUTH_TYPE` | The authentication type to use (e.g., jwt, none). |
-| `DEFAULT_API_KEY` | Default API key for fast server fallback authentication. |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | The OpenTelemetry OTLP endpoint. |
-| `PROJECTSTOOL` | Set to `True`/`False` to toggle the Projects tool module. |
-| `WORK_ITEMSTOOL` | Set to `True`/`False` to toggle the Work Items tool module. |
-| `CYCLESTOOL` | Set to `True`/`False` to toggle the Cycles tool module. |
-| `EPICSTOOL` | Set to `True`/`False` to toggle the Epics tool module. |
-| `MILESTONESTOOL` | Set to `True`/`False` to toggle the Milestones tool module. |
-| `MODULESTOOL` | Set to `True`/`False` to toggle the Modules tool module. |
-| `STATESTOOL` | Set to `True`/`False` to toggle the States tool module. |
-| `USERSTOOL` | Set to `True`/`False` to toggle the Users tool module. |
-| `WORKSPACESTOOL` | Set to `True`/`False` to toggle the Workspaces tool module. |
-| `INITIATIVESTOOL` | Set to `True`/`False` to toggle the Initiatives tool module. |
-| `INTAKETOOL` | Set to `True`/`False` to toggle the Intake tool module. |
-| `LABELSTOOL` | Set to `True`/`False` to toggle the Labels tool module. |
-| `PAGESTOOL` | Set to `True`/`False` to toggle the Pages tool module. |
-
----
-
-## Installation
-
-Pick the extra that matches what the operator want to run:
-
-| Extra | Installs | Use when |
-|-------|----------|----------|
-| `plane-agent[mcp]` | Connector-focused MCP server (`agent-connector-sdk` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
-| `plane-agent[agent]` | Agent runtime (`agent-connector-sdk` — model orchestration + `epistemic-graph[full]`) | The operator run the **integrated agent** |
-| `plane-agent[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
-
-```bash
 # Connector-focused MCP server (includes the shared graph engine)
 uv pip install "plane-agent[mcp]"
-
-# Agent runtime (adds model orchestration to the shared graph engine)
-uv pip install "plane-agent[agent]"
 
 # Everything (development)
 uv pip install "plane-agent[all]"      # or: python -m pip install "plane-agent[all]"
 ```
 
-### Container images (`:mcp` vs `:agent`)
+### Container images (`:mcp`)
 
-One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `--target`:
+One multi-stage `docker/Dockerfile` builds the MCP-only image (`--target mcp`):
 
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
-| `example/plane-agent:mcp` | `--target mcp` | `plane-agent[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `plane-mcp` |
-| `example/plane-agent@sha256:<digest>` | `--target agent` (default) | `plane-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `plane-agent` |
 
 ```bash
-docker build --target mcp   -t example/plane-agent:mcp    docker/   # connector-focused MCP server
-docker build --target agent -t example/plane-agent:agent-local docker/   # agent runtime
 ```
 
-`docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
 agent (`immutable agent digest`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
-Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
 Agent Connector SDK core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
-the server connector-focused; `[agent]` also enables model orchestration. Local
 deployments can use the bundled engine. For production or shared state, run
 **epistemic-graph as a dedicated database service** and configure the runtime to use it.
 Deployment recipes (single-node + Raft HA), connection configuration, and architecture
@@ -691,7 +473,6 @@ Contributions are welcome! Please ensure code quality by running local checks be
 - Validate type-safety with `mypy .`
 - Run test suites using `pytest`
 
-
 <!-- BEGIN agent-connector-sdk-deployment (generated; do not edit between markers) -->
 
 ## Deploy with `agent-connector-sdk-deployment`
@@ -705,7 +486,6 @@ to **"deploy `plane-agent` with agent-connector-sdk-deployment"**.
 | Install mode | Command |
 |------|---------|
 | Installed package | `uv tool install "plane-agent[mcp]"`, then run `plane-mcp` |
-| Editable source | `uv pip install -e ".[agent]"`, then run `plane-mcp` |
 | Immutable container | deploy `registry.example.invalid/plane-agent@sha256:<digest>` through the operator-selected orchestrator |
 
 The repository embeds no deployment profile, credential value, certificate path, or

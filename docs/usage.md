@@ -73,13 +73,5 @@ api.delete_work_item(project_id, work_item_id)
 
 Two console scripts are installed with the package:
 
-```bash
-# The MCP server
-plane-mcp --transport streamable-http --host 0.0.0.0 --port 8000
-
-# The A2A agent server (connects to the MCP server over MCP_URL)
-MCP_URL=http://localhost:8000/mcp plane-agent --host 0.0.0.0 --port 9004
-```
-
 Both accept `--help` for the full flag list. See [Deployment](deployment.md) for the
 transport, environment, and agent-wiring details.
