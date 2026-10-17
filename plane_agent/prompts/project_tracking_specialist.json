@@ -4,7 +4,7 @@
   "schema_version": "1.0",
   "prompt_version": "0.1.0",
   "source": "plane-agent",
-  "extends": "agent-utilities:base",
+  "extends": "agent-connector-sdk:base",
   "compose": "append",
   "description": "Plane project-tracking specialist: work-item triage, cycle/module planning, and knowledge-graph ingestion over the plane-agent MCP server.",
   "metadata": {

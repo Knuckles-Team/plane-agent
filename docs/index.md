@@ -1,6 +1,6 @@
 # plane-agent
 
-Plane project-management **MCP server + A2A agent** for the agent-utilities
+Plane project-management **MCP server + A2A agent** for the agent-connector-sdk
 ecosystem — typed, deterministic tools over the Plane REST API for projects,
 work items, cycles, modules, and the rest of the Plane work-management surface.
 

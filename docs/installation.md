@@ -16,7 +16,7 @@ path that matches how the operator want to run it.
 pip install plane-agent
 ```
 
-The base install already pulls in `agent-utilities[agent-runtime,logfire]`, so both the
+The base install already pulls in `agent-connector-sdk`, so both the
 **MCP server** (`plane-mcp`) and the **A2A agent** (`plane-agent`) console scripts
 are available immediately, with Logfire tracing enabled.
 
