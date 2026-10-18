@@ -3,15 +3,23 @@ from typing import Any
 
 from agent_connector_sdk.exceptions import require_auth
 
-from plane_agent.api.api_client_base import BaseApiClient
+from plane_agent.api.api_client_base import BaseApiClient, _query
 from plane_agent.plane_models import Project, Response
 
 
 class Api(BaseApiClient):
     @require_auth
-    def list_projects(self, **kwargs) -> Response:
+    def list_projects(
+        self,
+        per_page: int | None = None,
+        cursor: str | None = None,
+        order_by: str | None = None,
+    ) -> Response:
         """List all projects in the workspace."""
-        response = self._get("/projects/", params=kwargs)
+        response = self._get(
+            "/projects/",
+            params=_query(per_page=per_page, cursor=cursor, order_by=order_by),
+        )
         response.raise_for_status()
         data = response.json()
 

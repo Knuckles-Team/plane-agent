@@ -7,7 +7,6 @@
         "plane-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "intent",
         "CYCLESTOOL": "True",
         "EPICSTOOL": "True",
         "INITIATIVESTOOL": "True",
