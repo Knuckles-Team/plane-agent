@@ -119,5 +119,5 @@
     rdfs:label "Plane Project Tracking Ontology" ;
     rdfs:comment """Plane project-and-issue-tracking model — workspaces, software projects,
     work items (issues), cycles, modules, states and labels, with their containment and
-    assignment relationships — federated into the agent-utilities knowledge-graph hub.""" ;
+    assignment relationships — federated into the agent-connector-sdk knowledge-graph hub.""" ;
     owl:imports <http://knuckles.team/kg> .

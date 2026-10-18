@@ -1,6 +1,5 @@
 # plane-agent
 
-Plane project-management **MCP server + A2A agent** for the agent-utilities
 ecosystem — typed, deterministic tools over the Plane REST API for projects,
 work items, cycles, modules, and the rest of the Plane work-management surface.
 
@@ -16,7 +15,6 @@ work items, cycles, modules, and the rest of the Plane work-management surface.
 ## Overview
 
 `plane-agent` wraps the [Plane](https://plane.so/) REST API with typed,
-deterministic MCP tools and ships an optional A2A agent server that drives those
 tools conversationally. It provides:
 
 - **`Api`** — a composed REST client (`plane_agent.api_client.Api`) over the Plane
@@ -24,8 +22,6 @@ tools conversationally. It provides:
   states, initiatives, intake, milestones, workspaces).
 - **A broad MCP tool surface** — action-routed tool domains for every Plane
   resource, gated individually by `*TOOL` environment toggles.
-- **An A2A agent server** (`plane-agent` console script) that connects to the MCP
-  server over `MCP_URL` and exposes the tools to a Pydantic-AI agent.
 
 The agent **remains inactive when credentials are absent** — a `PLANE_API_KEY`
 and `PLANE_WORKSPACE_SLUG` are required before any tool will run.
@@ -60,5 +56,4 @@ plane-mcp --transport streamable-http --host 0.0.0.0 --port 8000
 ```
 
 See **[Installation](installation.md)** and **[Deployment](deployment.md)** for the
-full matrix (PyPI install, Docker image, all transports, the agent server, reverse
 proxy, DNS).

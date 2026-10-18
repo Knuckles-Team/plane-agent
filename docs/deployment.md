@@ -63,13 +63,10 @@ Store the real remote URL, outbound identity reference, and TLS-profile referenc
 <!-- END GENERATED: deployment-options -->
 
 This page covers running `plane-agent` as a long-lived service: the transports, the
-optional A2A agent server, a Docker Compose stack, putting it behind a Caddy reverse
 proxy, and giving it a DNS name with Technitium. To provision the **Plane platform**
 it connects to, see [Backing Platform](platform.md).
 
 > `plane-agent` ships an **MCP server** (console script `plane-mcp`) and a separate
-> **A2A agent server** (console script `plane-agent`). The MCP server is the typed,
-> deterministic tool surface; the agent server is a Pydantic-AI agent that connects
 > to the MCP server over `MCP_URL` and exposes the tools conversationally.
 
 ## Run the MCP server
@@ -167,23 +164,12 @@ docker compose -f docker/mcp.compose.yml up -d
 docker compose -f docker/mcp.compose.yml logs -f
 ```
 
-## Run the agent server
-
-When `server_type` is **mcp+agent**, the A2A agent server is exposed through the
-`plane-agent` console script and the
-[`docker/agent.compose.yml`](https://github.com/Knuckles-Team/plane-agent/blob/main/docker/agent.compose.yml)
-stack. The agent connects to the MCP server over `MCP_URL` and listens on port
-`9004`:
-
-```bash
 # Locally — point the agent at a running MCP server
 export MCP_URL=http://localhost:8000/mcp
 export MODEL_ID=gpt-4o
 export LLM_API_KEY=your_model_api_key
-plane-agent --host 0.0.0.0 --port 9004
 ```
 
-The `agent.compose.yml` stack runs both services together — the MCP server on
 `:8000` and the agent on `:9004`, wired by container name:
 
 ```yaml
@@ -198,7 +184,6 @@ services:
       - PORT=8000
     ports: ["8000:8000"]
 
-  plane-agent-agent:
     image: example/plane-agent@sha256:<digest>
     depends_on: [ plane-agent-mcp ]
     command: [ "plane-agent" ]
@@ -212,22 +197,6 @@ services:
 ```
 
 ```bash
-docker compose -f docker/agent.compose.yml up -d
-```
-
-| Setting | Default | Meaning |
-|---|---|---|
-| `MCP_URL` | `http://localhost:8000/mcp` | MCP server the agent connects to |
-| `MODEL_ID` | `gpt-4o` | Model the agent reasons with |
-| `LLM_API_KEY` | _(unset)_ | Credential for the model provider |
-| `LLM_BASE_URL` | _(unset)_ | Optional custom model endpoint |
-| `PORT` | `9004` | Agent server port |
-
-## Behind a Caddy reverse proxy
-
-Expose the HTTP server on a hostname with automatic TLS. Add to the operator's `Caddyfile`:
-
-```caddy
 # Internal (self-signed) — homelab .example.invalid zone
 plane-agent.example.invalid {
     tls internal

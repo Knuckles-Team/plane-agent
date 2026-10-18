@@ -16,8 +16,7 @@ path that matches how the operator want to run it.
 pip install plane-agent
 ```
 
-The base install already pulls in `agent-utilities[agent-runtime,logfire]`, so both the
-**MCP server** (`plane-mcp`) and the **A2A agent** (`plane-agent`) console scripts
+The base install already pulls in `agent-connector-sdk`, so both the
 are available immediately, with Logfire tracing enabled.
 
 ### Optional extras
@@ -60,16 +59,9 @@ docker run --rm -i \
   example/plane-agent@sha256:<digest>        # stdio transport (default)
 ```
 
-For an HTTP server with a published port and the agent server, see
 [Deployment](deployment.md).
 
 ## Verify the install
-
-```bash
-plane-mcp --help
-plane-agent --help
-python -c "import plane_agent; print(plane_agent.__version__)"
-```
 
 ## Next steps
 

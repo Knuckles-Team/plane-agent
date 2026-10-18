@@ -16,7 +16,7 @@
 
 ## Functional Requirements
 
-- **FR-001**: Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+- **FR-001**: Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0
 - **FR-002**: Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
 - **FR-003**: Monolithic: mcp_server.py (639L) — 1 functions with high complexity (worst: register_work_items_tools at 61L, CC=20); Low cohesion: 18 distinct concepts in one file
 - **FR-004**: 6 functions with nesting depth >4
@@ -40,7 +40,7 @@
 - **FR-022**: No changelog entries within the last 30 days
 - **FR-023**: keepachangelog not installed — pip install 'universal-skills[code-enhancer]'
 - **FR-024**: Undocumented env vars: DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, GRAPH_BACKEND, LLM_API_KEY, LLM_BASE_URL
-- **FR-025**: Analysis error: No module named 'agent_utilities.knowledge_graph'
+- **FR-025**: Analysis error: No module named 'agent_connector_sdk.knowledge_graph'
 
 ## Success Criteria
 
