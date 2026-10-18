@@ -6,8 +6,6 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Plane project-management API + MCP Server + A2A agent for the agent-utilities ecosystem.">
-      
       
       
         <link rel="canonical" href="https://knuckles-team.github.io/plane-agent/installation/">
@@ -923,8 +921,7 @@ path that matches how the operator want to run it.</p>
 <h2 id="from-pypi-recommended">From PyPI (recommended)<a class="headerlink" href="#from-pypi-recommended" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>plane-agent
 </span></code></pre></div>
-<p>The base install already pulls in <code>agent-utilities[agent-runtime,logfire]</code>, so both the
-<strong>MCP server</strong> (<code>plane-mcp</code>) and the <strong>A2A agent</strong> (<code>plane-agent</code>) console scripts
+<p>The base install already pulls in <code>agent-connector-sdk</code>, so both the
 are available immediately, with Logfire tracing enabled.</p>
 <h3 id="optional-extras">Optional extras<a class="headerlink" href="#optional-extras" title="Permanent link">&para;</a></h3>
 <table>
@@ -965,13 +962,8 @@ are available immediately, with Logfire tracing enabled.</p>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PLANE_WORKSPACE_SLUG</span><span class="o">=</span>your-workspace<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span>example/plane-agent@sha256:&lt;digest&gt;<span class="w">        </span><span class="c1"># stdio transport (default)</span>
 </span></code></pre></div>
-<p>For an HTTP server with a published port and the agent server, see
-<a href="../deployment/">Deployment</a>.</p>
+<p><a href="../deployment/">Deployment</a>.</p>
 <h2 id="verify-the-install">Verify the install<a class="headerlink" href="#verify-the-install" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>plane-mcp<span class="w"> </span>--help
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>plane-agent<span class="w"> </span>--help
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import plane_agent; print(plane_agent.__version__)"</span>
-</span></code></pre></div>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><a href="../deployment/">Deployment</a></strong> — run it as a long-lived MCP server and agent behind Caddy + DNS.</li>

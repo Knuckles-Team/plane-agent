@@ -6,8 +6,6 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Plane project-management API + MCP Server + A2A agent for the agent-utilities ecosystem.">
-      
       
       
         <link rel="canonical" href="https://knuckles-team.github.io/plane-agent/">
@@ -809,8 +807,7 @@
 
 
 <h1 id="plane-agent">plane-agent<a class="headerlink" href="#plane-agent" title="Permanent link">&para;</a></h1>
-<p>Plane project-management <strong>MCP server + A2A agent</strong> for the agent-utilities
-ecosystem — typed, deterministic tools over the Plane REST API for projects,
+<p>ecosystem — typed, deterministic tools over the Plane REST API for projects,
 work items, cycles, modules, and the rest of the Plane work-management surface.</p>
 <div class="admonition info">
 <p class="admonition-title">Official documentation</p>
@@ -823,7 +820,6 @@ release.</p>
 <a href="https://github.com/Knuckles-Team/plane-agent"><img alt="GitHub" src="https://img.shields.io/badge/source-GitHub-181717?logo=github" /></a></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p><code>plane-agent</code> wraps the <a href="https://plane.so/">Plane</a> REST API with typed,
-deterministic MCP tools and ships an optional A2A agent server that drives those
 tools conversationally. It provides:</p>
 <ul>
 <li><strong><code>Api</code></strong> — a composed REST client (<code>plane_agent.api_client.Api</code>) over the Plane
@@ -831,8 +827,6 @@ tools conversationally. It provides:</p>
   states, initiatives, intake, milestones, workspaces).</li>
 <li><strong>A broad MCP tool surface</strong> — action-routed tool domains for every Plane
   resource, gated individually by <code>*TOOL</code> environment toggles.</li>
-<li><strong>An A2A agent server</strong> (<code>plane-agent</code> console script) that connects to the MCP
-  server over <code>MCP_URL</code> and exposes the tools to a Pydantic-AI agent.</li>
 </ul>
 <p>The agent <strong>remains inactive when credentials are absent</strong> — a <code>PLANE_API_KEY</code>
 and <code>PLANE_WORKSPACE_SLUG</code> are required before any tool will run.</p>
@@ -858,7 +852,6 @@ and <code>PLANE_WORKSPACE_SLUG</code> are required before any tool will run.</p>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>plane-mcp<span class="w"> </span>--transport<span class="w"> </span>streamable-http<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
 </span></code></pre></div>
 <p>See <strong><a href="installation/">Installation</a></strong> and <strong><a href="deployment/">Deployment</a></strong> for the
-full matrix (PyPI install, Docker image, all transports, the agent server, reverse
 proxy, DNS).</p>
 
 
