@@ -3,6 +3,6 @@
   "connector": "plane-agent",
   "schema_version": "1",
   "tools": {
-    "plane_projects": "e6346ead22b6ba3f65adf3d9ca62ffcb21a00ad1c43eb0796d101de66b2e0be5"
+    "plane_list_projects": "7ef491ed75b57779191985597084b8a5c0d8217590fd8314c6d7c7a8061bb441"
   }
 }
