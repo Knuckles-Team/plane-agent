@@ -13,6 +13,11 @@ from agent_connector_sdk.tls.resolve import resolve_tls_profile
 logger = logging.getLogger(__name__)
 
 
+def _query(**values):
+    """Query-string parameters with the unset (None) values dropped."""
+    return {key: value for key, value in values.items() if value is not None}
+
+
 class BaseApiClient:
     def __init__(
         # CONCEPT:AU-ECO.mcp.fastmcp-middleware

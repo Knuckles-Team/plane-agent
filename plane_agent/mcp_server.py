@@ -178,7 +178,9 @@ def register_work_items_tools(mcp: FastMCP):
 
         if action == "list_work_items":
             result = await run_blocking(client.list_work_items, **kwargs)
-            await _auto_ingest("work_items", result, project_id=kwargs.get("project_id"))
+            await _auto_ingest(
+                "work_items", result, project_id=kwargs.get("project_id")
+            )
             return result
         if action == "create_work_item":
             return await run_blocking(client.create_work_item, **kwargs)
