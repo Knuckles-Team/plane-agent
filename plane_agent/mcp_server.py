@@ -710,70 +710,94 @@ def register_pages_tools(mcp: FastMCP):
 
 
 def register_kg_tools(mcp: FastMCP):
-    @mcp.tool(tags={"kg"})
-    async def plane_ingest(
-        action: str = Field(
-            description="Action to perform. Must be one of: 'ingest_projects', 'ingest_work_items', 'ingest_cycles'"
-        ),
-        params_json: str = Field(
-            default="{}",
-            description="JSON string of the underlying list_* params (ingest_work_items / ingest_cycles require 'project_id').",
-        ),
+    """Register the Plane to epistemic-graph ingest tools (one tool per record kind).
+
+    Each tool lists records via the Plane API, then pushes them as typed nodes + links
+    via the fast engine client (best-effort: ``{"ingested": null}`` with no engine).
+    CONCEPT:AU-KG.ingest.enterprise-source-extractor.
+    """
+
+    @mcp.tool(
+        name="plane_ingest_projects",
+        tags={"kg"},
+        annotations={"readOnlyHint": False, "idempotentHint": True},
+    )
+    async def plane_ingest_projects(
+        per_page: int | None = Field(default=None, description="Page size"),
+        cursor: str | None = Field(default=None, description="Pagination cursor"),
         client=Depends(get_client),
         ctx: Context | None = Field(
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Natively ingest Plane records into epistemic-graph as typed OWL nodes.
-
-        Lists records via the Plane API, then pushes them as typed nodes + links via the
-        fast engine client (best-effort — returns ``{"ingested": null}`` with no engine):
-        'ingest_projects' → :SoftwareProject (+ :Workspace / :inWorkspace);
-        'ingest_work_items' → :Issue (+ :belongsToProject / :assignedTo / :hasState / :inCycle);
-        'ingest_cycles' → :Cycle (+ :belongsToProject).
-        CONCEPT:AU-KG.ingest.enterprise-source-extractor.
-        """
-        if ctx:
-            await ctx.info("Executing tool...")
-        import json
-
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
-
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        valid_actions = ("ingest_projects", "ingest_work_items", "ingest_cycles")
-        resolved = resolve_action(action, valid_actions, service="plane-agent")
-        if isinstance(resolved, dict):
-            return resolved
-        action = resolved
-
+        """Ingest Plane projects as :SoftwareProject nodes (+ :Workspace / :inWorkspace)."""
         from plane_agent import kg_ingest
 
-        if action == "ingest_projects":
-            result = await run_blocking(client.list_projects, **kwargs)
-            records = _kg_records(result)
-            ingested = await kg_ingest.ingest_projects(
-                records, workspace_slug=getattr(client, "workspace_slug", None)
-            )
-            return {"listed": len(records), "ingested": ingested}
-        if action == "ingest_work_items":
-            result = await run_blocking(client.list_work_items, **kwargs)
-            records = _kg_records(result)
-            ingested = await kg_ingest.ingest_work_items(
-                records, project_id=kwargs.get("project_id")
-            )
-            return {"listed": len(records), "ingested": ingested}
-        if action == "ingest_cycles":
-            result = await run_blocking(client.list_cycles, **kwargs)
-            records = _kg_records(result)
-            ingested = await kg_ingest.ingest_cycles(
-                records, project_id=kwargs.get("project_id")
-            )
-            return {"listed": len(records), "ingested": ingested}
-        raise ValueError(f"Unknown action: {action}")
+        if ctx:
+            await ctx.info("Executing tool...")
+        kwargs = {
+            k: v for k, v in {"per_page": per_page, "cursor": cursor}.items() if v
+        }
+        result = await run_blocking(client.list_projects, **kwargs)
+        records = _kg_records(result)
+        ingested = await kg_ingest.ingest_projects(
+            records, workspace_slug=getattr(client, "workspace_slug", None)
+        )
+        return {"listed": len(records), "ingested": ingested}
+
+    @mcp.tool(
+        name="plane_ingest_work_items",
+        tags={"kg"},
+        annotations={"readOnlyHint": False, "idempotentHint": True},
+    )
+    async def plane_ingest_work_items(
+        project_id: str = Field(description="Project whose work items are ingested"),
+        per_page: int | None = Field(default=None, description="Page size"),
+        cursor: str | None = Field(default=None, description="Pagination cursor"),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """Ingest a project's work items as :Issue nodes (+ :belongsToProject / :assignedTo / :hasState / :inCycle)."""
+        from plane_agent import kg_ingest
+
+        if ctx:
+            await ctx.info("Executing tool...")
+        kwargs = {
+            k: v for k, v in {"per_page": per_page, "cursor": cursor}.items() if v
+        }
+        result = await run_blocking(client.list_work_items, project_id, **kwargs)
+        records = _kg_records(result)
+        ingested = await kg_ingest.ingest_work_items(records, project_id=project_id)
+        return {"listed": len(records), "ingested": ingested}
+
+    @mcp.tool(
+        name="plane_ingest_cycles",
+        tags={"kg"},
+        annotations={"readOnlyHint": False, "idempotentHint": True},
+    )
+    async def plane_ingest_cycles(
+        project_id: str = Field(description="Project whose cycles are ingested"),
+        per_page: int | None = Field(default=None, description="Page size"),
+        cursor: str | None = Field(default=None, description="Pagination cursor"),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """Ingest a project's cycles as :Cycle nodes (+ :belongsToProject)."""
+        from plane_agent import kg_ingest
+
+        if ctx:
+            await ctx.info("Executing tool...")
+        kwargs = {
+            k: v for k, v in {"per_page": per_page, "cursor": cursor}.items() if v
+        }
+        result = await run_blocking(client.list_cycles, project_id, **kwargs)
+        records = _kg_records(result)
+        ingested = await kg_ingest.ingest_cycles(records, project_id=project_id)
+        return {"listed": len(records), "ingested": ingested}
 
     return None
 

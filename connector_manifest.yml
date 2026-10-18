@@ -140,8 +140,8 @@ schema_mappings:
 sync:
 - preset: plane-projects
   server: plane-mcp
-  tool: plane_projects
-  action: list_projects
+  tool: plane_list_projects
+  action: null
   records_path: data
   id_field: id
   title_field: name
@@ -149,11 +149,11 @@ sync:
   updated_field: updated_at
   pagination: null
   doc_type: project
-  tool_schema_sha256: e6346ead22b6ba3f65adf3d9ca62ffcb21a00ad1c43eb0796d101de66b2e0be5
+  tool_schema_sha256: 7ef491ed75b57779191985597084b8a5c0d8217590fd8314c6d7c7a8061bb441
   raw:
     server: plane-mcp
-    tool: plane_projects
-    action: list_projects
+    tool: plane_list_projects
+    params_style: args
     records_path: data
     id_field: id
     title_field: name
