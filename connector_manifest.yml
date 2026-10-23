@@ -28,15 +28,15 @@ resources:
     lpg_rel_type: ''
   - name: inModule
     label: in module
-    target: Module
+    target: PlaneModule
     lpg_rel_type: ''
 - name: Label
   label: Label
   id_prefix: label
   relations: []
-- name: Module
+- name: PlaneModule
   label: Module
-  id_prefix: module
+  id_prefix: planemodule
   relations: []
 - name: ProjectState
   label: Project State
@@ -122,7 +122,7 @@ schema_mappings:
       sequenceId: xsd:integer
       startDate: xsd:string
       state: xsd:string
-  Module:
+  PlaneModule:
     ontology_class: Collection
     fields:
       endDate: xsd:string
@@ -190,13 +190,13 @@ provenance:
   - plane_agent/ontology/plane.ttl
   integrity:
     algorithm: urdna2015-sha256
-    hash: 5fdc6321bcf268e953d21c3adc5c946ca00f9b1e37a4754ef9f86f0183a442f6
+    hash: 8bb170c2c1ba4c66b3c291e61a4195fe2581b10bb32151124c0524237cbfbe21
     triple_count: 74
   signer: UNSIGNED-PREVIEW
   signature_algorithm: none
   signing_public_key: ''
   signature: null
-  source_commit: f17a3ac206a22aa906b23de2729f202a7a98f4b2
+  source_commit: 7e749a663664e81f0291a3c9eafdfd9e690c972e
 policy:
   pii_fields: {}
   tenant_boundary: null
@@ -212,8 +212,8 @@ review_todos:
   \ before relying on this crosswalk for reasoning/joins."
 - "schema_mappings.Label.ontology_class = 'Tag' [source ttl rdfs:subClassOf] \u2014 verify manually before\
   \ relying on this crosswalk for reasoning/joins."
-- "schema_mappings.Module.ontology_class = 'Collection' [source ttl rdfs:subClassOf] \u2014 verify manually\
-  \ before relying on this crosswalk for reasoning/joins."
+- "schema_mappings.PlaneModule.ontology_class = 'Collection' [source ttl rdfs:subClassOf] \u2014 verify\
+  \ manually before relying on this crosswalk for reasoning/joins."
 - "schema_mappings.ProjectState.ontology_class = 'Concept' [source ttl rdfs:subClassOf] \u2014 verify\
   \ manually before relying on this crosswalk for reasoning/joins."
 - "schema_mappings.SoftwareProject.ontology_class = 'SoftwareProject' [DRAFT \u2014 nearest hub-canonical-class-by-name\

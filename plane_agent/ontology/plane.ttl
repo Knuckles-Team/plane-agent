@@ -31,7 +31,7 @@
     rdfs:label "Cycle" ;
     rdfs:comment "A time-boxed cycle (sprint) grouping work items over a start/end window (plane_cycles)." .
 
-:Module a owl:Class ;
+:PlaneModule a owl:Class ;
     rdfs:subClassOf :Collection ;
     rdfs:label "Module" ;
     rdfs:comment "A feature grouping of work items within a project (plane_modules)." .
@@ -69,7 +69,7 @@
     rdfs:label "in module" ;
     rdfs:comment "Links an Issue to the Module it is grouped under." ;
     rdfs:domain :Issue ;
-    rdfs:range :Module .
+    rdfs:range :PlaneModule .
 
 :hasState a owl:ObjectProperty ;
     rdfs:label "has state" ;

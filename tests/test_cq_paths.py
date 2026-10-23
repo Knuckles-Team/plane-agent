@@ -32,7 +32,7 @@ def test_issue_carries_state_and_priority() -> None:
     (
         ("Workspace", "Namespace"),
         ("Cycle", "Iteration"),
-        ("Module", "Collection"),
+        ("PlaneModule", "Collection"),
         ("ProjectState", "Concept"),
     ),
 )
