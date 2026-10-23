@@ -21,6 +21,7 @@
     rdfs:comment "A Plane project: a container of work items, cycles and modules within a workspace (plane_projects). Named :SoftwareProject to stay distinct from other sources' generic :Project." .
 
 :Issue a owl:Class ;
+    rdfs:subClassOf :WorkItem ;
     rdfs:label "Issue" ;
     rdfs:comment "A Plane work item / issue — the unit of tracked work with a state, priority and assignees (plane_work_items)." .
 
@@ -37,6 +38,7 @@
     rdfs:comment "A workflow state a work item can occupy (e.g. Backlog, Todo, In Progress, Done) within a project (plane_states)." .
 
 :Label a owl:Class ;
+    rdfs:subClassOf :Tag ;
     rdfs:label "Label" ;
     rdfs:comment "A tag applied to work items for classification within a project (plane_labels)." .
 
