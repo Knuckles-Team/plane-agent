@@ -17,9 +17,8 @@
     rdfs:label "Workspace" ;
     rdfs:comment "A Plane workspace — the top-level tenant that owns projects and members (plane_workspaces)." .
 
-:SoftwareProject a owl:Class ;
-    rdfs:label "Software Project" ;
-    rdfs:comment "A Plane project: a container of work items, cycles and modules within a workspace (plane_projects). Named :SoftwareProject to stay distinct from other sources' generic :Project." .
+:SoftwareProject a owl:Class .
+
 
 :Issue a owl:Class ;
     rdfs:subClassOf :WorkItem ;
@@ -131,5 +130,7 @@
     rdfs:label "Plane Project Tracking Ontology" ;
     rdfs:comment """Plane project-and-issue-tracking model — workspaces, software projects,
     work items (issues), cycles, modules, states and labels, with their containment and
-    assignment relationships — federated into the agent-connector-sdk knowledge-graph hub.""" ;
-    owl:imports <http://knuckles.team/kg> .
+    assignment relationships — federated into the agent-connector-sdk knowledge-graph hub.""" .
+
+# ontology-codemod R3
+<http://knuckles.team/kg#PlaneModule> rdfs:subClassOf <http://knuckles.team/kg#Module> .
