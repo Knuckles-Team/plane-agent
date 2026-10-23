@@ -38,6 +38,10 @@ plane-agent = "plane_agent.connectors"
 [project.entry-points."agent_connector_sdk.prompt_providers"]
 plane-agent = "plane_agent.prompts"
 
+# The one declared connector identity: the fleet name (SDK-CONNECTOR-CONTROL-R071).
+[project.entry-points."agent_connector_sdk.connector"]
+plane-mcp = "plane_agent"
+
 [tool.uv.workspace]
 members = ["."]
 

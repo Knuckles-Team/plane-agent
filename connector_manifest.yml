@@ -1,4 +1,4 @@
-connector: plane-agent
+connector: plane-mcp
 ontology_source: plane
 schema_version: '1'
 resources:
