@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "spec_id": "CONN-PLANE-AGENT-CONNECTOR-CONTENT",
+  "owner_repo": "plane-agent",
+  "delivery_state": "VERIFIED",
+  "requirement_ids": [
+    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R001"
+  ],
+  "requirements": [
+    {
+      "id": "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R001",
+      "title": "Default content",
+      "delivery_state": "VERIFIED",
+      "landed_in": [
+        "72b4cf3dc717"
+      ],
+      "verified_by": [
+        "tests/test_default_content_surfaces.py:15"
+      ]
+    }
+  ]
+}
