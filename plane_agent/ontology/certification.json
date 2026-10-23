@@ -1,9 +1,6 @@
 {
   "api_version": "arbora.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "5da44a266aac623a98210bacc60c3b4af2b980607b6f16c806ed396cc93530af",
-    "plane_agent/connectors/mcp_source_presets.json": "404529255b50bc4e19bd2a6d8a257fc9fb378da898e55186fb4ec0bcf3fecb32",
-    "plane_agent/connectors/tool_schema_fingerprints.json": "389a2714307ec752f3d09f4651e6dbee7c6166f3474771df5c64974e25cc2718",
     "plane_agent/ontology/fixtures/records.json": "ad212a2725e246aceb1d2ecdf95db690f31b231888f6789f0c8867f0b70ab6e4",
     "plane_agent/ontology/mappings/source.yaml": "12d00c04472c85433a0f744bb2f0ca144445b8222ca06f920df292b4ec961f26",
     "plane_agent/ontology/migrations/manifest.json": "61b3a180e8fbc6862e59844dffe069ee13c592a4e635b259f6a39b174d30e5aa",
