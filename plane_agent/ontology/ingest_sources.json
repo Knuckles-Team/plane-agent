@@ -1,0 +1,16 @@
+{
+  "connector": "plane-mcp",
+  "sources": [
+    {
+      "source_id": "projects",
+      "record_type": "SoftwareProject",
+      "tools": ["plane_list_projects"],
+      "records_path": "data",
+      "id_field": "id",
+      "title_field": "name",
+      "text_field": "description",
+      "incremental": false,
+      "description": "Plane projects in the configured workspace."
+    }
+  ]
+}
