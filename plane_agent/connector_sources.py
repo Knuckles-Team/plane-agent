@@ -28,6 +28,39 @@ SOURCES = (
         text_field="description",
         title_field="name",
     ),
+    source_meta(
+        tool="plane_list_work_items",
+        source_id="work-items",
+        record_type="Issue",
+        id_field="id",
+        cursor_field="updated_at",
+        description="Plane work items of every project in the workspace.",
+        for_each={"source": "projects", "argument": "project_id", "field": "id"},
+        preset={
+            "doc_type": "work_item",
+            "params_style": "args",
+        },
+        records_path="data.results",
+        server="plane-mcp",
+        text_field="description_html",
+        title_field="name",
+    ),
+    source_meta(
+        tool="plane_list_states",
+        source_id="project-states",
+        record_type="ProjectState",
+        id_field="id",
+        cursor_field="updated_at",
+        description="Workflow states of every project; resolves the state id of a work item to its name.",
+        for_each={"source": "projects", "argument": "project_id", "field": "id"},
+        preset={
+            "doc_type": "project_state",
+            "params_style": "args",
+        },
+        records_path="data",
+        server="plane-mcp",
+        title_field="name",
+    ),
 )
 
 SCHEMA_MAPPINGS = {
