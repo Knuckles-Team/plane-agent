@@ -63,8 +63,8 @@ shape:LabelGovernanceShape a sh:NodeShape ;
         sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string
     ] .
 
-shape:ModuleGovernanceShape a sh:NodeShape ;
-    sh:targetClass :Module ;
+shape:PlaneModuleGovernanceShape a sh:NodeShape ;
+    sh:targetClass :PlaneModule ;
     sh:closed false ;
     sh:property [
         sh:path :sourceRecordRef ;
