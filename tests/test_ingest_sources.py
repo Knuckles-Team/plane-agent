@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from plane_agent.connector_sources import declaration as declared_sources
+from agent_connector_sdk.ingest import load_declaration
 from agent_connector_sdk.mcp.tool_surface import operation_prefix
 
 
@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 @pytest.mark.spec("CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003")
 def test_declares_ingestible_sources() -> None:
-    declaration = declared_sources()
+    declaration = load_declaration("plane_agent")
     assert declaration is not None
     assert declaration.connector == "plane-mcp"
     prefix = operation_prefix("plane-agent")
@@ -34,7 +34,7 @@ def test_declares_ingestible_sources() -> None:
 
 @pytest.mark.spec("CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003")
 def test_work_items_fan_out_per_project_and_map_to_issue_state() -> None:
-    declaration = declared_sources()
+    declaration = load_declaration("plane_agent")
     for source_id in ("work-items", "project-states"):
         source = declaration.source(source_id)
         assert source is not None and source.for_each is not None
@@ -57,7 +57,7 @@ def test_work_items_fan_out_per_project_and_map_to_issue_state() -> None:
 @pytest.mark.spec("CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003")
 def test_sources_name_read_only_tools() -> None:
     source_text = (REPO_ROOT / "plane_agent" / "mcp_server.py").read_text()
-    declaration = declared_sources()
+    declaration = load_declaration("plane_agent")
     for source in declaration.sources:
         assert not any(
             verb in tool for tool in source.tools for verb in ("create", "update", "delete")

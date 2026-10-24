@@ -20,21 +20,13 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
-import sys
 from typing import Any
 
-from agent_connector_sdk.config import load_config, setting
+from agent_connector_sdk.config import setting
 from agent_connector_sdk.mcp.action_dispatch import resolve_action
 from agent_connector_sdk.mcp.concurrency import run_blocking
-from agent_connector_sdk.mcp.server import create_mcp_server
-from agent_connector_sdk.mcp.tool_surface import register_tool_surface
-from starlette.requests import Request
-from starlette.responses import JSONResponse
 
-from plane_agent.api_client import Api
 from plane_agent.auth import get_client
-
-__version__ = "0.1.37"
 
 logger = get_logger(name="plane-agent")
 logger.setLevel(logging.INFO)
@@ -800,56 +792,3 @@ def register_kg_tools(mcp: FastMCP):
         return {"listed": len(records), "ingested": ingested}
 
     return None
-
-
-def get_mcp_instance() -> tuple[Any, ...]:
-    """Initialize and return the MCP instance.
-
-        Ecosystem Concepts:
-    (MCP & Universal Skills)
-    (Guardrail Engine)
-    """
-    load_config()
-    args, mcp, middlewares = create_mcp_server(
-        name="plane-agent MCP",
-        version=__version__,
-        instructions="plane-agent MCP Server — Condensed Action-Routed Tools.",
-    )
-
-    @mcp.custom_route("/health", methods=["GET"])
-    async def health_check(request: Request) -> JSONResponse:
-        return JSONResponse({"status": "OK"})
-
-    register_tool_surface(
-        mcp,
-        client_cls=Api,
-        get_client=get_client,
-        service="plane-agent",
-        tools_module=sys.modules[__name__],
-    )
-
-    for mw in middlewares:
-        mcp.add_middleware(mw)
-    return mcp, args, middlewares
-
-
-def mcp_server() -> None:
-    mcp, args, middlewares = get_mcp_instance()
-    print(f"plane-agent MCP v{__version__}", file=sys.stderr)
-    print("\nStarting MCP Server", file=sys.stderr)
-    print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
-    print(f"  Auth: {args.auth_type}", file=sys.stderr)
-
-    if args.transport == "stdio":
-        mcp.run(transport="stdio")
-    elif args.transport == "streamable-http":
-        mcp.run(transport="streamable-http", host=args.host, port=args.port)
-    elif args.transport == "sse":
-        mcp.run(transport="sse", host=args.host, port=args.port)
-    else:
-        logger.error("Invalid transport", extra={"transport": args.transport})
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    mcp_server()

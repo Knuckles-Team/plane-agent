@@ -11,7 +11,7 @@ sys.argv = ["mcp_server.py"]
 import asyncio
 import inspect
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from agent_connector_sdk.exceptions import AuthError
@@ -101,9 +101,9 @@ def get_all_mcp_tool_names():
     """Every tool the MCP server registers (one per API operation)."""
     import asyncio
 
-    from plane_agent.mcp_server import get_mcp_instance
+    from agent_connector_sdk.connector import build_server
 
-    mcp, _, _ = get_mcp_instance()
+    _, mcp = build_server("plane_agent", command_args=[])
     return sorted(tool.name for tool in asyncio.run(mcp.list_tools()))
 
 
@@ -114,62 +114,15 @@ async def test_all_mcp_tools(tool_name):
 
     CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
-    from plane_agent.mcp_server import get_mcp_instance
+    from agent_connector_sdk.connector import build_server
 
-    mcp, _, _ = get_mcp_instance()
+    _, mcp = build_server("plane_agent", command_args=[])
     tool = next(t for t in await mcp.list_tools() if t.name == tool_name)
     properties = tool.parameters.get("properties", {})
     assert "action" not in properties
     assert set(properties) != {"params_json"}
     assert tool.annotations is not None
     assert tool.annotations.read_only_hint is not None
-
-
-@pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
-def test_mcp_server_run_options():
-    """Test MCP server run options.
-
-    CONCEPT:AU-ECO.mcp.fastmcp-middleware
-    """
-    from plane_agent.mcp_server import mcp_server
-
-    mock_mcp = MagicMock()
-    mock_args = MagicMock()
-
-    with patch(
-        "plane_agent.mcp_server.get_mcp_instance",
-        return_value=(mock_mcp, mock_args, []),
-    ):
-        # Stdio Transport
-        mock_args.transport = "stdio"
-        mcp_server()
-        mock_mcp.run.assert_called_with(transport="stdio")
-
-        # SSE Transport
-        mock_args.transport = "sse"
-        mock_args.host = "127.0.0.1"
-        mock_args.port = 8000
-        mcp_server()
-        mock_mcp.run.assert_called_with(transport="sse", host="127.0.0.1", port=8000)
-
-        # Streamable HTTP Transport
-        mock_args.transport = "streamable-http"
-        mock_args.host = "127.0.0.1"
-        mock_args.port = 8000
-        mcp_server()
-        mock_mcp.run.assert_called_with(
-            transport="streamable-http", host="127.0.0.1", port=8000
-        )
-
-        # Invalid Transport
-        mock_args.transport = "invalid"
-        with patch("sys.exit") as mock_exit:
-            mcp_server()
-            mock_exit.assert_called_with(1)
-
-
-
-
 
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
@@ -206,9 +159,9 @@ def test_sse_healthcheck():
     """
 
     async def run_test():
-        from plane_agent.mcp_server import get_mcp_instance
+        from agent_connector_sdk.connector import build_server
 
-        mcp, _, _ = get_mcp_instance()
+        _, mcp = build_server("plane_agent", command_args=[])
 
         # Introspect Starlette routes
         routes = []
