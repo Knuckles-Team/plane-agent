@@ -31,8 +31,8 @@ _BINDING = IngestBinding(connector=_SOURCE, stream=_DOMAIN)
 
 def _to_entity(record: dict[str, Any]) -> Entity:
     return Entity(
-        id=record.get("id"),
-        node_type=record.get("node_type"),
+        id=record.get("id") or "",
+        node_type=record.get("node_type") or "",
         properties={k: v for k, v in record.items() if k not in ("id", "node_type")},
     )
 
