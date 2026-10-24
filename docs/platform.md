@@ -25,9 +25,9 @@ services:
     image: artifacts.plane.so/makeplane/plane-aio-community:stable
     environment:
       DOMAIN_NAME: "plane.example.invalid"
-      DATABASE_URL: "postgresql://plane:plane@plane-db:5432/plane"
+      DATABASE_URL: "postgresql://USER:PASSWORD@plane-db:5432/plane"
       REDIS_URL: "redis://plane-redis:6379"
-      AMQP_URL: "amqp://plane:plane@plane-mq:5672/plane"
+      AMQP_URL: "amqp://USER:PASSWORD@plane-mq:5672/plane"
       FILE_SIZE_LIMIT: "10485760"
       AWS_REGION: "us-east-1"
       AWS_ACCESS_KEY_ID: "${MINIO_ACCESS_KEY}"

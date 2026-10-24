@@ -183,4 +183,4 @@ def test_ingest_binding_connector_is_the_sdk_connector_identity() -> None:
     from plane_agent import connector_sources, kg_ingest
 
     assert kg_ingest._BINDING.connector == connector_name("plane_agent") == "plane-mcp"
-    assert connector_sources.CONNECTOR == kg_ingest._BINDING.connector
+    assert connector_name("plane_agent") == kg_ingest._BINDING.connector
