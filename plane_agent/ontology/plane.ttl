@@ -82,6 +82,20 @@
     rdfs:domain :Issue ;
     rdfs:range :Label .
 
+:projectLedBy a owl:ObjectProperty ;
+    rdfs:label "project led by" ;
+    rdfs:comment "Links a SoftwareProject to its project lead (projects.project_lead), the accountable owner." ;
+    rdfs:subPropertyOf :ownedBy ;
+    rdfs:domain :SoftwareProject ;
+    rdfs:range :Person .
+
+:workItemOfProject a owl:ObjectProperty ;
+    rdfs:label "work item of project" ;
+    rdfs:comment "Links a work item to the SoftwareProject it belongs to (work_items.project)." ;
+    rdfs:subPropertyOf :belongsToProject ;
+    rdfs:domain :Issue ;
+    rdfs:range :SoftwareProject .
+
 :assignedTo a owl:ObjectProperty ;
     rdfs:label "assigned to" ;
     rdfs:comment "Links an Issue to a Person responsible for it." ;

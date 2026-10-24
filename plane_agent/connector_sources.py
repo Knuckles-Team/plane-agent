@@ -24,6 +24,14 @@ SOURCES = (
         server="plane-mcp",
         text_field="description",
         title_field="name",
+        edges=[
+            {
+                "relationship": "projectLedBy",
+                "target_field": "project_lead",
+                "target_type": "Person",
+                "target_id_template": "user:{id}",
+            },
+        ],
     ),
     source_meta(
         tool="plane_list_work_items",
@@ -41,6 +49,21 @@ SOURCES = (
         server="plane-mcp",
         text_field="description_html",
         title_field="name",
+        edges=[
+            {
+                "relationship": "assignedTo",
+                "target_field": "assignees",
+                "target_type": "Person",
+                "target_id_template": "user:{id}",
+            },
+            {
+                "relationship": "workItemOfProject",
+                "target_field": "project",
+                "target_type": "SoftwareProject",
+                "target_id_template": "{id}",
+                "target_stream": "projects",
+            },
+        ],
     ),
     source_meta(
         tool="plane_list_states",
@@ -94,6 +117,10 @@ SCHEMA_MAPPINGS = {
         "field_sets": ["fields_1"],
         "ontology_class": "Concept",
     },
+    "Person": {
+        "fields": {},
+        "ontology_class": "Person",
+    },
     "SoftwareProject": {
         "field_sets": ["fields_1"],
         "ontology_class": "SoftwareProject",
@@ -124,6 +151,11 @@ RESOURCES = (
         "id_prefix": "planemodule",
         "label": "Module",
         "name": "PlaneModule",
+    },
+    {
+        "id_prefix": "person",
+        "label": "Person",
+        "name": "Person",
     },
     {
         "id_prefix": "projectstate",
