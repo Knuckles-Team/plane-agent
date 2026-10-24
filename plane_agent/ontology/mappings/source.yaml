@@ -1,5 +1,5 @@
 schema_version: '1'
-connector: plane-agent
+connector: plane-mcp
 ontology_source: plane
 sync:
 - preset: plane-projects

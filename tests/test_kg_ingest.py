@@ -175,3 +175,12 @@ async def test_empty_ingest_entities_is_rejected(ingest):
     service, _transport = ingest
     with pytest.raises(IngestError, match="at least one entity"):
         await ingest_entities([], ingest=service)
+
+
+def test_ingest_binding_connector_is_the_sdk_connector_identity() -> None:
+    from agent_connector_sdk.connector_identity import connector_name
+
+    from plane_agent import connector_sources, kg_ingest
+
+    assert kg_ingest._BINDING.connector == connector_name("plane_agent") == "plane-mcp"
+    assert connector_sources.CONNECTOR == kg_ingest._BINDING.connector

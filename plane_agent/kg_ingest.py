@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from agent_connector_sdk.connector_identity import connector_name
 from agent_connector_sdk.ingest import (
     ChangeSet,
     Entity,
@@ -23,7 +24,7 @@ from agent_connector_sdk.ingest import (
 
 logger = logging.getLogger("plane_agent.kg")
 
-_SOURCE = "plane-agent"
+_SOURCE = connector_name("plane_agent")
 _DOMAIN = "plane"
 _BINDING = IngestBinding(connector=_SOURCE, stream=_DOMAIN)
 
