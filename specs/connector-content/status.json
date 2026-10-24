@@ -57,7 +57,7 @@
       "title": "Owner and assignee edges",
       "delivery_state": "VERIFIED",
       "landed_in": [
-        "52459d59621b"
+        "c23b4876d7ed"
       ],
       "verified_by": [
         "tests/test_catalog_edges.py:23",
