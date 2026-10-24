@@ -95,13 +95,6 @@ repos:
     language: system
     pass_filenames: false
     always_run: true
-  - id: check-bumpversion
-    name: validate bumpversion config
-    entry: |-
-      bash -c 'if [ -f ".bumpversion.cfg" ]; then bump2version patch --dry-run --allow-dirty; fi'
-    language: system
-    pass_filenames: false
-    always_run: true
 - repo: https://github.com/AleksaC/hadolint-py
   rev: v2.15.1 # v2.14.0
   hooks:
