@@ -27,8 +27,7 @@
       "landed_in": [],
       "verified_by": [
         "tests/test_ontology_parent_link.py:10"
-      ],
-      "priority": 0
+      ]
     },
     {
       "id": "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003",
@@ -39,8 +38,7 @@
         "tests/test_ingest_sources.py:15",
         "tests/test_ingest_sources.py:35",
         "tests/test_ingest_sources.py:57"
-      ],
-      "priority": 0
+      ]
     },
     {
       "id": "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R004",
@@ -49,8 +47,7 @@
       "landed_in": [],
       "verified_by": [
         "tests/test_cq_paths.py:13"
-      ],
-      "priority": 0
+      ]
     },
     {
       "id": "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R005",
@@ -64,15 +61,5 @@
         "tests/test_catalog_edges.py:39"
       ]
     }
-  ],
-  "frontier": [
-    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R002",
-    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003",
-    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R004"
-  ],
-  "unserved": [
-    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R002",
-    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003",
-    "CONN-PLANE-AGENT-CONNECTOR-CONTENT-R004"
   ]
 }
