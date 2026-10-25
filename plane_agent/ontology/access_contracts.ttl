@@ -1,0 +1,126 @@
+@prefix ac: <https://knuckles-team.github.io/agent-connector-sdk/access#> .
+@prefix pl: <http://knuckles.team/kg#> .
+
+# Read contracts for the classes declared by plane.ttl.  The MCP tools expose
+# both read and write actions, but these mappings select the list/retrieve
+# routes only.  The source classes remain distinct from any unapproved hub
+# crosswalk; in particular, Plane Issue is not asserted to be an Incident.
+
+pl:workspaceAccess a ac:AccessContract ;
+    ac:classIri pl:Workspace ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "workspace" ;
+    ac:keyField "slug" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_workspaces" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "none" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 300 ;
+    ac:costHint "low" .
+
+pl:softwareProjectAccess a ac:AccessContract ;
+    ac:classIri pl:SoftwareProject ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "project" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_projects" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "cursor" ;
+    ac:pushdown "filter", "limit", "sort" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 300 ;
+    ac:costHint "low" .
+
+pl:softwareProjectIdentifierBinding a ac:PropertyBinding ;
+    ac:contract pl:softwareProjectAccess ; ac:property pl:identifier ; ac:field "identifier" .
+
+pl:issueAccess a ac:AccessContract ;
+    ac:classIri pl:Issue ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "work_item" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_work_items" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "cursor" ;
+    ac:pushdown "filter", "limit", "sort" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 60 ;
+    ac:costHint "medium" .
+
+pl:issueSequenceIdBinding a ac:PropertyBinding ;
+    ac:contract pl:issueAccess ; ac:property pl:sequenceId ; ac:field "sequence_id" .
+
+pl:issuePriorityBinding a ac:PropertyBinding ;
+    ac:contract pl:issueAccess ; ac:property pl:priority ; ac:field "priority" .
+
+pl:cycleAccess a ac:AccessContract ;
+    ac:classIri pl:Cycle ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "cycle" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_cycles" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "cursor" ;
+    ac:pushdown "filter", "limit", "sort" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 300 ;
+    ac:costHint "medium" .
+
+pl:cycleStartDateBinding a ac:PropertyBinding ;
+    ac:contract pl:cycleAccess ; ac:property pl:startDate ; ac:field "start_date" .
+
+pl:cycleEndDateBinding a ac:PropertyBinding ;
+    ac:contract pl:cycleAccess ; ac:property pl:endDate ; ac:field "end_date" .
+
+pl:moduleAccess a ac:AccessContract ;
+    ac:classIri pl:PlaneModule ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "module" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_modules" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "cursor" ;
+    ac:pushdown "filter", "limit", "sort" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 300 ;
+    ac:costHint "medium" .
+
+pl:projectStateAccess a ac:AccessContract ;
+    ac:classIri pl:ProjectState ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "state" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_states" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "cursor" ;
+    ac:pushdown "filter", "limit", "sort" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 300 ;
+    ac:costHint "low" .
+
+pl:labelAccess a ac:AccessContract ;
+    ac:classIri pl:Label ;
+    ac:sourceId "plane-agent" ;
+    ac:entity "label" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "plane_labels" ;
+    ac:parameter "action", "params_json" ;
+    ac:pagination "cursor" ;
+    ac:pushdown "filter", "limit", "sort" ;
+    ac:authRef "env://PLANE_API_KEY" ;
+    ac:rateLimitPerMinute 60 ;
+    ac:freshnessSeconds 300 ;
+    ac:costHint "low" .
