@@ -50,6 +50,7 @@ def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
         "version": 1,
         "sources": [{"glob": "specs/*/status.json", "kind": "spec"}],
     }
+    assert not (ROOT / ".github/workflows/docs.yml").exists()
 
 
 def test_development_skill_is_source_backed():
