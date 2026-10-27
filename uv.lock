@@ -997,7 +997,7 @@ wheels = [
 
 [[package]]
 name = "plane-agent"
-version = "2.3.13"
+version = "2.3.14"
 source = { editable = "." }
 dependencies = [
     { name = "agent-connector-sdk", extra = ["mcp"] },

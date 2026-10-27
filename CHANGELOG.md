@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.14] - 2026-10-27
+
+### Added
+- Add the Plane rapid-delivery development skill, Pages spec dashboard wiring,
+  and focused publication contract tests.
+
 ## [2.3.12] - 2026-10-24
 
 ### Added
