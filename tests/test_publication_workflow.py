@@ -7,7 +7,6 @@ import re
 import tomllib
 from pathlib import Path
 
-import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,7 +17,6 @@ def _actions_on(workflow: dict):
 
 
 def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
-
 
     config = json.loads((ROOT / ".github/spec-dashboard.json").read_text())
     assert config == {
@@ -61,9 +59,7 @@ def test_development_skill_is_source_backed():
 
     project_data = tomllib.loads((ROOT / "pyproject.toml").read_text())
     project = project_data["project"]
-    package_data = project_data["tool"]["setuptools"]["package-data"][
-        "plane_agent"
-    ]
+    package_data = project_data["tool"]["setuptools"]["package-data"]["plane_agent"]
     assert "skills/**" in package_data
     assert re.search(
         rf'^name = "plane-agent"\nversion = "{re.escape(project["version"])}"$',
