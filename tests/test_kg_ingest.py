@@ -27,7 +27,9 @@ class _FakeTransport:
         self.requests: list[Any] = []
 
     async def source_status(self, connector: str, stream: str) -> Any:  # noqa: V107
-        return SimpleNamespace(accepted_checkpoint=None)
+        return SimpleNamespace(
+            connector=connector, stream=stream, accepted_checkpoint=None
+        )
 
     async def submit(self, request: Any) -> Any:
         self.requests.append(request)
@@ -55,7 +57,11 @@ def _node(transport: _FakeTransport, record_id: str) -> dict[str, Any]:
 
 def _edges(transport: _FakeTransport) -> list[tuple[str, str, str]]:
     return [
-        (rel.source.record_id, rel.target.record_id, rel.relation_reference.rsplit("/", 1)[-1])
+        (
+            rel.source.record_id,
+            rel.target.record_id,
+            rel.relation_reference.rsplit("/", 1)[-1],
+        )
         for rel in transport.requests[-1].relationships
     ]
 
@@ -96,9 +102,11 @@ async def test_ingest_projects_maps_project_and_workspace(ingest):
     assert proj["identifier"] == "DEMO"
     assert proj["externalToolId"] == "p1"
     assert _node(transport, "plane:workspace:acme")
-    assert ("plane:softwareproject:p1", "plane:workspace:acme", "inWorkspace") in _edges(
-        transport
-    )
+    assert (
+        "plane:softwareproject:p1",
+        "plane:workspace:acme",
+        "inWorkspace",
+    ) in _edges(transport)
 
 
 @pytest.mark.asyncio
@@ -140,10 +148,14 @@ async def test_ingest_work_items_maps_issue_and_links(ingest):
 @pytest.mark.asyncio
 async def test_ingest_work_items_uses_fallback_project_id(ingest):
     service, transport = ingest
-    await ingest_work_items([{"id": "wi9", "name": "Task"}], project_id="pX", ingest=service)
-    assert ("plane:issue:wi9", "plane:softwareproject:pX", "belongsToProject") in _edges(
-        transport
+    await ingest_work_items(
+        [{"id": "wi9", "name": "Task"}], project_id="pX", ingest=service
     )
+    assert (
+        "plane:issue:wi9",
+        "plane:softwareproject:pX",
+        "belongsToProject",
+    ) in _edges(transport)
 
 
 @pytest.mark.asyncio
@@ -165,9 +177,11 @@ async def test_ingest_cycles_maps_cycle_and_project_link(ingest):
     cyc = _node(transport, "plane:cycle:cy1")
     assert cyc["startDate"] == "2026-07-07"
     assert cyc["endDate"] == "2026-07-20"
-    assert ("plane:cycle:cy1", "plane:softwareproject:p1", "belongsToProject") in _edges(
-        transport
-    )
+    assert (
+        "plane:cycle:cy1",
+        "plane:softwareproject:p1",
+        "belongsToProject",
+    ) in _edges(transport)
 
 
 @pytest.mark.asyncio
@@ -180,7 +194,7 @@ async def test_empty_ingest_entities_is_rejected(ingest):
 def test_ingest_binding_connector_is_the_sdk_connector_identity() -> None:
     from agent_connector_sdk.connector_identity import connector_name
 
-    from plane_agent import connector_sources, kg_ingest
+    from plane_agent import kg_ingest
 
     assert kg_ingest._BINDING.connector == connector_name("plane_agent") == "plane-mcp"
     assert connector_name("plane_agent") == kg_ingest._BINDING.connector
