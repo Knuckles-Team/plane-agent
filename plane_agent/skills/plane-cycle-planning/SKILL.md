@@ -11,7 +11,7 @@ description: >-
 license: MIT
 tags: [plane, cycles, sprints, modules, planning, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Plane Cycle & Module Planning

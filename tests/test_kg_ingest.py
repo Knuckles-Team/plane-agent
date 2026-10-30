@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
+from scion_sdk.ingest import IngestError, KnowledgeIngest
 
 from plane_agent.kg_ingest import (
     ingest_cycles,
@@ -192,7 +192,7 @@ async def test_empty_ingest_entities_is_rejected(ingest):
 
 
 def test_ingest_binding_connector_is_the_sdk_connector_identity() -> None:
-    from agent_connector_sdk.connector_identity import connector_name
+    from scion_sdk.connector_identity import connector_name
 
     from plane_agent import kg_ingest
 

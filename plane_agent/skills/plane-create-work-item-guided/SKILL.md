@@ -12,7 +12,7 @@ description: >-
 license: MIT
 tags: [plane, create-work-item, work-item-types, properties, custom-fields, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Guided Plane Work Item Creation

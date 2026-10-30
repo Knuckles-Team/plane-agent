@@ -14,7 +14,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from agent_connector_sdk.exceptions import AuthError
+from scion_sdk.exceptions import AuthError
 
 
 @pytest.mark.concept("AU-ECO.mcp.fastmcp-middleware")
@@ -41,7 +41,7 @@ def test_auth_edge_cases(mock_session):
     with pytest.raises(RuntimeError, match="AUTHENTICATION ERROR"):
         get_client(api_key="xyz", workspace_slug="abc")
 
-    from agent_connector_sdk.exceptions import ParameterError
+    from scion_sdk.exceptions import ParameterError
 
     mock_session.status_code = 404
     with pytest.raises(ParameterError, match="Workspace slug 'abc' not found"):
@@ -101,7 +101,7 @@ def get_all_mcp_tool_names():
     """Every tool the MCP server registers (one per API operation)."""
     import asyncio
 
-    from agent_connector_sdk.connector import build_server
+    from scion_sdk.connector import build_server
 
     _, mcp = build_server("plane_agent", command_args=[])
     return sorted(tool.name for tool in asyncio.run(mcp.list_tools()))
@@ -114,7 +114,7 @@ async def test_all_mcp_tools(tool_name):
 
     CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
-    from agent_connector_sdk.connector import build_server
+    from scion_sdk.connector import build_server
 
     _, mcp = build_server("plane_agent", command_args=[])
     tool = next(t for t in await mcp.list_tools() if t.name == tool_name)
@@ -159,7 +159,7 @@ def test_sse_healthcheck():
     """
 
     async def run_test():
-        from agent_connector_sdk.connector import build_server
+        from scion_sdk.connector import build_server
 
         _, mcp = build_server("plane_agent", command_args=[])
 
@@ -205,7 +205,7 @@ def test_create_epic_edge_cases(mock_session):
 
     CONCEPT:AU-ECO.mcp.fastmcp-middleware
     """
-    from agent_connector_sdk.exceptions import ParameterError
+    from scion_sdk.exceptions import ParameterError
 
     from plane_agent.api_client import Api
 

@@ -25,7 +25,7 @@ logs, and skill content.
 
 ## Repository map and runtime boundary
 
-- `plane_agent/__init__.py` creates the `agent-connector-sdk` `Connector` with
+- `plane_agent/__init__.py` creates the `scion-sdk` `Connector` with
   `Api`, `get_client`, and `plane_agent.mcp_server` as its tool module.
   Preserve the connector identity and the `plane-mcp` entry points in
   `pyproject.toml`.

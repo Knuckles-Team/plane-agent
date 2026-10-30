@@ -12,7 +12,7 @@ description: >-
 license: MIT
 tags: [plane, issues, work-items, project-tracking, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Plane Work Item Tracking

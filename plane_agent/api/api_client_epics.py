@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from typing import Any, cast
 
-from agent_connector_sdk.exceptions import ParameterError, require_auth
+from scion_sdk.exceptions import ParameterError, require_auth
 
 from plane_agent.api.api_client_base import BaseApiClient
 from plane_agent.plane_models import Response

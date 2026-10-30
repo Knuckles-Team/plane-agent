@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from agent_connector_sdk.ingest import load_declaration
-from agent_connector_sdk.mcp.tool_surface import operation_prefix
+from scion_sdk.ingest import load_declaration
+from scion_sdk.mcp.tool_surface import operation_prefix
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
