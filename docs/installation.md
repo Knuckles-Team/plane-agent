@@ -16,7 +16,7 @@ path that matches how the operator want to run it.
 pip install plane-agent
 ```
 
-The base install already pulls in `agent-connector-sdk`, so both the
+The base install already pulls in `scion-sdk`, so both the
 are available immediately, with Logfire tracing enabled.
 
 ### Optional extras

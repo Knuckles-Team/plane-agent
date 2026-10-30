@@ -5,9 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from agent_connector_sdk.ingest.live_declaration import load_declaration
-from agent_connector_sdk.ingest.model import EntityRef
-from agent_connector_sdk.ingest.source_sync import _edges  # noqa: PLC2701
+from scion_sdk.ingest.live_declaration import load_declaration
+from scion_sdk.ingest.model import EntityRef
+from scion_sdk.ingest.source_sync import _edges  # noqa: PLC2701
 
 import plane_agent
 

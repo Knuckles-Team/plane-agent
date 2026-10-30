@@ -11,7 +11,7 @@ description: >-
 license: MIT
 tags: [plane, knowledge-graph, ingestion, ontology, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Plane Knowledge-Graph Ingestion
@@ -28,7 +28,7 @@ nodes** — `:SoftwareProject`, `:Issue`, `:Cycle`, `:Workspace`, `:ProjectState
 ## When NOT to use
 - Operational reads/writes on Plane itself → `plane-work-item-tracking` /
   `plane-cycle-planning`.
-- Generic document-sync of many sources → the `agent-connector-sdk-source-integration`
+- Generic document-sync of many sources → the `scion-sdk-source-integration`
   skill drives the `plane-projects` mcp_tool preset instead.
 
 ## Prerequisites & environment
@@ -90,5 +90,5 @@ Ingest a project's cycles — `action="ingest_cycles"`:
 ## Related
 - **plane-work-item-tracking** / **plane-cycle-planning** — produce the records this
   skill mirrors into the graph.
-- **agent-connector-sdk-source-integration** — the fleet-wide `source_sync` path that
+- **scion-sdk-source-integration** — the fleet-wide `source_sync` path that
   consumes the `plane-projects` document preset.
