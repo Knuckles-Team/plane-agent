@@ -44,7 +44,7 @@ The fleet operator and the engine rely on this behaviour of `plane-agent`: `plan
 
 ### User Story 4 - Competency-question paths (Priority: P2)
 
-The fleet operator and the engine rely on this behaviour of `plane-agent`: `plane.ttl` declares `state` on `Issue` (the work-item type that the shared `WorkItem` parent carries `priority` and `state` for); `Workspace` extends `Namespace`, `Cycle` extends `Iteration`, `PlaneModule` (the Plane module, distinct from the code `Module`) extends `Collection` and `ProjectState` extends `Concept`; no `schema_mappings` entry has a null `ontology_class`. It is proven independently of the other stories.
+The fleet operator and the engine rely on this behaviour of `plane-agent`: `plane_agent/ontology/plane.ttl` declares `state` on `Issue` (the work-item type that the shared `WorkItem` parent carries `priority` and `state` for); `Workspace` extends `Namespace`, `Cycle` extends `Iteration`, `PlaneModule` (the Plane module, distinct from the code `Module`) extends `Collection` and `ProjectState` extends `Concept`; no `schema_mappings` entry has a null `ontology_class`. It is proven independently of the other stories.
 
 **Acceptance Scenarios**:
 
