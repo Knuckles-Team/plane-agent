@@ -14,78 +14,79 @@ metadata:
   author: Knuckles-Team
   version: '0.1.0'
 ---
-# Plane Cycle & Module Planning
 
-Domain-typed access to Plane **cycles** (time-boxed sprints) and **modules**
-(feature groupings) for iteration planning. Prefer these tools over ad-hoc HTTP —
-they carry Plane's cycle/module conventions and return cycle/module-shaped records.
+# Plane Cycle Planning
 
-## When to use
-- Create / read / update / delete a cycle (sprint) or module.
-- Add work items to, or remove them from, a cycle or module.
-- Transfer work items from one cycle to another.
-- Read the work-item roster of a cycle or module.
+Every step below is one typed tool call; there is no `action` or JSON-string argument. Resolve ids by name first, read before you change, and ask for approval before anything destructive.
 
-## When NOT to use
-- Creating or editing the work items themselves → `plane-work-item-tracking`.
-- Pushing cycles/work items into the knowledge graph → `plane-kg-ingestion`.
-- Epics, milestones, or initiatives → the `plane_epics` / `plane_milestones` /
-  `plane_initiatives` tools.
+## Plan cycle
 
-## Prerequisites & environment
-Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
+Create a cycle, fill it with work items, move leftovers and read what is in it.
 
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `PLANE_BASE_URL` | optional | API base (default `https://api.plane.so`) |
-| `PLANE_API_KEY` | ✅ | Plane API key (`x-api-key`) |
-| `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug |
-| `PLANE_SSL_VERIFY` | optional | TLS verification toggle |
-| `MCP_TOOL_MODE` | optional | `condensed` \| `verbose` \| `both` |
+1. `plane_create_cycle` (project_id, data)
+2. `plane_list_cycles` (project_id, params_json)
+3. `plane_retrieve_cycle` (project_id, cycle_id)
+4. `plane_update_cycle` (project_id, cycle_id, data)
+5. `plane_add_work_items_to_cycle` (project_id, cycle_id, issue_ids)
+6. `plane_list_cycle_work_items` (project_id, cycle_id, params_json)
+7. `plane_remove_work_item_from_cycle` (project_id, cycle_id, work_item_id, confirm)
+8. `plane_transfer_cycle_work_items` (project_id, cycle_id, new_cycle_id)
+9. `plane_list_archived_cycles` (project_id, params_json)
 
-## Tools & actions
-Prefer the **condensed** tools; each takes `action` + a `params_json` **JSON string**.
+## Plan modules and milestones
 
-| Condensed tool | Key actions |
-|----------------|-------------|
-| `plane_cycles` | `list_cycles`, `create_cycle`, `retrieve_cycle`, `update_cycle`, `delete_cycle`, `list_cycle_work_items`, `add_work_items_to_cycle` |
-| `plane_modules` | `list_modules`, `create_module`, `retrieve_module`, `update_module`, `delete_module`, `list_module_work_items`, `add_work_items_to_module` |
+Group work into modules and milestones.
 
-### Key parameters
-- `project_id` — required for every call.
-- `cycle_id` / `module_id` — required for retrieve/update/delete and roster calls.
-- `issue_ids` — a **list** of work-item ids for `add_work_items_to_*`.
-- `data` — object for create/update (`name`, `start_date`, `end_date`, …).
+1. `plane_create_module` (project_id, data)
+2. `plane_list_modules` (project_id, params_json)
+3. `plane_update_module` (project_id, module_id, data)
+4. `plane_add_work_items_to_module` (project_id, module_id, issue_ids)
+5. `plane_list_module_work_items` (project_id, module_id, params_json)
+6. `plane_remove_work_item_from_module` (project_id, module_id, work_item_id, confirm)
+7. `plane_archive_module` (project_id, module_id)
+8. `plane_unarchive_module` (project_id, module_id)
+9. `plane_list_archived_modules` (project_id, params_json)
+10. `plane_create_milestone` (project_id, data)
+11. `plane_list_milestones` (project_id, params_json)
+12. `plane_update_milestone` (project_id, milestone_id, data)
+13. `plane_add_work_items_to_milestone` (project_id, milestone_id, issue_ids)
+14. `plane_list_milestone_work_items` (project_id, milestone_id, params_json)
+15. `plane_remove_work_items_from_milestone` (project_id, milestone_id, issue_ids, confirm)
 
-## Recipes (`params_json`)
-Create a two-week cycle:
-```json
-{"project_id":"<project_uuid>","data":{"name":"Sprint 12","start_date":"2026-07-07","end_date":"2026-07-20"}}
-```
-List a project's cycles:
-```json
-{"project_id":"<project_uuid>"}
-```
-Add work items to a cycle:
-```json
-{"project_id":"<project_uuid>","cycle_id":"<cycle_uuid>","issue_ids":["<id1>","<id2>"]}
-```
-Read a cycle's work-item roster:
-```json
-{"project_id":"<project_uuid>","cycle_id":"<cycle_uuid>"}
-```
+## Plan epics and initiatives
 
-## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
-- `add_work_items_to_cycle` / `add_work_items_to_module` take `issue_ids` as a JSON
-  **array**, not a comma string; the client maps it to Plane's `issues` field.
-- `start_date` / `end_date` are ISO-8601 dates (`YYYY-MM-DD`); an end before start is
-  rejected by Plane.
-- A work item can sit in at most one cycle at a time — use `transfer_cycle_work_items`
-  (verbose surface) to move it, or remove-then-add.
-- All ids are workspace-scoped by `PLANE_WORKSPACE_SLUG`.
+Plan epics and initiatives above individual work items.
 
-## Related
-- **plane-work-item-tracking** — create and triage the work items you schedule here.
-- **plane-kg-ingestion** — mirror cycles into the knowledge graph as typed `:Cycle`
-  nodes linked to their `:SoftwareProject`.
+1. `plane_create_epic` (project_id, data)
+2. `plane_list_epics` (project_id, params_json)
+3. `plane_retrieve_epic` (project_id, epic_id)
+4. `plane_update_epic` (project_id, epic_id, data)
+5. `plane_create_initiative` (data)
+6. `plane_list_initiatives` (per_page, cursor, order_by)
+7. `plane_retrieve_initiative` (initiative_id)
+8. `plane_update_initiative` (initiative_id, data)
+
+## Retire plane objects
+
+Delete work items, comments, links, cycles, modules, epics, initiatives, milestones, states or a project after approval.
+
+1. `plane_delete_work_item` (project_id, work_item_id, confirm)
+2. `plane_delete_work_item_comment` (project_id, work_item_id, comment_id, confirm)
+3. `plane_delete_work_item_link` (project_id, work_item_id, link_id, confirm)
+4. `plane_delete_cycle` (project_id, cycle_id, confirm)
+5. `plane_delete_module` (project_id, module_id, confirm)
+6. `plane_delete_epic` (project_id, epic_id, confirm)
+7. `plane_delete_initiative` (initiative_id, confirm)
+8. `plane_delete_milestone` (project_id, milestone_id, confirm)
+9. `plane_delete_state` (project_id, state_id, confirm)
+10. `plane_delete_project` (project_id, confirm)
+11. `plane_delete_intake_work_item` (project_id, work_item_id, confirm)
+12. `plane_delete_work_log` (project_id, work_item_id, work_log_id, confirm)
+13. `plane_delete_work_item_property` (project_id, type_id, work_item_property_id, confirm)
+14. `plane_delete_work_item_type` (project_id, work_item_type_id, confirm)
+
+## Guardrails
+
+- Never print tokens, passwords or webhook secrets.
+- Public or destructive actions need the requester's confirmation of the target and text.
+- Report ids (and refusal codes) for every call.

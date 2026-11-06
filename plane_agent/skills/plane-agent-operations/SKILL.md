@@ -7,27 +7,36 @@ description: >-
 
 # Plane Agent Operations
 
-Use the provider's governed MCP tools through Arbora delegation.
+Every step below is one typed tool call; there is no `action` or JSON-string argument. Resolve ids by name first, read before you change, and ask for approval before anything destructive.
 
-## Workflow
+## Verify workspace
 
-1. Establish the verified GraphSession and tenant before discovery or retrieval.
-2. Discover the current condensed tool surface; never assume a stale tool name or schema.
-3. Prefer read-only inspection first. For changes, present impact and use the provider's
-   dry-run or preview mode when available.
-4. Execute mutations as fenced WorkItems so retries remain idempotent and auditable.
-5. Ingest source data only through the signed connector preset and ChangeEnvelope path.
-6. Verify the durable result and its trace/evidence before reporting completion.
+Confirm the credential, the workspace and its features.
 
-## Safety contract
+1. `plane_get_me`
+2. `plane_get_workspace`
+3. `plane_get_workspace_members`
+4. `plane_get_workspace_features`
 
-- Never persist credentials, endpoints, raw personal identifiers, hostnames, or local paths.
-- Resolve TLS trust and verification from environment/configuration; never hardcode bypasses.
-- Treat unknown ACL, tenant, schema, or tool-contract state as a hard failure.
-- Require explicit approval for destructive, externally visible, or irreversible actions.
-- Keep runtime traces policy-scoped and privacy-sanitized.
+## Configure project model
 
-## Specialized workflows
+Shape a project's states, labels, types and properties.
 
-Read [the workflow catalog](references/catalog.md) only when the request needs a
-provider-specific procedure, parameter map, script, or reference asset.
+1. `plane_list_states` (project_id, params_json)
+2. `plane_create_state` (project_id, data)
+3. `plane_retrieve_state` (project_id, state_id)
+4. `plane_update_state` (project_id, state_id, data)
+5. `plane_create_label` (project_id, data)
+6. `plane_list_work_item_types` (project_id)
+7. `plane_create_work_item_type` (project_id, data)
+8. `plane_update_work_item_type` (project_id, work_item_type_id, data)
+9. `plane_list_work_item_properties` (project_id, type_id, params_json)
+10. `plane_create_work_item_property` (project_id, type_id, data)
+11. `plane_update_work_item_property` (project_id, type_id, work_item_property_id, data)
+12. `plane_update_project_features` (project_id, data)
+
+## Guardrails
+
+- Never print tokens, passwords or webhook secrets.
+- Public or destructive actions need the requester's confirmation of the target and text.
+- Report ids (and refusal codes) for every call.
