@@ -4,7 +4,7 @@ skill_type: skill
 description: >-
   Track and manage Plane work items (issues) via the plane-agent MCP server —
   list, search, read, create, update and delete work items, and manage their
-  comments, links, relations and work logs with the domain-typed tool. Use when
+  comments, links, relations and work logs with the typed tools. Use when
   the agent must triage a project's backlog, open or update an issue, comment on
   or link work items, or log time. Do NOT use for sprint/cycle or module planning
   (use plane-cycle-planning) or for pushing Plane data into the knowledge graph
@@ -15,81 +15,98 @@ metadata:
   author: Knuckles-Team
   version: '0.1.0'
 ---
+
 # Plane Work Item Tracking
 
-Domain-typed access to Plane **work items** (issues) for backlog triage and
-day-to-day tracking. Prefer these tools over ad-hoc HTTP — they carry Plane's
-work-item field conventions and return work-item-shaped records.
+Every step below is one typed tool call; there is no `action` or JSON-string argument. Resolve ids by name first, read before you change, and ask for approval before anything destructive.
 
-## When to use
-- List / search / triage a project's work items.
-- Read a single work item by id or by project identifier + sequence number.
-- Create, update, or delete a work item.
-- Add comments, links, or relations; read activity; create work logs.
+## Browse projects
 
-## When NOT to use
-- Cycle (sprint) or module planning → `plane-cycle-planning`.
-- Ingesting Plane records into the knowledge graph → `plane-kg-ingestion`.
-- Workspace/member administration, states, labels, pages → the corresponding
-  `plane_workspaces` / `plane_states` / `plane_labels` / `plane_pages` tools.
+Find a project and read its members, features, states and labels.
 
-## Prerequisites & environment
-Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
+1. `plane_list_projects` (per_page, cursor, order_by)
+2. `plane_retrieve_project` (project_id)
+3. `plane_get_project_members` (project_id, params_json)
+4. `plane_get_project_features` (project_id)
+5. `plane_list_states` (project_id, params_json)
+6. `plane_list_labels` (project_id, params_json)
 
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `PLANE_BASE_URL` | optional | API base (default `https://api.plane.so`) |
-| `PLANE_API_KEY` | ✅ | Plane API key (`x-api-key`) |
-| `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug |
-| `PLANE_SSL_VERIFY` | optional | TLS verification toggle |
-| `MCP_TOOL_MODE` | optional | `condensed` \| `verbose` \| `both` — selects the condensed surface below vs. the 1:1 verbose tools |
+## Find work items
 
-## Tools & actions
-Prefer the **condensed** tool; it takes `action` + a `params_json` **JSON string**
-whose keys are passed straight to the client method.
+Find work items by filter, text or identifier and read one.
 
-| Condensed tool | Key actions |
-|----------------|-------------|
-| `plane_work_items` | `list_work_items`, `search_work_items`, `retrieve_work_item`, `retrieve_work_item_by_identifier`, `create_work_item`, `update_work_item`, `delete_work_item`, `list_work_item_comments`, `create_work_item_comment`, `list_work_item_links`, `create_work_item_link`, `list_work_item_relations`, `list_work_item_activities`, `list_work_logs`, `create_work_log` |
+1. `plane_list_work_items` (project_id, params_json)
+2. `plane_search_work_items` (query, params_json)
+3. `plane_advanced_search_work_items` (data)
+4. `plane_retrieve_work_item` (project_id, work_item_id)
+5. `plane_retrieve_work_item_by_identifier` (project_identifier, issue_identifier)
 
-### Key parameters
-- `project_id` — required for every list/create call.
-- `work_item_id` — required for retrieve/update/delete and sub-resource calls.
-- `project_identifier` + `issue_identifier` — for `retrieve_work_item_by_identifier`
-  (e.g. project key `PROJ` + sequence `42`).
-- `data` — object of field→value for create/update (`name`, `description`,
-  `priority`, `state`, `assignees`, …).
+## Update work item
 
-## Recipes (`params_json`)
-List a project's work items (cursor pagination survives in the raw envelope):
-```json
-{"project_id":"<project_uuid>","per_page":50}
-```
-Retrieve one by human identifier (project key + sequence):
-```json
-{"project_identifier":"PROJ","issue_identifier":42}
-```
-Create a work item:
-```json
-{"project_id":"<project_uuid>","data":{"name":"VPN gateway unreachable","priority":"high","description":"Reported by HQ"}}
-```
-Comment on a work item:
-```json
-{"project_id":"<project_uuid>","work_item_id":"<id>","data":{"comment_html":"<p>Investigating.</p>"}}
-```
+Change a work item and leave a comment with the reason.
 
-## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
-- `priority` is a choice value: `urgent`, `high`, `medium`, `low`, or `none`.
-- `state` and `assignees` expect Plane **ids** (state uuid, member ids), not names —
-  resolve them via `plane_states` / `plane_workspaces` first.
-- `list_work_items` returns the raw Plane envelope (`results`, `next_cursor`,
-  `count`, …); page with the cursor fields rather than assuming a flat list.
-- Every call is workspace-scoped by `PLANE_WORKSPACE_SLUG`; a `project_id` from a
-  different workspace 404s.
+1. `plane_retrieve_work_item_by_identifier` (project_identifier, issue_identifier)
+2. `plane_update_work_item` (project_id, work_item_id, data)
+3. `plane_create_work_item_comment` (project_id, work_item_id, data)
+4. `plane_list_work_item_comments` (project_id, work_item_id, params_json)
+5. `plane_list_work_item_activities` (project_id, work_item_id, params_json)
 
-## Related
-- **plane-cycle-planning** — schedule these work items into cycles and modules.
-- **plane-kg-ingestion** — mirror work items into the knowledge graph as typed
-  `:Issue` nodes (the `plane_ingest` tool, `ingest_work_items` action; also fires
-  automatically on `list_work_items`).
+## Link and relate work items
+
+Attach links and relate work items to each other.
+
+1. `plane_create_work_item_link` (project_id, work_item_id, data)
+2. `plane_list_work_item_links` (project_id, work_item_id, params_json)
+3. `plane_create_work_item_relation` (project_id, work_item_id, data)
+4. `plane_list_work_item_relations` (project_id, work_item_id)
+5. `plane_remove_work_item_relation` (project_id, work_item_id, related_issue, confirm)
+
+## Triage intake
+
+Review incoming intake requests and accept, edit or reject them.
+
+1. `plane_list_intake_work_items` (project_id, params_json)
+2. `plane_retrieve_intake_work_item` (project_id, work_item_id)
+3. `plane_create_intake_work_item` (project_id, data)
+4. `plane_update_intake_work_item` (project_id, work_item_id, data)
+
+## Track time
+
+Log time on work items and summarise it for a project.
+
+1. `plane_create_work_log` (project_id, work_item_id, data)
+2. `plane_list_work_logs` (project_id, work_item_id, params_json)
+3. `plane_update_work_log` (project_id, work_item_id, work_log_id, data)
+4. `plane_get_project_worklog_summary` (project_id)
+
+## Document in pages
+
+Write and read project pages.
+
+1. `plane_create_project_page` (project_id, data)
+2. `plane_retrieve_project_page` (project_id, page_id)
+
+## Retire plane objects
+
+Delete work items, comments, links, cycles, modules, epics, initiatives, milestones, states or a project after approval.
+
+1. `plane_delete_work_item` (project_id, work_item_id, confirm)
+2. `plane_delete_work_item_comment` (project_id, work_item_id, comment_id, confirm)
+3. `plane_delete_work_item_link` (project_id, work_item_id, link_id, confirm)
+4. `plane_delete_cycle` (project_id, cycle_id, confirm)
+5. `plane_delete_module` (project_id, module_id, confirm)
+6. `plane_delete_epic` (project_id, epic_id, confirm)
+7. `plane_delete_initiative` (initiative_id, confirm)
+8. `plane_delete_milestone` (project_id, milestone_id, confirm)
+9. `plane_delete_state` (project_id, state_id, confirm)
+10. `plane_delete_project` (project_id, confirm)
+11. `plane_delete_intake_work_item` (project_id, work_item_id, confirm)
+12. `plane_delete_work_log` (project_id, work_item_id, work_log_id, confirm)
+13. `plane_delete_work_item_property` (project_id, type_id, work_item_property_id, confirm)
+14. `plane_delete_work_item_type` (project_id, work_item_type_id, confirm)
+
+## Guardrails
+
+- Never print tokens, passwords or webhook secrets.
+- Public or destructive actions need the requester's confirmation of the target and text.
+- Report ids (and refusal codes) for every call.
