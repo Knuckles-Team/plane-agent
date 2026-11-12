@@ -9,7 +9,7 @@ import pytest
 
 pytestmark = pytest.mark.spec("CONN-PLANE-AGENT-CONNECTOR-CONTENT-R002")
 
-PARENT_IRI = "http://knuckles.team/kg"
+PARENT_IRI = "https://knuckles-team.github.io/ontology/core"
 ONTOLOGIES = sorted(
     (Path(__file__).resolve().parents[1] / "plane_agent" / "ontology").glob("*.ttl")
 )
@@ -19,15 +19,15 @@ SUBCLASS = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 # Parent classes of the medulla ontology that this connector links to or redeclares.
 PARENT_CLASSES = frozenset(
     (
-        "http://knuckles.team/kg#Namespace",
-        "http://knuckles.team/kg#Iteration",
-        "http://knuckles.team/kg#Collection",
-        "http://knuckles.team/kg#Concept",
-        "http://knuckles.team/kg#Module",
-        "http://knuckles.team/kg#Person",
-        "http://knuckles.team/kg#SoftwareProject",
-        "http://knuckles.team/kg#Tag",
-        "http://knuckles.team/kg#WorkItem",
+        "https://knuckles-team.github.io/ontology/core#Namespace",
+        "https://knuckles-team.github.io/ontology/core#Iteration",
+        "https://knuckles-team.github.io/ontology/core#Collection",
+        "https://knuckles-team.github.io/ontology/core#Concept",
+        "https://knuckles-team.github.io/ontology/core#Module",
+        "https://knuckles-team.github.io/ontology/core#Person",
+        "https://knuckles-team.github.io/ontology/connector/plane#SoftwareProject",
+        "https://knuckles-team.github.io/ontology/core#Tag",
+        "https://knuckles-team.github.io/ontology/core#WorkItem",
     )
 )
 # Classes for which the parent ontology has no fitting class yet. Each is a candidate for a new
