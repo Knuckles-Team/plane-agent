@@ -1,4 +1,4 @@
-@prefix ac: <https://knuckles-team.github.io/agent-connector-sdk/access#> .
+@prefix ac: <https://knuckles-team.github.io/scion-sdk/access#> .
 @prefix pl: <http://knuckles.team/kg#> .
 
 # Read contracts for the classes declared by plane.ttl.  The MCP tools expose

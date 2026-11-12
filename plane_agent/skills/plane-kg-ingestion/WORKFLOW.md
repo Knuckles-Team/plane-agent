@@ -1,10 +1,10 @@
 # Plane Kg Ingestion
 
-Natively mirror Plane data into the epistemic-graph knowledge graph as typed OWL nodes via the plane-agent MCP server — push projects (:SoftwareProject), work items (:Issue) and cycles (:Cycle) with their containment/assignment links. Use when the agent must ingest or refresh a project's tracking data in the KG for cross-source reasoning or semantic search. Do NOT use for operational CRUD/triage (use plane-work-item-tracking) or sprint planning (use plane-cycle-planning).
+Natively mirror Plane data into the medulla knowledge graph as typed OWL nodes via the plane-agent MCP server — push projects (:SoftwareProject), work items (:Issue) and cycles (:Cycle) with their containment/assignment links. Use when the agent must ingest or refresh a project's tracking data in the KG for cross-source reasoning or semantic search. Do NOT use for operational CRUD/triage (use plane-work-item-tracking) or sprint planning (use plane-cycle-planning).
 
 # Plane Knowledge-Graph Ingestion
 
-Push Plane records into the ONE epistemic-graph knowledge graph as **typed OWL
+Push Plane records into the ONE medulla knowledge graph as **typed OWL
 nodes** — `:SoftwareProject`, `:Issue`, `:Cycle`, `:Workspace`, `:ProjectState`,
 `:Person` — with their `:belongsToProject` / `:inWorkspace` / `:assignedTo` /
 `:hasState` / `:inCycle` links. Backs cross-source reasoning and semantic search.
@@ -21,7 +21,7 @@ nodes** — `:SoftwareProject`, `:Issue`, `:Cycle`, `:Workspace`, `:ProjectState
 
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`plane-agent`** MCP server. A
-reachable epistemic-graph engine is required for a real write; with no engine the
+reachable medulla engine is required for a real write; with no engine the
 tools **no-op** and return `{"ingested": null}` (safe to call anywhere).
 
 | Variable | Required | Notes |

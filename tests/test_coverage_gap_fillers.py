@@ -2,7 +2,7 @@ import os
 import sys
 
 # Keep AgentConfig hermetic during this module's startup coverage.
-os.environ["AGENT_UTILITIES_TESTING"] = "true"
+os.environ["MERISTEM_TESTING"] = "true"
 
 # Set dummy sys.argv before importing anything to prevent create_mcp_server parsing issues
 sys.argv = ["mcp_server.py"]
