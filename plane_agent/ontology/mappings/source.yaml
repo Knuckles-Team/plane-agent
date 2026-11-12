@@ -4,8 +4,7 @@ ontology_source: plane
 sync:
 - preset: plane-projects
   server: plane-mcp
-  tool: plane_projects
-  action: list_projects
+  tool: plane_list_projects
   records_path: data
   id_field: id
   title_field: name

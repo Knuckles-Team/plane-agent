@@ -30,7 +30,7 @@ def test_issue_carries_state_and_priority() -> None:
 @pytest.mark.parametrize(
     ("name", "parent"),
     (
-        ("Workspace", "Namespace"),
+        ("Workspace", "Collection"),
         ("Cycle", "Iteration"),
         ("PlaneModule", "Collection"),
         ("ProjectState", "Concept"),

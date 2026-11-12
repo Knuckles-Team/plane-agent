@@ -17,8 +17,8 @@ they carry Plane's cycle/module conventions and return cycle/module-shaped recor
 ## When NOT to use
 - Creating or editing the work items themselves → `plane-work-item-tracking`.
 - Pushing cycles/work items into the knowledge graph → `plane-kg-ingestion`.
-- Epics, milestones, or initiatives → the `plane_epics` / `plane_milestones` /
-  `plane_initiatives` tools.
+- Epics, milestones, or initiatives → the `plane_*_epic`, `plane_*_milestone` and
+  `plane_*_initiative` tools.
 
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
@@ -29,15 +29,10 @@ Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
 | `PLANE_API_KEY` | ✅ | Plane API key (`x-api-key`) |
 | `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug |
 | `PLANE_TLS_PROFILE` | optional | Named outbound TLS policy from AgentConfig |
-| `MCP_TOOL_MODE` | optional | `condensed` \| `verbose` \| `both` |
 
-## Tools & actions
-Prefer the **condensed** tools; each takes `action` + a `params_json` **JSON string**.
-
-| Condensed tool | Key actions |
-|----------------|-------------|
-| `plane_cycles` | `list_cycles`, `create_cycle`, `retrieve_cycle`, `update_cycle`, `delete_cycle`, `list_cycle_work_items`, `add_work_items_to_cycle` |
-| `plane_modules` | `list_modules`, `create_module`, `retrieve_module`, `update_module`, `delete_module`, `list_module_work_items`, `add_work_items_to_module` |
+## Tools
+Cycles: `plane_list_cycles`, `plane_create_cycle`, `plane_retrieve_cycle`, `plane_update_cycle`, `plane_delete_cycle`, `plane_list_cycle_work_items`, `plane_add_work_items_to_cycle`, `plane_transfer_cycle_work_items`.
+Modules: `plane_list_modules`, `plane_create_module`, `plane_retrieve_module`, `plane_update_module`, `plane_delete_module`, `plane_list_module_work_items`, `plane_add_work_items_to_module`.
 
 ### Key parameters
 - `project_id` — required for every call.
@@ -45,7 +40,7 @@ Prefer the **condensed** tools; each takes `action` + a `params_json` **JSON str
 - `issue_ids` — a **list** of work-item ids for `add_work_items_to_*`.
 - `data` — object for create/update (`name`, `start_date`, `end_date`, …).
 
-## Recipes (`params_json`)
+## Recipes (tool arguments)
 Create a two-week cycle:
 ```json
 {"project_id":"<project_uuid>","data":{"name":"Sprint 12","start_date":"2026-07-07","end_date":"2026-07-20"}}
@@ -64,13 +59,12 @@ Read a cycle's work-item roster:
 ```
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
 - `add_work_items_to_cycle` / `add_work_items_to_module` take `issue_ids` as a JSON
   **array**, not a comma string; the client maps it to Plane's `issues` field.
 - `start_date` / `end_date` are ISO-8601 dates (`YYYY-MM-DD`); an end before start is
   rejected by Plane.
-- A work item can sit in at most one cycle at a time — use `transfer_cycle_work_items`
-  (verbose surface) to move it, or remove-then-add.
+- A work item can sit in at most one cycle at a time — use `plane_transfer_cycle_work_items`
+  to move it, or remove-then-add.
 - All ids are workspace-scoped by `PLANE_WORKSPACE_SLUG`.
 
 ## Related

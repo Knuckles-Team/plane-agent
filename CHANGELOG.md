@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.18] - 2026-11-12
+
+### Removed
+- The thirteen action-routed tools (`plane_projects`, `plane_work_items`, `plane_cycles`, `plane_epics`, `plane_milestones`, `plane_modules`, `plane_states`, `plane_users`, `plane_workspaces`, `plane_initiatives`, `plane_intake`, `plane_labels`, `plane_pages`). Every action they routed to is already a typed per-operation tool (`plane_list_projects`, `plane_create_work_item`, ...), so callers switch to the typed name. The best-effort ingest that rode on the action-routed `list_*` calls is gone; the `plane_ingest_*` tools remain.
+
+### Changed
+- Read contracts and the source mapping name the typed list tools; the `Workspace` class extends the core `Collection` class; skills and docs describe the typed tools.
+
 ## [2.3.17] - 2026-11-06
 
 ### Changed

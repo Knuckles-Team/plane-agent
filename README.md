@@ -77,25 +77,6 @@ This table is auto-generated from the live server — do not edit by hand.
 
 <!-- MCP-TOOLS-TABLE:START -->
 
-#### Condensed action-routed tools (`MCP_TOOL_MODE=condensed`)
-
-| MCP Tool | Toggle Env Var | Description |
-|----------|----------------|-------------|
-| `plane_cycles` | `CYCLESTOOL` | Manage plane cycles operations. |
-| `plane_epics` | `EPICSTOOL` | Manage plane epics operations. |
-| `plane_ingest` | `KGTOOL` | Natively ingest Plane records into epistemic-graph as typed OWL nodes. |
-| `plane_initiatives` | `INITIATIVESTOOL` | Manage plane initiatives operations. |
-| `plane_intake` | `INTAKETOOL` | Manage plane intake operations. |
-| `plane_labels` | `LABELSTOOL` | Manage plane labels operations. |
-| `plane_milestones` | `MILESTONESTOOL` | Manage plane milestones operations. |
-| `plane_modules` | `MODULESTOOL` | Manage plane modules operations. |
-| `plane_pages` | `PAGESTOOL` | Manage plane pages operations. |
-| `plane_projects` | `PROJECTSTOOL` | Manage plane projects operations. |
-| `plane_states` | `STATESTOOL` | Manage plane states operations. |
-| `plane_users` | `USERSTOOL` | Manage plane users operations. |
-| `plane_work_items` | `WORK_ITEMSTOOL` | Manage plane work items operations. |
-| `plane_workspaces` | `WORKSPACESTOOL` | Manage plane workspaces operations. |
-
 #### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
 
 <details>
@@ -208,7 +189,7 @@ This table is auto-generated from the live server — do not edit by hand.
 
 </details>
 
-_14 action-routed tool(s) · 102 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (**`intent` default** — the six verb-tools, granular set loaded on demand · `condensed` action-routed · `verbose` 1:1 · `both`). Auto-generated — do not edit._
+_102 typed per-operation tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (**`intent` default** — the six verb-tools, granular set loaded on demand · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/index.md](docs/index.md).

@@ -28,49 +28,29 @@ tools **no-op** and return `{"ingested": null}` (safe to call anywhere).
 |----------|----------|-------|
 | `PLANE_API_KEY` | ✅ | Plane API key |
 | `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug |
-| `PLANE_KG_INGEST` | optional | `true` (default) auto-ingests on the `list_*` fetch flow; set `false` to disable |
-| `MCP_TOOL_MODE` | optional | `condensed` \| `verbose` \| `both` |
 
-## Tools & actions
-One action-routed tool lists via the real Plane client, then pushes typed nodes
-best-effort. Takes `action` + a `params_json` **JSON string**.
+## Tools
+One typed tool per record kind lists via the real Plane client, then pushes typed nodes best-effort.
 
-| Condensed tool | Action | What it ingests |
-|----------------|--------|-----------------|
-| `plane_ingest` | `ingest_projects` | projects → `:SoftwareProject` (+ `:Workspace` / `:inWorkspace`) |
-| `plane_ingest` | `ingest_work_items` | work items → `:Issue` (+ `:belongsToProject` / `:assignedTo` / `:hasState` / `:inCycle`) |
-| `plane_ingest` | `ingest_cycles` | cycles → `:Cycle` (+ `:belongsToProject`) |
+| Tool | Parameters | What it ingests |
+|------|------------|-----------------|
+| `plane_ingest_projects` | `per_page`, `cursor` | projects → `:SoftwareProject` (+ `:Workspace` / `:inWorkspace`) |
+| `plane_ingest_work_items` | `project_id` (required), `per_page`, `cursor` | work items → `:Issue` (+ `:belongsToProject` / `:assignedTo` / `:hasState` / `:inCycle`) |
+| `plane_ingest_cycles` | `project_id` (required), `per_page`, `cursor` | cycles → `:Cycle` (+ `:belongsToProject`) |
 
 Node ids follow `plane:<class>:<externalId>` (e.g. `plane:issue:<uuid>`), and each
 `type` matches a class the package's `plane.ttl` ontology federates into the hub.
 
-### Key parameters
-- `action` — one of `ingest_projects`, `ingest_work_items`, `ingest_cycles`.
-- `params_json` — a JSON **string** of the underlying `list_*` params.
-  `ingest_work_items` and `ingest_cycles` require `project_id`.
-
-## Recipes (`action` + `params_json`)
-Ingest every project in the workspace — `action="ingest_projects"`:
-```json
-{}
-```
-Ingest a project's work items — `action="ingest_work_items"`:
-```json
-{"project_id":"<project_uuid>","per_page":100}
-```
-Ingest a project's cycles — `action="ingest_cycles"`:
-```json
-{"project_id":"<project_uuid>"}
-```
+## Recipes
+Ingest every project: call `plane_ingest_projects` with no arguments.
+Ingest a project's work items: `plane_ingest_work_items` with `project_id` and optional `per_page`.
+Ingest a project's cycles: `plane_ingest_cycles` with `project_id`.
 
 ## Gotchas
 - Ingestion is **best-effort and idempotent**: no engine → `{"ingested": null}`,
   no exception; re-running MERGEs the same node ids.
-- Auto-ingest already fires on `plane_work_items list_work_items`,
-  `plane_projects list_projects`, and `plane_cycles list_cycles` when
-  `PLANE_KG_INGEST` is not `false` — call these explicit tools for an on-demand
-  backfill or when auto-ingest is disabled.
-- `plane_ingest ingest_work_items` needs a `project_id`; without it the Plane list
+- Listing tools do not ingest on their own; call the explicit ingest tools for a backfill or a refresh.
+- `plane_ingest_work_items` needs a `project_id`; without it the Plane list
   call fails before anything is pushed.
 - The shared `native_ingest` primitive is used when present; otherwise a
   self-contained txn fallback writes the same nodes.

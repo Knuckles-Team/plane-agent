@@ -6,19 +6,33 @@ from pathlib import Path
 
 from scion_sdk.access_contract import parse_access_contracts
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ROOT / "plane_agent" / "ontology" / "access_contracts.ttl"
 KG = "http://knuckles.team/kg#"
 
 EXPECTED = {
-    "Workspace": ("plane_workspaces", "workspace", "slug", "none"),
-    "SoftwareProject": ("plane_projects", "project", "id", "cursor"),
-    "Issue": ("plane_work_items", "work_item", "id", "cursor"),
-    "Cycle": ("plane_cycles", "cycle", "id", "cursor"),
-    "PlaneModule": ("plane_modules", "module", "id", "cursor"),
-    "ProjectState": ("plane_states", "state", "id", "cursor"),
-    "Label": ("plane_labels", "label", "id", "cursor"),
+    "Workspace": ("plane_get_workspace", "workspace", "slug", "none"),
+    "SoftwareProject": ("plane_list_projects", "project", "id", "cursor"),
+    "Issue": ("plane_list_work_items", "work_item", "id", "cursor"),
+    "Cycle": ("plane_list_cycles", "cycle", "id", "cursor"),
+    "PlaneModule": ("plane_list_modules", "module", "id", "cursor"),
+    "ProjectState": ("plane_list_states", "state", "id", "cursor"),
+    "Label": ("plane_list_labels", "label", "id", "cursor"),
+}
+
+PARAMETERS = {
+    "plane_get_workspace": (),
+    "plane_list_projects": ("per_page", "cursor", "order_by"),
+    **{
+        name: ("project_id", "params_json")
+        for name in (
+            "plane_list_work_items",
+            "plane_list_cycles",
+            "plane_list_modules",
+            "plane_list_states",
+            "plane_list_labels",
+        )
+    },
 }
 
 
@@ -28,7 +42,9 @@ def _contracts():
 
 def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
     contracts = _contracts()
-    by_class = {contract.class_iri.rsplit("#", 1)[-1]: contract for contract in contracts}
+    by_class = {
+        contract.class_iri.rsplit("#", 1)[-1]: contract for contract in contracts
+    }
 
     assert set(by_class) == set(EXPECTED)
     for class_name, (operation, entity, key_field, pagination) in EXPECTED.items():
@@ -39,7 +55,9 @@ def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
         assert contract.operation == operation
         assert contract.entity == entity
         assert contract.key_field == key_field
-        assert contract.parameters == ("action", "params_json")
+        assert tuple(sorted(contract.parameters)) == tuple(
+            sorted(PARAMETERS[operation])
+        )
         assert contract.auth_ref == "env://PLANE_API_KEY"
         assert contract.pagination == pagination
         if pagination == "none":
@@ -61,7 +79,9 @@ def test_plane_contract_artifact_is_packaged_under_ontology() -> None:
 
 
 def test_plane_contract_bindings_use_declared_fields() -> None:
-    contracts = {contract.class_iri.rsplit("#", 1)[-1]: contract for contract in _contracts()}
+    contracts = {
+        contract.class_iri.rsplit("#", 1)[-1]: contract for contract in _contracts()
+    }
 
     assert (KG + "identifier", "identifier") in contracts["SoftwareProject"].predicates
     assert (KG + "sequenceId", "sequence_id") in contracts["Issue"].predicates

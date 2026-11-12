@@ -25,17 +25,16 @@ Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
 | `PLANE_BASE_URL` | optional | API base (default `[configured-endpoint]`) |
 | `PLANE_API_KEY` | ✅ | Plane API key (`x-api-key`) |
 | `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug |
-| `MCP_TOOL_MODE` | ⚠️ see gotcha | Must be `verbose` or `both` to reach `plane_list_work_item_properties` |
 
-## Tools & actions
-| Tool | Key actions |
-|------|-------------|
-| `plane_projects` | `list_projects` (resolve a project name → uuid) |
-| `plane_work_items` | `list_work_item_types`, `create_work_item` |
-| `plane_list_work_item_properties` | **verbose-only** tool — a type's custom properties (`project_id` + `type_id`) |
-| `plane_states` | `list_states` (state name → uuid) |
-| `plane_labels` | `list_labels` (label name → uuid) |
-| `plane_workspaces` | `get_workspace_members` (assignee name → member id) |
+## Tools
+| Tool | Use |
+|------|-----|
+| `plane_list_projects` | resolve a project name → uuid |
+| `plane_list_work_item_types`, `plane_create_work_item` | the types a project defines; create the item |
+| `plane_list_work_item_properties` | a type's custom properties (`project_id` + `type_id`) |
+| `plane_list_states` | state name → uuid |
+| `plane_list_labels` | label name → uuid |
+| `plane_get_workspace_members` | assignee name → member id |
 
 ## Recipes (discover → resolve ids → create)
 
@@ -43,7 +42,7 @@ Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
 ```json
 {"project_id":"<project_uuid>"}
 ```
-`plane_work_items` `action="list_work_item_types"` → the types the project defines (Plane
+`plane_list_work_item_types` → the types the project defines (Plane
 types are first-class). Pick one with the user and note its `id` (`type_id`).
 
 ### 2. Discover the type's custom properties
@@ -57,9 +56,9 @@ any the user asked for. See `references/property-discovery.md` for the value sha
 custom-property values are attached on create.
 
 ### 3. Resolve the ids Plane needs (names are not accepted)
-- `plane_states list_states` → the `state` uuid.
-- `plane_workspaces get_workspace_members` → the `assignees` member ids.
-- `plane_labels list_labels` → the `labels` uuids.
+- `plane_list_states` → the `state` uuid.
+- `plane_get_workspace_members` → the `assignees` member ids.
+- `plane_list_labels` → the `labels` uuids.
 
 ### 4. Create
 ```json
@@ -73,14 +72,10 @@ custom-property values are attached on create.
   "labels":["<label_uuid>"]
 }}
 ```
-`plane_work_items` `action="create_work_item"`. Report the returned `id` + `sequence_id`.
+`plane_create_work_item`. Report the returned `id` + `sequence_id`.
 Attach custom-property values per `references/property-discovery.md`.
 
 ## Gotchas
-- **Verbose surface required:** `plane_list_work_item_properties` exists only on the
-  verbose tool surface. If `MCP_TOOL_MODE=condensed` (the default), custom-property
-  discovery is unavailable — set `MCP_TOOL_MODE=verbose` or `both` on the server, or
-  proceed with only the built-in fields and tell the user custom properties were skipped.
 - `priority` is a fixed choice: `urgent`, `high`, `medium`, `low`, `none` — not free text.
 - `state`, `assignees`, `labels`, and `type` are **uuids**, never names — always resolve
   them first (step 3).

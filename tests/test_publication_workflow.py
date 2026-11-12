@@ -38,7 +38,6 @@ def test_development_skill_is_source_backed():
         "plane_agent/mcp_server.py",
         "plane_agent/ontology/plane.ttl",
         "tests/test_publication_workflow.py",
-        "tests/test_action_discovery.py",
         "tests/test_access_contracts.py",
         "tests/test_ingest_sources.py",
         "tests/test_startup.py",
@@ -50,7 +49,6 @@ def test_development_skill_is_source_backed():
         "PLANE_BASE_URL",
         "PLANE_API_KEY",
         "PLANE_WORKSPACE_SLUG",
-        "PLANE_KG_INGEST",
         "PLANE_TLS_PROFILE",
         "plane-mcp",
     ):

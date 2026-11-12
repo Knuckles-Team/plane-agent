@@ -8,8 +8,8 @@ Plane has no JQL. You filter by passing Plane's own query params through `params
 ```json
 {"project_id":"<project_uuid>","assignees":"<member_id>","per_page":100}
 ```
-`plane_work_items` `action="list_work_items"`. Resolve `<member_id>` once via
-`plane_users get_me`. Repeat per project (there is no workspace-wide item list).
+`plane_list_work_items`. Resolve `<member_id>` once via
+`plane_get_me`. Repeat per project (there is no workspace-wide item list).
 
 ## Paging the cursor envelope
 The response is `{"results":[...], "next_cursor":"...", "count":N, "next_page_results":bool}`.
@@ -24,7 +24,7 @@ list the states:
 ```json
 {"project_id":"<project_uuid>"}
 ```
-`plane_states` `action="list_states"` → each state has `id`, `name`, and
+`plane_list_states` → each state has `id`, `name`, and
 `group` ∈ {`backlog`, `unstarted`, `started`, `completed`, `cancelled`}. Build the set of
 state ids whose group is `completed` or `cancelled`, then **exclude items whose `state`
 matches** after listing. (Plane also accepts a server-side `state_group` filter on some

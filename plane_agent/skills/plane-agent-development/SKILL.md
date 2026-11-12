@@ -16,7 +16,7 @@ metadata:
 
 # Plane Agent development
 
-This repository owns the Plane transport, API mappings, MCP action tools,
+This repository owns the Plane transport, API mappings, typed MCP tools,
 knowledge-graph ingestion mappings, packaged skills, and connector
 documentation. Shared connector transport and admission behavior belongs to
 the SDK and its owning repositories. Read `AGENTS.md` before changing code;
@@ -29,9 +29,9 @@ logs, and skill content.
   `Api`, `get_client`, and `plane_agent.mcp_server` as its tool module.
   Preserve the connector identity and the `plane-mcp` entry points in
   `pyproject.toml`.
-- `plane_agent/mcp_server.py` owns the action-routed `plane_*` MCP tools and
-  the best-effort list-flow KG ingestion. Preserve action names, parameter
-  JSON shapes, tool tags, and the `PLANE_KG_INGEST` default-on behavior.
+- `plane_agent/mcp_server.py` owns the `plane_ingest_*` KG tools; every other `plane_*` tool is derived by
+  the SDK from one `Api` client method. Keep one tool per operation and add no
+  `action` argument.
 - `plane_agent/api_client.py` composes the domain clients in `plane_agent/api/`
   for projects, work items, cycles, epics, initiatives, intake, milestones,
   modules, states, and workspaces. Reuse these clients rather than adding a
@@ -53,13 +53,13 @@ contract for `PIPE-CONNSPEC-R152.4`.
 
 - Find the owning row first with `git grep -n "<term>" -- specs` and extend
   that spec before adding new requirement text.
-- Inspect the SDK `Connector`, action dispatch, domain client, auth/TLS path,
+- Inspect the SDK `Connector`, domain client, auth/TLS path,
   package-data declaration, and focused tests before changing runtime or
   packaged content.
 - Keep changes inside this connector. SDK transport, shared Pages rendering,
   admission, and durable graph state belong to their owner repositories.
 - Preserve workspace scoping through `PLANE_WORKSPACE_SLUG`, the governed TLS
-  profile, action payload schemas, ontology mappings, and the existing
+  profile, tool argument schemas, ontology mappings, and the existing
   best-effort KG ingestion boundary.
 - Every delivered local requirement needs a bound test. Generated
   `specs/*/status.json` files are produced by `pipelines-hook spec-status`; do
@@ -77,7 +77,6 @@ uv sync --locked
 /var/tmp/arbora-delivery/scale/run-narrow-test-slot.sh \
   uv run --locked --extra test pytest -q \
     tests/test_publication_workflow.py \
-    tests/test_action_discovery.py \
     tests/test_access_contracts.py \
     tests/test_ingest_sources.py \
     tests/test_startup.py
@@ -112,7 +111,7 @@ inspection does not prove a served deployment.
   mappings, and metadata ingestion under their existing boundaries.
 - Use injected `PLANE_*` configuration only. Never print or commit API keys,
   workspace secrets, private URLs, TLS material, or generated state.
-- Preserve the current action-to-client mappings and workspace scope. Mock
+- Preserve the current tool-to-client mappings and workspace scope. Mock
   external calls and assert typed failures for missing credentials.
 - Keep generated status files under the Pipelines/status owner; this skill does
   not authorize editing `specs/*/status.json`.

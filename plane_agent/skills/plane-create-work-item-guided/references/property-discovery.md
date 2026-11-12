@@ -2,7 +2,7 @@
 
 Plane's answer to Jira custom fields is **properties**, and they are attached to a
 **work-item type**, not to the project globally. Discover them with the verbose tool
-`plane_list_work_item_properties` (`params_json={"project_id":"…","type_id":"…"}`), which
+`plane_list_work_item_properties` (arguments `project_id` and `type_id`), which
 returns descriptors shaped like:
 
 ```json
@@ -16,9 +16,6 @@ returns descriptors shaped like:
 }
 ```
 
-> Requires `MCP_TOOL_MODE=verbose` or `both`. Under `condensed` (the default) this tool is
-> not mounted — either flip the mode on the server or create the item with built-in fields
-> only and tell the user custom properties were skipped.
 
 ## What to collect
 1. Every descriptor with `is_required: true`.
@@ -56,8 +53,8 @@ property before bulk-setting.
 ## Id resolution cheat-sheet
 | Field | Resolve with |
 |-------|--------------|
-| `type` | `plane_work_items list_work_item_types` → type `id` |
-| `state` | `plane_states list_states` → state `id` |
-| `assignees` | `plane_workspaces get_workspace_members` → member `id` |
-| `labels` | `plane_labels list_labels` → label `id` |
+| `type` | `plane_list_work_item_types` → type `id` |
+| `state` | `plane_list_states` → state `id` |
+| `assignees` | `plane_get_workspace_members` → member `id` |
+| `labels` | `plane_list_labels` → label `id` |
 | custom `OPTION` values | `plane_list_work_item_properties` → `settings.options[].id` |
