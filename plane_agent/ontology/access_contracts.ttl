@@ -2,8 +2,8 @@
 @prefix pl: <http://knuckles.team/kg#> .
 
 # Read contracts for the classes declared by plane.ttl.  The MCP tools expose
-# both read and write actions, but these mappings select the list/retrieve
-# routes only.  The source classes remain distinct from any unapproved hub
+# both read and write operations, but these mappings select the list/retrieve
+# tools only.  The source classes remain distinct from any unapproved hub
 # crosswalk; in particular, Plane Issue is not asserted to be an Incident.
 
 pl:workspaceAccess a ac:AccessContract ;
@@ -12,8 +12,7 @@ pl:workspaceAccess a ac:AccessContract ;
     ac:entity "workspace" ;
     ac:keyField "slug" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_workspaces" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_get_workspace" ;
     ac:pagination "none" ;
     ac:authRef "env://PLANE_API_KEY" ;
     ac:rateLimitPerMinute 60 ;
@@ -26,8 +25,8 @@ pl:softwareProjectAccess a ac:AccessContract ;
     ac:entity "project" ;
     ac:keyField "id" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_projects" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_list_projects" ;
+    ac:parameter "per_page", "cursor", "order_by" ;
     ac:pagination "cursor" ;
     ac:pushdown "filter", "limit", "sort" ;
     ac:authRef "env://PLANE_API_KEY" ;
@@ -44,8 +43,8 @@ pl:issueAccess a ac:AccessContract ;
     ac:entity "work_item" ;
     ac:keyField "id" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_work_items" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_list_work_items" ;
+    ac:parameter "project_id", "params_json" ;
     ac:pagination "cursor" ;
     ac:pushdown "filter", "limit", "sort" ;
     ac:authRef "env://PLANE_API_KEY" ;
@@ -65,8 +64,8 @@ pl:cycleAccess a ac:AccessContract ;
     ac:entity "cycle" ;
     ac:keyField "id" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_cycles" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_list_cycles" ;
+    ac:parameter "project_id", "params_json" ;
     ac:pagination "cursor" ;
     ac:pushdown "filter", "limit", "sort" ;
     ac:authRef "env://PLANE_API_KEY" ;
@@ -86,8 +85,8 @@ pl:moduleAccess a ac:AccessContract ;
     ac:entity "module" ;
     ac:keyField "id" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_modules" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_list_modules" ;
+    ac:parameter "project_id", "params_json" ;
     ac:pagination "cursor" ;
     ac:pushdown "filter", "limit", "sort" ;
     ac:authRef "env://PLANE_API_KEY" ;
@@ -101,8 +100,8 @@ pl:projectStateAccess a ac:AccessContract ;
     ac:entity "state" ;
     ac:keyField "id" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_states" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_list_states" ;
+    ac:parameter "project_id", "params_json" ;
     ac:pagination "cursor" ;
     ac:pushdown "filter", "limit", "sort" ;
     ac:authRef "env://PLANE_API_KEY" ;
@@ -116,8 +115,8 @@ pl:labelAccess a ac:AccessContract ;
     ac:entity "label" ;
     ac:keyField "id" ;
     ac:accessKind "mcp_tool" ;
-    ac:operation "plane_labels" ;
-    ac:parameter "action", "params_json" ;
+    ac:operation "plane_list_labels" ;
+    ac:parameter "project_id", "params_json" ;
     ac:pagination "cursor" ;
     ac:pushdown "filter", "limit", "sort" ;
     ac:authRef "env://PLANE_API_KEY" ;

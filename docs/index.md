@@ -20,7 +20,7 @@ tools conversationally. It provides:
 - **`Api`** — a composed REST client (`plane_agent.api_client.Api`) over the Plane
   workspace API, organized by domain (projects, work items, cycles, modules,
   states, initiatives, intake, milestones, workspaces).
-- **A broad MCP tool surface** — action-routed tool domains for every Plane
+- **A broad MCP tool surface** — one typed tool per operation for every Plane
   resource, gated individually by `*TOOL` environment toggles.
 
 The agent **remains inactive when credentials are absent** — a `PLANE_API_KEY`

@@ -26,17 +26,15 @@ Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
 | `PLANE_BASE_URL` | optional | API base (default `[configured-endpoint]`) |
 | `PLANE_API_KEY` | ✅ | Plane API key (`x-api-key`) |
 | `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug — every call is scoped to it |
-| `MCP_TOOL_MODE` | optional | `condensed` (default) exposes the action-routed tools below |
 
-The condensed tools take `action` + a `params_json` **JSON string**.
 
-## Tools & actions
-| Condensed tool | Key actions used here |
-|----------------|-----------------------|
-| `plane_users` | `get_me` (resolve the current member id) |
-| `plane_projects` | `list_projects` (enumerate the workspace's projects) |
-| `plane_states` | `list_states` (resolve state → group to drop finished work) |
-| `plane_work_items` | `list_work_items`, `create_work_item_comment`, `update_work_item` |
+## Tools
+| Tool | Use |
+|------|-----|
+| `plane_get_me` | resolve the current member id |
+| `plane_list_projects` | enumerate the workspace's projects |
+| `plane_list_states` | resolve state → group to drop finished work |
+| `plane_list_work_items`, `plane_create_work_item_comment`, `plane_update_work_item` | read the queue; write back |
 
 ## Key parameters & the Jira difference
 Plane has **no query language and no cross-project search** for "assigned to me", and
@@ -52,14 +50,14 @@ Resolve identity, then projects:
 ```json
 {}
 ```
-`plane_users get_me` → your member `id`. `plane_projects list_projects` → project ids.
+`plane_get_me` → your member `id`. `plane_list_projects` → project ids.
 
 For **each** project, list your open items (the response is a raw cursor envelope —
 page with `next_cursor`):
 ```json
 {"project_id":"<project_uuid>","assignees":"<member_id>","per_page":100}
 ```
-`plane_work_items list_work_items`. To drop finished work, call `plane_states list_states`
+`plane_list_work_items`. To drop finished work, call `plane_list_states`
 for that project and exclude items whose `state` id belongs to a state with
 `group` ∈ {`completed`, `cancelled`} (see `references/filter-recipes.md`).
 
@@ -75,15 +73,14 @@ computed from `updated_at`.
 ### 2. Suggest updates from this session's context
 For each ranked item, scan the **current conversation** for facts that concern it. For
 every match, **draft** and **confirm before writing**:
-- A progress comment → `plane_work_items` `action="create_work_item_comment"`,
-  `params_json={"project_id":"…","work_item_id":"…","data":{"comment_html":"<p>…</p>"}}`.
-- A field edit (priority, state, assignees) → `plane_work_items` `action="update_work_item"`,
-  `params_json={"project_id":"…","work_item_id":"…","data":{...}}`.
+- A progress comment → `plane_create_work_item_comment`
+  with `{"project_id":"…","work_item_id":"…","data":{"comment_html":"<p>…</p>"}}`.
+- A field edit (priority, state, assignees) → `plane_update_work_item`
+  with `{"project_id":"…","work_item_id":"…","data":{...}}`.
 
 Never apply a write without explicit user confirmation of the drafted change.
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
 - Every call is scoped to `PLANE_WORKSPACE_SLUG`; a `project_id` from another workspace 404s.
 - `list_work_items` returns the raw envelope (`results`, `next_cursor`, `count`); page the
   cursor rather than assuming a flat list, then feed the merged `results` to the script.

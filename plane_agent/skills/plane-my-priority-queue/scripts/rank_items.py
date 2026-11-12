@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rank Plane work items by a combined priority + staleness score.
 
-Reads the JSON produced by the ``plane_work_items`` ``list_work_items`` action —
+Reads the JSON produced by the ``plane_list_work_items`` tool —
 a raw cursor envelope ``{"results": [...]}``, a bare list, or a list you have
 concatenated across several projects — from a file argument or stdin, and prints a
 single list sorted highest-first by::
@@ -13,7 +13,7 @@ than 7 days (flagged ``STALE``). Stdlib only — no third-party dependencies.
 
 Usage::
 
-    plane_work_items list_work_items ... > items.json
+    plane_list_work_items ... > items.json
     python rank_items.py items.json            # human table
     python rank_items.py --json items.json     # ranked JSON list
     cat items.json | python rank_items.py      # stdin

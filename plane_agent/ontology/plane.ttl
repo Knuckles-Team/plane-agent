@@ -13,7 +13,7 @@
 # plane_modules / plane_states / …). The shared :Person class is REUSED, never redefined.
 
 :Workspace a owl:Class ;
-    rdfs:subClassOf :Namespace ;
+    rdfs:subClassOf :Collection ;
     rdfs:label "Workspace" ;
     rdfs:comment "A Plane workspace — the top-level tenant that owns projects and members (plane_workspaces)." .
 

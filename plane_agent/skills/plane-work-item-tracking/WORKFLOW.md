@@ -18,7 +18,7 @@ work-item field conventions and return work-item-shaped records.
 - Cycle (sprint) or module planning → `plane-cycle-planning`.
 - Ingesting Plane records into the knowledge graph → `plane-kg-ingestion`.
 - Workspace/member administration, states, labels, pages → the corresponding
-  `plane_workspaces` / `plane_states` / `plane_labels` / `plane_pages` tools.
+  `plane_get_workspace_members`, `plane_list_states`, `plane_list_labels` and the `plane_*_page` tools.
 
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
@@ -29,15 +29,9 @@ Connect via the `mcp-client` skill against the **`plane-agent`** MCP server.
 | `PLANE_API_KEY` | ✅ | Plane API key (`x-api-key`) |
 | `PLANE_WORKSPACE_SLUG` | ✅ | Target workspace slug |
 | `PLANE_TLS_PROFILE` | optional | Named outbound TLS policy from AgentConfig |
-| `MCP_TOOL_MODE` | optional | `condensed` \| `verbose` \| `both` — selects the condensed surface below vs. the 1:1 verbose tools |
 
-## Tools & actions
-Prefer the **condensed** tool; it takes `action` + a `params_json` **JSON string**
-whose keys are passed straight to the client method.
-
-| Condensed tool | Key actions |
-|----------------|-------------|
-| `plane_work_items` | `list_work_items`, `search_work_items`, `retrieve_work_item`, `retrieve_work_item_by_identifier`, `create_work_item`, `update_work_item`, `delete_work_item`, `list_work_item_comments`, `create_work_item_comment`, `list_work_item_links`, `create_work_item_link`, `list_work_item_relations`, `list_work_item_activities`, `list_work_logs`, `create_work_log` |
+## Tools
+One typed tool per operation: `plane_list_work_items`, `plane_search_work_items`, `plane_retrieve_work_item`, `plane_retrieve_work_item_by_identifier`, `plane_create_work_item`, `plane_update_work_item`, `plane_delete_work_item`, `plane_list_work_item_comments`, `plane_create_work_item_comment`, `plane_list_work_item_links`, `plane_create_work_item_link`, `plane_list_work_item_relations`, `plane_list_work_item_activities`, `plane_list_work_logs`, `plane_create_work_log`.
 
 ### Key parameters
 - `project_id` — required for every list/create call.
@@ -47,7 +41,7 @@ whose keys are passed straight to the client method.
 - `data` — object of field→value for create/update (`name`, `description`,
   `priority`, `state`, `assignees`, …).
 
-## Recipes (`params_json`)
+## Recipes (tool arguments)
 List a project's work items (cursor pagination survives in the raw envelope):
 ```json
 {"project_id":"<project_uuid>","per_page":50}
@@ -66,10 +60,9 @@ Comment on a work item:
 ```
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
 - `priority` is a choice value: `urgent`, `high`, `medium`, `low`, or `none`.
 - `state` and `assignees` expect Plane **ids** (state uuid, member ids), not names —
-  resolve them via `plane_states` / `plane_workspaces` first.
+  resolve them via `plane_list_states` / `plane_get_workspace_members` first.
 - `list_work_items` returns the raw Plane envelope (`results`, `next_cursor`,
   `count`, …); page with the cursor fields rather than assuming a flat list.
 - Every call is workspace-scoped by `PLANE_WORKSPACE_SLUG`; a `project_id` from a
@@ -78,5 +71,4 @@ Comment on a work item:
 ## Related
 - **plane-cycle-planning** — schedule these work items into cycles and modules.
 - **plane-kg-ingestion** — mirror work items into the knowledge graph as typed
-  `:Issue` nodes (the `plane_ingest` tool, `ingest_work_items` action; also fires
-  automatically on `list_work_items`).
+  `:Issue` nodes (the `plane_ingest_work_items` tool).

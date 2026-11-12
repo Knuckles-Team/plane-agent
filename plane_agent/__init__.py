@@ -7,5 +7,5 @@ connector = Connector(
     api=Api,
     get_client=get_client,
     tools="plane_agent.mcp_server",
-    instructions="plane-agent MCP Server — Condensed Action-Routed Tools.",
+    instructions="plane-agent MCP Server — one typed tool per Plane API operation.",
 )

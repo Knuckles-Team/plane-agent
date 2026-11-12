@@ -56,7 +56,9 @@ def test_work_items_fan_out_per_project_and_map_to_issue_state() -> None:
 
 @pytest.mark.spec("CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003")
 def test_sources_name_read_only_tools() -> None:
-    source_text = (REPO_ROOT / "plane_agent" / "mcp_server.py").read_text()
+    source_text = "".join(
+        path.read_text() for path in (REPO_ROOT / "plane_agent" / "api").glob("*.py")
+    )
     declaration = load_declaration("plane_agent")
     for source in declaration.sources:
         assert not any(
