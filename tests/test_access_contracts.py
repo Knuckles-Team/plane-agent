@@ -50,7 +50,7 @@ def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
     assert set(by_class) == set(EXPECTED)
     for class_name, (operation, entity, key_field, pagination) in EXPECTED.items():
         contract = by_class[class_name]
-        assert contract.class_iri == KG + class_name
+        assert contract.class_iri in (CONNECTOR_NS + class_name, KG + class_name)
         assert contract.source_id == "plane-agent"
         assert contract.access_kind == "mcp_tool"
         assert contract.operation == operation
@@ -70,7 +70,7 @@ def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
 def test_plane_contracts_do_not_promote_draft_crosswalks() -> None:
     contracts = _contracts()
 
-    assert all(contract.class_iri.startswith(KG) for contract in contracts)
+    assert all(contract.class_iri.startswith((CONNECTOR_NS, KG)) for contract in contracts)
     assert all(contract.class_iri != KG + "Incident" for contract in contracts)
     assert all(contract.source_id == "plane-agent" for contract in contracts)
 
