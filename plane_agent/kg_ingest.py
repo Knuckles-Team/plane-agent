@@ -1,4 +1,4 @@
-"""Native epistemic-graph ingestion for Plane work-management records.
+"""Native medulla ingestion for Plane work-management records.
 
 All writes go through the ``scion_sdk.ingest`` knowledge-ingest facade. Nodes
 use canonical ``node_type`` and edges use canonical ``relationship``; nodes and edges

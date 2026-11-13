@@ -37,7 +37,7 @@ def test_issue_carries_state_and_priority() -> None:
     ),
 )
 def test_classes_extend_a_shared_parent(name: str, parent: str) -> None:
-    assert f"rdfs:subClassOf :{parent}" in _block(name)
+    assert f"rdfs:subClassOf core:{parent}" in _block(name)
 
 
 

@@ -8,7 +8,8 @@ from scion_sdk.access_contract import parse_access_contracts
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ROOT / "plane_agent" / "ontology" / "access_contracts.ttl"
-KG = "http://knuckles.team/kg#"
+KG = "https://knuckles-team.github.io/ontology/core#"
+CONNECTOR_NS = "https://knuckles-team.github.io/ontology/connector/plane#"
 
 EXPECTED = {
     "Workspace": ("plane_get_workspace", "workspace", "slug", "none"),
@@ -49,7 +50,7 @@ def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
     assert set(by_class) == set(EXPECTED)
     for class_name, (operation, entity, key_field, pagination) in EXPECTED.items():
         contract = by_class[class_name]
-        assert contract.class_iri == KG + class_name
+        assert contract.class_iri in (CONNECTOR_NS + class_name, KG + class_name)
         assert contract.source_id == "plane-agent"
         assert contract.access_kind == "mcp_tool"
         assert contract.operation == operation
@@ -69,7 +70,7 @@ def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
 def test_plane_contracts_do_not_promote_draft_crosswalks() -> None:
     contracts = _contracts()
 
-    assert all(contract.class_iri.startswith(KG) for contract in contracts)
+    assert all(contract.class_iri.startswith((CONNECTOR_NS, KG)) for contract in contracts)
     assert all(contract.class_iri != KG + "Incident" for contract in contracts)
     assert all(contract.source_id == "plane-agent" for contract in contracts)
 
@@ -83,6 +84,6 @@ def test_plane_contract_bindings_use_declared_fields() -> None:
         contract.class_iri.rsplit("#", 1)[-1]: contract for contract in _contracts()
     }
 
-    assert (KG + "identifier", "identifier") in contracts["SoftwareProject"].predicates
-    assert (KG + "sequenceId", "sequence_id") in contracts["Issue"].predicates
-    assert (KG + "startDate", "start_date") in contracts["Cycle"].predicates
+    assert (CONNECTOR_NS + "identifier", "identifier") in contracts["SoftwareProject"].predicates
+    assert (CONNECTOR_NS + "sequenceId", "sequence_id") in contracts["Issue"].predicates
+    assert (CONNECTOR_NS + "startDate", "start_date") in contracts["Cycle"].predicates

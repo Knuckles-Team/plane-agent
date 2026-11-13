@@ -45,7 +45,7 @@ def _kg_records(result: Any, key: str = "results") -> list[dict[str, Any]]:
 
 
 def register_kg_tools(mcp: FastMCP):
-    """Register the Plane to epistemic-graph ingest tools (one tool per record kind).
+    """Register the Plane to medulla ingest tools (one tool per record kind).
 
     Each tool lists records via the Plane API, then pushes them as typed nodes + links
     via the fast engine client (best-effort: ``{"ingested": null}`` with no engine).
