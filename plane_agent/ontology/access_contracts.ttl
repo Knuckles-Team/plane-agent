@@ -58,6 +58,12 @@
 :issuePriorityBinding a ac:PropertyBinding ;
     ac:contract :issueAccess ; ac:property :priority ; ac:field "priority" .
 
+:issueStateBinding a ac:PropertyBinding ;
+    ac:contract :issueAccess ; ac:property :state ; ac:field "state" .
+
+:issuePullRequestUrlBinding a ac:PropertyBinding ;
+    ac:contract :issueAccess ; ac:property :pullRequestUrl ; ac:field "pullRequestUrl" .
+
 :cycleAccess a ac:AccessContract ;
     ac:classIri :Cycle ;
     ac:sourceId "plane-agent" ;

@@ -118,6 +118,12 @@
     rdfs:domain :Issue ;
     rdfs:range xsd:string .
 
+:pullRequestUrl a owl:DatatypeProperty ;
+    rdfs:label "pull request URL" ;
+    rdfs:comment "URL of the pull request linked to a work item." ;
+    rdfs:domain :Issue ;
+    rdfs:range xsd:string .
+
 :priority a owl:DatatypeProperty ;
     rdfs:label "priority" ;
     rdfs:comment "Priority of a work item (urgent, high, medium, low, none)." ;
