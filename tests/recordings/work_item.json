@@ -1,0 +1,16 @@
+[
+  {
+    "id": "0b7c1f0e-0000-4000-8000-000000000001",
+    "sequence_id": 42,
+    "priority": "high",
+    "state": "In Progress",
+    "pullRequestUrl": "https://example.invalid/org/repo/pull/12"
+  },
+  {
+    "id": "0b7c1f0e-0000-4000-8000-000000000002",
+    "sequence_id": 43,
+    "priority": "low",
+    "state": "Done",
+    "pullRequestUrl": "https://example.invalid/org/repo/pull/13"
+  }
+]
