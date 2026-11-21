@@ -22,9 +22,9 @@ def _block(name: str) -> str:
     return match.group(0)
 
 
-def test_issue_carries_state_and_priority() -> None:
+def test_state_and_priority_are_core_properties_not_pack_declarations() -> None:
     for prop in ("state", "priority"):
-        assert "rdfs:domain :Issue" in _block(prop), prop
+        assert not re.search(rf"^:{prop} a owl:", TTL, flags=re.M), prop
 
 
 @pytest.mark.parametrize(
@@ -38,7 +38,6 @@ def test_issue_carries_state_and_priority() -> None:
 )
 def test_classes_extend_a_shared_parent(name: str, parent: str) -> None:
     assert f"rdfs:subClassOf core:{parent}" in _block(name)
-
 
 
 def test_no_mapping_has_a_null_ontology_class() -> None:

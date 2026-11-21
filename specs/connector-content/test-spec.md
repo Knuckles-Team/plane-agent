@@ -4,7 +4,7 @@ Governing spec: [spec.md](spec.md).
 
 | Test ID | Requirement | Proving test | Expected observation |
 |---|---|---|---|
-| T-001 | `CONN-PLANE-AGENT-CONNECTOR-CONTENT-R001` | `tests/test_default_content_surfaces.py::test_default_content_surfaces` (planned) | `resources/list` includes `skill://` and `ontology://`; `prompts/list` includes each packaged prompt. |
+| T-001 | `CONN-PLANE-AGENT-CONNECTOR-CONTENT-R001` | `tests/test_default_content_surfaces.py::test_default_content_surfaces`, `tests/test_ontology_one_schema.py` (planned) | `resources/list` includes `skill://` and `ontology://`; `prompts/list` includes each packaged prompt. |
 | T-002 | `CONN-PLANE-AGENT-CONNECTOR-CONTENT-R002` | `tests/test_ontology_parent_link.py::test_ontology_joins_the_parent_graph` | The test parses each ontology and finds no orphan class beyond the pending list. |
 | T-003 | `CONN-PLANE-AGENT-CONNECTOR-CONTENT-R003` | `tests/test_ingest_sources.py::test_declares_ingestible_sources` | The declaration names a read-only tool for each source, maps `work-items` to `Issue` with `state`, and fans out per project. |
 | T-004 | `CONN-PLANE-AGENT-CONNECTOR-CONTENT-R004` | `tests/test_cq_paths.py::test_issue_carries_state_and_priority` | The test finds `state` and `priority` on `Issue` and no null mapping. |
