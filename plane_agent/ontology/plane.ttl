@@ -18,15 +18,6 @@
     rdfs:label "Workspace" ;
     rdfs:comment "A Plane workspace — the top-level tenant that owns projects and members (plane_workspaces)." .
 
-:SoftwareProject a owl:Class ;
-    rdfs:subClassOf core:SoftwareProject .
-
-
-:Issue a owl:Class ;
-    rdfs:subClassOf core:WorkItem ;
-    rdfs:label "Issue" ;
-    rdfs:comment "A Plane work item / issue — the unit of tracked work with a state, priority and assignees (plane_work_items)." .
-
 :Cycle a owl:Class ;
     rdfs:subClassOf core:Iteration ;
     rdfs:label "Cycle" ;
@@ -52,88 +43,52 @@
 :inWorkspace a owl:ObjectProperty ;
     rdfs:label "in workspace" ;
     rdfs:comment "Links a SoftwareProject to the Workspace that owns it." ;
-    rdfs:domain :SoftwareProject ;
+    rdfs:domain core:SoftwareProject ;
     rdfs:range :Workspace .
 
 :belongsToProject a owl:ObjectProperty ;
     rdfs:label "belongs to project" ;
     rdfs:comment "Links an Issue, Cycle, Module, ProjectState or Label to its owning SoftwareProject." ;
-    rdfs:range :SoftwareProject .
-
-:inCycle a owl:ObjectProperty ;
-    rdfs:label "in cycle" ;
-    rdfs:comment "Links an Issue to the Cycle it is scheduled in." ;
-    rdfs:domain :Issue ;
-    rdfs:range :Cycle .
-
-:inModule a owl:ObjectProperty ;
-    rdfs:label "in module" ;
-    rdfs:comment "Links an Issue to the Module it is grouped under." ;
-    rdfs:domain :Issue ;
-    rdfs:range :PlaneModule .
-
-:hasState a owl:ObjectProperty ;
-    rdfs:label "has state" ;
-    rdfs:comment "Links an Issue to its current ProjectState." ;
-    rdfs:domain :Issue ;
-    rdfs:range :ProjectState .
+    rdfs:range core:SoftwareProject .
 
 :hasLabel a owl:ObjectProperty ;
     rdfs:label "has label" ;
     rdfs:comment "Links an Issue to a Label applied to it." ;
-    rdfs:domain :Issue ;
+    rdfs:domain core:Issue ;
     rdfs:range :Label .
 
 :projectLedBy a owl:ObjectProperty ;
     rdfs:label "project led by" ;
     rdfs:comment "Links a SoftwareProject to its project lead (projects.project_lead), the accountable owner." ;
     rdfs:subPropertyOf core:ownedBy ;
-    rdfs:domain :SoftwareProject ;
+    rdfs:domain core:SoftwareProject ;
     rdfs:range core:Person .
 
 :workItemOfProject a owl:ObjectProperty ;
     rdfs:label "work item of project" ;
     rdfs:comment "Links a work item to the SoftwareProject it belongs to (work_items.project)." ;
     rdfs:subPropertyOf :belongsToProject ;
-    rdfs:domain :Issue ;
-    rdfs:range :SoftwareProject .
-
-:assignedTo a owl:ObjectProperty ;
-    rdfs:label "assigned to" ;
-    rdfs:comment "Links an Issue to a Person responsible for it." ;
-    rdfs:domain :Issue ;
-    rdfs:range core:Person .
+    rdfs:domain core:Issue ;
+    rdfs:range core:SoftwareProject .
 
 # --- fields (owl:DatatypeProperty) ---
 
 :sequenceId a owl:DatatypeProperty ;
     rdfs:label "sequence id" ;
     rdfs:comment "Project-scoped human-readable sequence number of a work item (e.g. PROJ-42)." ;
-    rdfs:domain :Issue ;
+    rdfs:domain core:Issue ;
     rdfs:range xsd:integer .
-
-:state a owl:DatatypeProperty ;
-    rdfs:label "state" ;
-    rdfs:comment "Workflow state name of a work item (Backlog, Todo, In Progress, Done, Cancelled)." ;
-    rdfs:domain :Issue ;
-    rdfs:range xsd:string .
 
 :pullRequestUrl a owl:DatatypeProperty ;
     rdfs:label "pull request URL" ;
     rdfs:comment "URL of the pull request linked to a work item." ;
-    rdfs:domain :Issue ;
-    rdfs:range xsd:string .
-
-:priority a owl:DatatypeProperty ;
-    rdfs:label "priority" ;
-    rdfs:comment "Priority of a work item (urgent, high, medium, low, none)." ;
-    rdfs:domain :Issue ;
+    rdfs:domain core:Issue ;
     rdfs:range xsd:string .
 
 :identifier a owl:DatatypeProperty ;
     rdfs:label "identifier" ;
     rdfs:comment "Short project identifier / key used to prefix work-item sequence ids (e.g. PROJ)." ;
-    rdfs:domain :SoftwareProject ;
+    rdfs:domain core:SoftwareProject ;
     rdfs:range xsd:string .
 
 :startDate a owl:DatatypeProperty ;

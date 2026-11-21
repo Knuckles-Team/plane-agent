@@ -14,8 +14,13 @@ import plane_agent
 ONTOLOGY = Path(plane_agent.__file__).parent / "ontology" / "plane.ttl"
 
 
-def _domain_and_range(name: str) -> tuple[str, str]:
-    block = ONTOLOGY.read_text(encoding="utf-8").split(f"\n:{name} a owl:ObjectProperty")[1]
+def _domain_and_range(name: str) -> tuple[str, str] | None:
+    parts = ONTOLOGY.read_text(encoding="utf-8").split(
+        f"\n:{name} a owl:ObjectProperty"
+    )
+    if len(parts) == 1:
+        return None  # a core property: the pack references it and does not declare it
+    block = parts[1]
     block = block.split(" .\n")[0]
     import re
 
@@ -31,7 +36,8 @@ def test_every_declared_edge_is_an_ontology_property_of_its_record_type() -> Non
     seen = set()
     for source in declaration.sources:
         for edge in source.edges:
-            assert _domain_and_range(edge.relationship) == (source.record_type, edge.target_type)
+            declared = _domain_and_range(edge.relationship)
+            assert declared in (None, (source.record_type, edge.target_type))
             assert edge.target_type in declaration.schema_mappings
             seen.add((source.source_id, edge.relationship))
     assert seen == {
@@ -42,12 +48,20 @@ def test_every_declared_edge_is_an_ontology_property_of_its_record_type() -> Non
 
 
 @pytest.mark.spec("CONN-PLANE-AGENT-CONNECTOR-CONTENT-R005")
-def test_project_and_work_item_references_become_lead_assignee_and_project_edges() -> None:
+def test_project_and_work_item_references_become_lead_assignee_and_project_edges() -> (
+    None
+):
     declaration = load_declaration("plane_agent")
     project = {"id": "p1", "project_lead": "u1"}
     item = {"id": "w1", "assignees": ["u1", "u2"], "project": "p1"}
-    leads = {(r.relationship, r.target) for _, r in _edges("p1", project, declaration.source("projects"))}
-    items = {(r.relationship, r.target) for _, r in _edges("w1", item, declaration.source("work-items"))}
+    leads = {
+        (r.relationship, r.target)
+        for _, r in _edges("p1", project, declaration.source("projects"))
+    }
+    items = {
+        (r.relationship, r.target)
+        for _, r in _edges("w1", item, declaration.source("work-items"))
+    }
     assert leads == {("projectLedBy", "user:u1")}
     assert items == {
         ("assignedTo", "user:u1"),

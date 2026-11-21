@@ -1,5 +1,6 @@
 @prefix ac: <https://knuckles-team.github.io/ontology/access#> .
 @prefix : <https://knuckles-team.github.io/ontology/connector/plane#> .
+@prefix kg: <https://knuckles-team.github.io/ontology/core#> .
 
 # Read contracts for the classes declared by plane.ttl.  The MCP tools expose
 # both read and write operations, but these mappings select the list/retrieve
@@ -20,7 +21,7 @@
     ac:costHint "low" .
 
 :softwareProjectAccess a ac:AccessContract ;
-    ac:classIri :SoftwareProject ;
+    ac:classIri kg:SoftwareProject ;
     ac:sourceId "plane-agent" ;
     ac:entity "project" ;
     ac:keyField "id" ;
@@ -38,7 +39,7 @@
     ac:contract :softwareProjectAccess ; ac:property :identifier ; ac:field "identifier" .
 
 :issueAccess a ac:AccessContract ;
-    ac:classIri :Issue ;
+    ac:classIri kg:Issue ;
     ac:sourceId "plane-agent" ;
     ac:entity "work_item" ;
     ac:keyField "id" ;
@@ -56,10 +57,10 @@
     ac:contract :issueAccess ; ac:property :sequenceId ; ac:field "sequence_id" .
 
 :issuePriorityBinding a ac:PropertyBinding ;
-    ac:contract :issueAccess ; ac:property :priority ; ac:field "priority" .
+    ac:contract :issueAccess ; ac:property kg:priority ; ac:field "priority" .
 
 :issueStateBinding a ac:PropertyBinding ;
-    ac:contract :issueAccess ; ac:property :state ; ac:field "state" .
+    ac:contract :issueAccess ; ac:property kg:state ; ac:field "state" .
 
 :issuePullRequestUrlBinding a ac:PropertyBinding ;
     ac:contract :issueAccess ; ac:property :pullRequestUrl ; ac:field "pullRequestUrl" .

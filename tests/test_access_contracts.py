@@ -76,7 +76,9 @@ def test_every_declared_plane_class_has_a_typed_read_contract() -> None:
 def test_plane_contracts_do_not_promote_draft_crosswalks() -> None:
     contracts = _contracts()
 
-    assert all(contract.class_iri.startswith((CONNECTOR_NS, KG)) for contract in contracts)
+    assert all(
+        contract.class_iri.startswith((CONNECTOR_NS, KG)) for contract in contracts
+    )
     assert all(contract.class_iri != KG + "Incident" for contract in contracts)
     assert all(contract.source_id == "plane-agent" for contract in contracts)
 
@@ -90,7 +92,9 @@ def test_plane_contract_bindings_use_declared_fields() -> None:
         contract.class_iri.rsplit("#", 1)[-1]: contract for contract in _contracts()
     }
 
-    assert (CONNECTOR_NS + "identifier", "identifier") in contracts["SoftwareProject"].predicates
+    assert (CONNECTOR_NS + "identifier", "identifier") in contracts[
+        "SoftwareProject"
+    ].predicates
     assert (CONNECTOR_NS + "sequenceId", "sequence_id") in contracts["Issue"].predicates
     assert (CONNECTOR_NS + "startDate", "start_date") in contracts["Cycle"].predicates
 
@@ -116,7 +120,9 @@ def _declared_terms() -> set[str]:
     return set(re.findall(r"^:(\w+)\s+a\s+owl:", text, flags=re.M))
 
 
-def _competency_findings(contracts, tools: set[str], terms: set[str], recordings: Path) -> list[str]:
+def _competency_findings(
+    contracts, tools: set[str], terms: set[str], recordings: Path
+) -> list[str]:
     found: list[str] = []
     by_entity = {c.entity: c for c in contracts}
     for entity, want in COMPETENCY.items():
@@ -126,13 +132,19 @@ def _competency_findings(contracts, tools: set[str], terms: set[str], recordings
             continue
         if contract.operation not in tools:
             found.append(f"{entity}: tool {contract.operation} is not served")
-        if _local(contract.class_iri) != want["class"] or want["class"] not in terms:
+        if _local(contract.class_iri) != want["class"] or (
+            "/ontology/connector/" in contract.class_iri and want["class"] not in terms
+        ):
             found.append(f"{entity}: class {contract.class_iri} not in ontology")
         if contract.key_field != want["key"] or contract.access_kind != "mcp_tool":
             found.append(f"{entity}: wrong key or access kind")
         bound = {field: prop for prop, field in contract.predicates}
         for field in want["columns"]:
-            if field not in bound or _local(bound[field]) != field or field not in terms:
+            if (
+                field not in bound
+                or _local(bound[field]) != field
+                or ("/ontology/connector/" in bound[field] and field not in terms)
+            ):
                 found.append(f"{entity}: column {field} is not an ontology property")
         path = recordings / f"{entity}.json"
         if not path.is_file():
@@ -155,13 +167,20 @@ def _competency_contracts():
 @pytest.mark.spec(ROW_ID)
 def test_competency_contracts_certified() -> None:
     tools = served_surface(build_server("plane_agent", command_args=[])[1]).tools
-    assert _competency_findings(_competency_contracts(), tools, _declared_terms(), RECORDINGS) == []
+    assert (
+        _competency_findings(
+            _competency_contracts(), tools, _declared_terms(), RECORDINGS
+        )
+        == []
+    )
 
 
 @pytest.mark.spec(ROW_ID)
 def test_missing_tool_or_column_fails_certification(tmp_path: Path) -> None:
     entity, want = next(iter(COMPETENCY.items()))
     (tmp_path / f"{entity}.json").write_text(json.dumps([{want["key"]: "x"}]))
-    found = _competency_findings(_competency_contracts(), set(), _declared_terms(), tmp_path)
+    found = _competency_findings(
+        _competency_contracts(), set(), _declared_terms(), tmp_path
+    )
     assert any("is not served" in f for f in found)
     assert any("recording lacks" in f for f in found)
