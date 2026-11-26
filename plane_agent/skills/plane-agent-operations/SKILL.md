@@ -9,6 +9,22 @@ description: >-
 
 Every step below is one typed tool call; there is no `action` or JSON-string argument. Resolve ids by name first, read before you change, and ask for approval before anything destructive.
 
+## Steps
+
+1. Call `plane_get_me` and verify the response returns your user id and display name.
+2. Call `plane_get_workspace` and verify the workspace slug matches the one the requester named.
+3. Call `plane_list_states` for the target project and verify the state names you will use appear in the listing.
+4. Describe the planned `plane_update_state` or `plane_create_state` call to the requester and verify explicit approval before running it.
+5. Run the change and read it back with `plane_retrieve_state` and verify the stored name and group match the request.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or 403 response | `PLANE_API_KEY` is missing or revoked, or `PLANE_BASE_URL` or `PLANE_WORKSPACE_SLUG` is wrong | Set `PLANE_BASE_URL`, `PLANE_API_KEY` and `PLANE_WORKSPACE_SLUG` in the environment, restart the server, and repeat `plane_get_me` |
+| 404 or empty result for a project, work item or cycle | The id was guessed instead of resolved by name | Resolve the id with `plane_list_projects` or the matching list tool and use the id returned |
+| Feature change has no effect | The feature is disabled at workspace level | Read `plane_get_workspace_features`, ask the requester to enable it with `plane_update_workspace_features`, and repeat `plane_update_project_features` |
+
 ## Verify workspace
 
 Confirm the credential, the workspace and its features.

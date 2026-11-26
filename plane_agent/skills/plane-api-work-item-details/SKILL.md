@@ -17,6 +17,22 @@ Every operation is its own typed tool; arguments follow the upstream API (path p
 filters are optional arguments). Read first (get, list, search), change second, and obtain approval before
 any delete, disable, revoke or reset.
 
+## Steps
+
+1. Resolve the project with `plane_list_projects` and verify exactly one project matches the requested name.
+2. Read the current state with `plane_retrieve_work_item_by_identifier` and verify the work item id and current state are shown.
+3. Describe the planned `plane_create_work_item_comment` call to the requester and verify explicit approval when it is a delete of a work item, comment, link or work log.
+4. Apply the change with `plane_create_work_item_comment` and verify the response returns a comment id.
+5. Read it back with `plane_list_work_item_comments` and verify the new comment appears.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or 403 response | `PLANE_API_KEY` is missing or revoked, or `PLANE_BASE_URL` or `PLANE_WORKSPACE_SLUG` is wrong | Set `PLANE_BASE_URL`, `PLANE_API_KEY` and `PLANE_WORKSPACE_SLUG` in the environment, restart the server, and repeat `plane_get_me` |
+| 404 or empty result for a project, work item or cycle | The id was guessed instead of resolved by name | Resolve the id with `plane_list_projects` or the matching list tool and use the id returned |
+| Destructive call refused | `confirm=true` was not passed to the delete or remove tool | Name the target to the requester, get approval, and repeat the call with `confirm=true` |
+
 | Tool | Summary |
 |---|---|
 | `plane_advanced_search_work_items` | Advanced search for work items. |

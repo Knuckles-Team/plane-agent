@@ -67,6 +67,23 @@ contract for `PIPE-CONNSPEC-R152.4`.
 - Run focused tests through the narrow test-slot wrapper and run repository
   hooks normally. Never use `--no-verify`, skip gates, or live credentials.
 
+## Steps
+
+1. Read `AGENTS.md` and run `git status --short` and verify the tree holds only files you intend to change.
+2. Find the owning spec row with `git grep -n "<term>" -- specs` and verify the row id you will cite in the `Spec:` trailer.
+3. Make the change inside this connector and verify `git diff --stat` lists no path outside it.
+4. Run `uv sync --locked` and the focused tests `tests/test_publication_workflow.py` and `tests/test_access_contracts.py` with `pytest -q` and verify zero failures.
+5. Run `uvx pre-commit run --all-files` and verify every hook reports Passed.
+6. Commit with the `Spec:` trailer adjacent to the agent trailer and verify `git log -1` shows both in the final paragraph.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| `uv sync --locked` fails | `uv.lock` is out of step with `pyproject.toml` | Run `uv lock`, inspect the lock diff, and commit the lock file with the change |
+| Test fails on live credentials | A test reached a real workspace | Mock the Plane response in the test and unset `PLANE_API_KEY` before rerunning |
+| Pre-commit hook fails | The change broke a shared connector gate | Read the hook output, fix the reported file, and rerun `uvx pre-commit run --all-files` without bypassing the hook |
+
 ## Setup and focused gates
 
 From the repository root:
