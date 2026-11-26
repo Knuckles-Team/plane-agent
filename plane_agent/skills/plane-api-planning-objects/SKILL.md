@@ -17,6 +17,22 @@ Every operation is its own typed tool; arguments follow the upstream API (path p
 filters are optional arguments). Read first (get, list, search), change second, and obtain approval before
 any delete, disable, revoke or reset.
 
+## Steps
+
+1. Resolve the project with `plane_list_projects` and verify exactly one project matches the requested name.
+2. Read the current state with `plane_list_cycles` and verify the cycle names and ids are listed.
+3. Describe the planned `plane_add_work_items_to_cycle` call to the requester and verify explicit approval when it is a delete of a cycle, module, milestone, epic or initiative.
+4. Apply the change with `plane_add_work_items_to_cycle` and verify the response succeeds for each issue id.
+5. Read it back with `plane_list_cycle_work_items` and verify every added work item is in the roster.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or 403 response | `PLANE_API_KEY` is missing or revoked, or `PLANE_BASE_URL` or `PLANE_WORKSPACE_SLUG` is wrong | Set `PLANE_BASE_URL`, `PLANE_API_KEY` and `PLANE_WORKSPACE_SLUG` in the environment, restart the server, and repeat `plane_get_me` |
+| 404 or empty result for a project, work item or cycle | The id was guessed instead of resolved by name | Resolve the id with `plane_list_projects` or the matching list tool and use the id returned |
+| Destructive call refused | `confirm=true` was not passed to the delete or remove tool | Name the target to the requester, get approval, and repeat the call with `confirm=true` |
+
 | Tool | Summary |
 |---|---|
 | `plane_add_work_items_to_cycle` | Add work items to a cycle. |

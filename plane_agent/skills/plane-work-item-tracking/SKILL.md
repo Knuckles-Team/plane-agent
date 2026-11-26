@@ -2,13 +2,7 @@
 name: plane-work-item-tracking
 skill_type: skill
 description: >-
-  Track and manage Plane work items (issues) via the plane-agent MCP server —
-  list, search, read, create, update and delete work items, and manage their
-  comments, links, relations and work logs with the typed tools. Use when
-  the agent must triage a project's backlog, open or update an issue, comment on
-  or link work items, or log time. Do NOT use for sprint/cycle or module planning
-  (use plane-cycle-planning) or for pushing Plane data into the knowledge graph
-  (use plane-kg-ingestion).
+  Track and manage Plane work items (issues) via the plane-agent MCP server — list, search, read, create, update and delete work items, and manage their comments, links, relations and work logs with the typed tools. Use when the agent must triage a project's backlog, open or update an issue, comment on or link work items, or log time.
 license: MIT
 tags: [plane, issues, work-items, project-tracking, mcp]
 metadata:
@@ -18,7 +12,25 @@ metadata:
 
 # Plane Work Item Tracking
 
+Scope: Track and manage Plane work items (issues) via the plane-agent MCP server — list, search, read, create, update and delete work items, and manage their comments, links, relations and work logs with the typed tools. Use when the agent must triage a project's backlog, open or update an issue, comment on or link work items, or log time. Do NOT use for sprint/cycle or module planning (use plane-cycle-planning) or for pushing Plane data into the knowledge graph (use plane-kg-ingestion).
+
 Every step below is one typed tool call; there is no `action` or JSON-string argument. Resolve ids by name first, read before you change, and ask for approval before anything destructive.
+
+## Steps
+
+1. Find the project with `plane_list_projects` and verify exactly one project matches the requested name.
+2. Find the item with `plane_retrieve_work_item_by_identifier` or `plane_search_work_items` and verify the returned title matches the request.
+3. Describe the planned `plane_update_work_item` change to the requester and verify explicit approval when it deletes or closes the item.
+4. Apply the change with `plane_update_work_item` and verify the response shows the new field values.
+5. Leave the reason with `plane_create_work_item_comment` and verify the comment appears in `plane_list_work_item_comments`.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or 403 response | `PLANE_API_KEY` is missing or revoked, or `PLANE_BASE_URL` or `PLANE_WORKSPACE_SLUG` is wrong | Set `PLANE_BASE_URL`, `PLANE_API_KEY` and `PLANE_WORKSPACE_SLUG` in the environment, restart the server, and repeat `plane_get_me` |
+| 404 or empty result for a project, work item or cycle | The id was guessed instead of resolved by name | Resolve the id with `plane_list_projects` or the matching list tool and use the id returned |
+| Destructive call refused | `confirm=true` was not passed to the delete or remove tool | Name the target to the requester, get approval, and repeat the call with `confirm=true` |
 
 ## Browse projects
 

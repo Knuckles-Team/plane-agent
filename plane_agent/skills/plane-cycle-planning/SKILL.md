@@ -2,12 +2,7 @@
 name: plane-cycle-planning
 skill_type: skill
 description: >-
-  Plan and run Plane cycles (sprints) and modules via the plane-agent MCP server —
-  create/read/update cycles and modules, assign or transfer work items between
-  them, and read a cycle's or module's work-item roster. Use when the agent must
-  set up a sprint, group work into a feature module, move issues across cycles, or
-  review what is scheduled in a cycle. Do NOT use for work-item CRUD/triage (use
-  plane-work-item-tracking) or knowledge-graph ingestion (use plane-kg-ingestion).
+  Plan and run Plane cycles (sprints) and modules via the plane-agent MCP server — create/read/update cycles and modules, assign or transfer work items between them, and read a cycle's or module's work-item roster. Use when the agent must set up a sprint, group work into a feature module, move issues across cycles, or review what is scheduled in a cycle.
 license: MIT
 tags: [plane, cycles, sprints, modules, planning, mcp]
 metadata:
@@ -17,7 +12,25 @@ metadata:
 
 # Plane Cycle Planning
 
+Scope: Plan and run Plane cycles (sprints) and modules via the plane-agent MCP server — create/read/update cycles and modules, assign or transfer work items between them, and read a cycle's or module's work-item roster. Use when the agent must set up a sprint, group work into a feature module, move issues across cycles, or review what is scheduled in a cycle. Do NOT use for work-item CRUD/triage (use plane-work-item-tracking) or knowledge-graph ingestion (use plane-kg-ingestion).
+
 Every step below is one typed tool call; there is no `action` or JSON-string argument. Resolve ids by name first, read before you change, and ask for approval before anything destructive.
+
+## Steps
+
+1. Resolve the project with `plane_list_projects` and verify exactly one project matches the requested name.
+2. List existing cycles with `plane_list_cycles` and verify no cycle already covers the same dates.
+3. Create the cycle with `plane_create_cycle` and verify the response returns a cycle id.
+4. Add work items with `plane_add_work_items_to_cycle` and verify `plane_list_cycle_work_items` lists every added issue id.
+5. For leftovers from a finished cycle, move them with `plane_transfer_cycle_work_items` and verify the old cycle roster no longer holds the open items.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or 403 response | `PLANE_API_KEY` is missing or revoked, or `PLANE_BASE_URL` or `PLANE_WORKSPACE_SLUG` is wrong | Set `PLANE_BASE_URL`, `PLANE_API_KEY` and `PLANE_WORKSPACE_SLUG` in the environment, restart the server, and repeat `plane_get_me` |
+| 404 or empty result for a project, work item or cycle | The id was guessed instead of resolved by name | Resolve the id with `plane_list_projects` or the matching list tool and use the id returned |
+| Destructive call refused | `confirm=true` was not passed to the delete or remove tool | Name the target to the requester, get approval, and repeat the call with `confirm=true` |
 
 ## Plan cycle
 
