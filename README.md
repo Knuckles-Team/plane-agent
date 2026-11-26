@@ -20,28 +20,9 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/plane-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/plane-agent)
 
-> **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
-> interfaces, and guidance for provisioning a self-hosted Plane instance are
-> maintained in the [official documentation](https://knuckles-team.github.io/plane-agent/).
-
----
-
-## Table of Contents
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [CLI or API](#cli-or-api)
-- [MCP](#mcp)
-  - [Available MCP Tools](#available-mcp-tools)
-  - [MCP Configuration Examples](#mcp-configuration-examples)
-  - [Dynamic Tool Selection & Visibility](#dynamic-tool-selection--visibility)
-  - [Running the Agent CLI](#running-the-agent-cli)
-  - [Docker Compose Orchestration](#docker-compose-orchestration)
-- [Security & Governance](#security-governance)
-- [Environment Variables](#environment-variables)
-- [Installation](#installation)
-- [Documentation](#documentation)
-- [Repository Owners](#repository-owners)
-- [Contribute](#contribute)
+> **Documentation** — Installation, deployment, and usage across the API, CLI, MCP,
+> and A2A agent interfaces are maintained in the
+> [official documentation](https://knuckles-team.github.io/plane-agent/).
 
 ---
 
@@ -378,6 +359,8 @@ the detailed transport contract.
   ingress. Keep its URL, outbound identity references, trust profile, and exact
   `MCP_ALLOWED_HOSTS` in `AgentConfig`.
 <!-- END GENERATED: additional-deployment-options -->
+
+---
 
 ## Agent
 
