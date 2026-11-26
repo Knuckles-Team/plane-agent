@@ -364,6 +364,7 @@ the detailed transport contract.
 
 ## Agent
 
+```bash
 # Set credentials
 export PLANE_BASE_URL="your_value"
 export PLANE_WORKSPACE_SLUG="your_value"
